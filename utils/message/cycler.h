@@ -34,9 +34,9 @@ namespace utl {
 
         void setListener(CyclerListener* l);
 
-        void post(Executable* exec);
-        void postDelayed(Executable* exec, uint64_t delay);
-        void postAtTime(Executable* exec, uint64_t at_time);
+        void post(Executable* exec, int id = -1);
+        void postDelayed(Executable* exec, uint64_t delay, int id = -1);
+        void postAtTime(Executable* exec, uint64_t at_time, int id = -1);
 
         void post(const std::function<void()>& func, int id = -1);
         void postDelayed(const std::function<void()>& func, uint64_t delay, int id = -1);
@@ -46,7 +46,7 @@ namespace utl {
         void postDelayed(Message* msg, uint64_t delay);
         void postAtTime(Message* msg, uint64_t at_time);
 
-        void post(int what);
+        void post(int id);
         void postDelayed(int id, uint64_t delay);
         void postAtTime(int id, uint64_t at_time);
 
@@ -60,6 +60,8 @@ namespace utl {
         static uint64_t now();
 
     private:
+        MessagePump* getCurrentPump() const;
+
         MessagePump* pump_;
         CyclerListener* listener_;
     };

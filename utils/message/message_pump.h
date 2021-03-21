@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <mutex>
+#include <stack>
 
 
 namespace utl {
@@ -50,7 +51,7 @@ namespace utl {
     private:
         static std::mutex sync_;
         static MessagePump* main_pump_;
-        static thread_local std::shared_ptr<MessagePump> cur_pump_;
+        static thread_local std::stack<std::shared_ptr<MessagePump>> cur_pump_;
     };
 
 }

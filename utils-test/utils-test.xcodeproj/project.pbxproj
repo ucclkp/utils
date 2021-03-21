@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6724E6C524A74F26003FA2B2 /* json_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6BE24A74F26003FA2B2 /* json_unit_test.cpp */; };
-		6724E6C624A74F26003FA2B2 /* big_integer_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6BF24A74F26003FA2B2 /* big_integer_unit_test.cpp */; };
 		6724E6C724A74F26003FA2B2 /* endian_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6C024A74F26003FA2B2 /* endian_unit_test.cpp */; };
 		6724E6C824A74F26003FA2B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6C324A74F26003FA2B2 /* main.cpp */; };
 		6783F42024C730B300056DA1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6783F41F24C730B300056DA1 /* Foundation.framework */; };
@@ -29,9 +28,7 @@
 
 /* Begin PBXFileReference section */
 		6724E6BE24A74F26003FA2B2 /* json_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_unit_test.cpp; sourceTree = "<group>"; };
-		6724E6BF24A74F26003FA2B2 /* big_integer_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = big_integer_unit_test.cpp; sourceTree = "<group>"; };
 		6724E6C024A74F26003FA2B2 /* endian_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = endian_unit_test.cpp; sourceTree = "<group>"; };
-		6724E6C124A74F26003FA2B2 /* big_integer_unit_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = big_integer_unit_test.h; sourceTree = "<group>"; };
 		6724E6C224A74F26003FA2B2 /* endian_unit_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endian_unit_test.h; sourceTree = "<group>"; };
 		6724E6C324A74F26003FA2B2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		6724E6C424A74F26003FA2B2 /* json_unit_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json_unit_test.h; sourceTree = "<group>"; };
@@ -56,8 +53,6 @@
 		67B85B8B24A6023E005C89A9 = {
 			isa = PBXGroup;
 			children = (
-				6724E6BF24A74F26003FA2B2 /* big_integer_unit_test.cpp */,
-				6724E6C124A74F26003FA2B2 /* big_integer_unit_test.h */,
 				6724E6C024A74F26003FA2B2 /* endian_unit_test.cpp */,
 				6724E6C224A74F26003FA2B2 /* endian_unit_test.h */,
 				6724E6BE24A74F26003FA2B2 /* json_unit_test.cpp */,
@@ -145,7 +140,6 @@
 				6724E6C524A74F26003FA2B2 /* json_unit_test.cpp in Sources */,
 				6724E6C724A74F26003FA2B2 /* endian_unit_test.cpp in Sources */,
 				6724E6C824A74F26003FA2B2 /* main.cpp in Sources */,
-				6724E6C624A74F26003FA2B2 /* big_integer_unit_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

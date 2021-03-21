@@ -16,7 +16,7 @@
 #ifdef OS_WINDOWS
 #include "utils/message/win/message_pump_win.h"
 #elif defined OS_MAC
-#include "utils/message/mac/message_looper_mac.h"
+#include "utils/message/mac/message_pump_mac.h"
 #endif
 
 
@@ -24,7 +24,7 @@ namespace utl {
 
     std::mutex MessagePump::sync_;
     MessagePump* MessagePump::main_pump_ = nullptr;
-    thread_local std::shared_ptr<MessagePump> MessagePump::cur_pump_;
+    thread_local std::stack<std::shared_ptr<MessagePump>> MessagePump::cur_pump_;
 
 
     MessagePump::MessagePump()
@@ -46,15 +46,14 @@ namespace utl {
     void MessagePump::create() {
         std::lock_guard<std::mutex> lk(sync_);
 
-        if (cur_pump_) {
-            return;
-        }
+        std::shared_ptr<MessagePump> pump;
 
 #ifdef OS_WINDOWS
-        cur_pump_.reset(new MessagePumpWin());
+        pump.reset(new MessagePumpWin());
 #elif defined OS_MAC
-        cur_pump_.reset(new MessageLooperMac());
+        pump.reset(new MessagePumpMac());
 #endif
+        cur_pump_.push(pump);
     }
 
     // static
@@ -104,8 +103,8 @@ namespace utl {
 
     // static
     void MessagePump::destroy() {
-        if (cur_pump_) {
-            cur_pump_.reset();
+        if (!cur_pump_.empty()) {
+            cur_pump_.pop();
         }
     }
 
@@ -117,8 +116,8 @@ namespace utl {
 
     // static
     MessagePump* MessagePump::getCurrent() {
-        DCHECK(cur_pump_);
-        return cur_pump_.get();
+        DCHECK(!cur_pump_.empty());
+        return cur_pump_.top().get();
     }
 
     // static

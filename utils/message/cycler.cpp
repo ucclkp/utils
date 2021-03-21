@@ -17,7 +17,7 @@
 namespace utl {
 
     Cycler::Cycler()
-        : pump_(MessagePump::getCurrent()),
+        : pump_(nullptr),
           listener_(nullptr) {
     }
 
@@ -27,24 +27,25 @@ namespace utl {
     }
 
     Cycler::~Cycler() {
-        pump_->getQueue()->remove(this);
+        getCurrentPump()->getQueue()->remove(this);
     }
 
     void Cycler::setListener(CyclerListener* l) {
         listener_ = l;
     }
 
-    void Cycler::post(Executable* exec) {
-        postDelayed(exec, 0);
+    void Cycler::post(Executable* exec, int id) {
+        postDelayed(exec, 0, id);
     }
 
-    void Cycler::postDelayed(Executable* exec, uint64_t delay) {
-        postAtTime(exec, delay + now());
+    void Cycler::postDelayed(Executable* exec, uint64_t delay, int id) {
+        postAtTime(exec, delay + now(), id);
     }
 
-    void Cycler::postAtTime(Executable* exec, uint64_t at_time) {
+    void Cycler::postAtTime(Executable* exec, uint64_t at_time, int id) {
         Message msg;
         msg.callback = exec;
+        msg.id = id;
 
         postAtTime(&msg, at_time);
     }
@@ -65,8 +66,8 @@ namespace utl {
         postAtTime(&msg, at_time);
     }
 
-    void Cycler::post(int what) {
-        postDelayed(what, 0);
+    void Cycler::post(int id) {
+        postDelayed(id, 0);
     }
 
     void Cycler::postDelayed(int id, uint64_t delay) {
@@ -95,22 +96,29 @@ namespace utl {
 
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
-        pump_->getQueue()->enqueue(*msg);
-        pump_->wakeup();
+        getCurrentPump()->getQueue()->enqueue(*msg);
+        getCurrentPump()->wakeup();
     }
 
     bool Cycler::hasMessages(int id) {
-        return pump_->getQueue()->contains(this, id);
+        return getCurrentPump()->getQueue()->contains(this, id);
     }
 
     void Cycler::removeMessages(int id) {
-        pump_->getQueue()->remove(this, id);
+        getCurrentPump()->getQueue()->remove(this, id);
     }
 
     void Cycler::dispatchMessage(const Message& msg) {
         if (listener_) {
             listener_->onHandleMessage(msg);
         }
+    }
+
+    MessagePump* Cycler::getCurrentPump() const {
+        if (!pump_) {
+            return MessagePump::getCurrent();
+        }
+        return pump_;
     }
 
     // static

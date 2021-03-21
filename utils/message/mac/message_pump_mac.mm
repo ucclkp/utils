@@ -4,7 +4,7 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#include "utils/message/mac/message_looper_mac.h"
+#include "utils/message/mac/message_pump_mac.h"
 
 #include <numeric>
 
@@ -16,7 +16,7 @@
 
 namespace utl {
 
-    MessageLooperMac::MessageLooperMac() {
+    MessagePumpMac::MessagePumpMac() {
         NSRunLoop* ns_loop = [NSRunLoop currentRunLoop];
         CFRunLoopRef cf_loop = [ns_loop getCFRunLoop];
 
@@ -48,7 +48,7 @@ namespace utl {
         }
     }
 
-    MessageLooperMac::~MessageLooperMac() {
+    MessagePumpMac::~MessagePumpMac() {
         if (timer_) {
             CFRelease(timer_);
         }
@@ -60,21 +60,21 @@ namespace utl {
         }
     }
 
-    void MessageLooperMac::onSourcePerform(void* info) {
-        auto ptr = static_cast<utl::MessageLooperMac*>(info);
+    void MessagePumpMac::onSourcePerform(void* info) {
+        auto ptr = static_cast<utl::MessagePumpMac*>(info);
         if (!ptr->doWork()) {
             [NSApp stop:nil];
         }
     }
 
-    void MessageLooperMac::onTimerPerform(CFRunLoopTimerRef timer, void* info) {
-        auto ptr = static_cast<utl::MessageLooperMac*>(info);
+    void MessagePumpMac::onTimerPerform(CFRunLoopTimerRef timer, void* info) {
+        auto ptr = static_cast<utl::MessagePumpMac*>(info);
         if (ptr->source_) {
             CFRunLoopSourceSignal(ptr->source_);
         }
     }
 
-    void MessageLooperMac::runLoopCalback(
+    void MessagePumpMac::runLoopCalback(
         CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)
     {
         //auto ptr = static_cast<utl::MessageLooperMac*>(info);
@@ -100,7 +100,7 @@ namespace utl {
         }
     }
 
-    void MessageLooperMac::wakeup() {
+    void MessagePumpMac::wakeup() {
         if (source_) {
             NSRunLoop* ns_loop = [NSRunLoop currentRunLoop];
             CFRunLoopRef cf_loop = [ns_loop getCFRunLoop];
@@ -109,7 +109,7 @@ namespace utl {
         }
     }
 
-    bool MessageLooperMac::doWork() {
+    bool MessagePumpMac::doWork() {
         if (quit_imm_) {
             return false;
         }
@@ -133,7 +133,7 @@ namespace utl {
         return true;
     }
 
-    void MessageLooperMac::wait(int64_t delay) {
+    void MessagePumpMac::wait(int64_t delay) {
         if (delay != -1) {
             if (timer_) {
                 auto next = CFAbsoluteTimeGetCurrent() + delay / 1000.0;
@@ -142,7 +142,7 @@ namespace utl {
         }
     }
 
-    void MessageLooperMac::loop() {
+    void MessagePumpMac::loop() {
         [NSApp run];
     }
 

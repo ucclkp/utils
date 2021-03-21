@@ -4,19 +4,19 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_MESSAGE_MAC_MESSAGE_LOOPER_MAC_H_
-#define UTILS_MESSAGE_MAC_MESSAGE_LOOPER_MAC_H_
+#ifndef UTILS_MESSAGE_MAC_MESSAGE_PUMP_MAC_H_
+#define UTILS_MESSAGE_MAC_MESSAGE_PUMP_MAC_H_
 
-#include "utils/message/message_looper.h"
+#include "utils/message/message_pump.h"
 
 #import <CoreFoundation/CoreFoundation.h>
 
 
 namespace utl {
 
-    class MessageLooperMac : public MessagePump {
+    class MessagePumpMac : public MessagePump {
     public:
-        ~MessageLooperMac();
+        ~MessagePumpMac();
 
         void wakeup() override;
         void loop() override;
@@ -24,7 +24,7 @@ namespace utl {
     private:
         friend class MessagePump;
 
-        MessageLooperMac();
+        MessagePumpMac();
 
         static void onSourcePerform(void* info);
         static void onTimerPerform(CFRunLoopTimerRef timer, void* info);
@@ -41,4 +41,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_MESSAGE_MAC_MESSAGE_LOOPER_MAC_H_
+#endif  // UTILS_MESSAGE_MAC_MESSAGE_PUMP_MAC_H_
