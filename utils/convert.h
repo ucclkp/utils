@@ -34,24 +34,6 @@ namespace utl {
     std::u16string toASCIIUpper(const std::u16string_view& str);
     std::u16string toASCIILower(const std::u16string_view& str);
 
-    template <typename R>
-    auto STLCST(const R&, int count) -> typename R::size_type {
-        DCHECK(count >= 0);
-        return static_cast<typename R::size_type>(count);
-    }
-
-    template <typename R>
-    int STLCInt(R count) {
-        DCHECK(static_cast<R>((std::numeric_limits<int>::max)()) >= count);
-        return static_cast<int>(count);
-    }
-
-    template <typename R>
-    uint32_t STLCU32(R count) {
-        DCHECK(static_cast<R>((std::numeric_limits<uint32_t>::max)()) >= count);
-        return static_cast<uint32_t>(count);
-    }
-
     inline std::u16string to_u16string(int val) {
         return UTF8ToUTF16(std::to_string(val));
     }

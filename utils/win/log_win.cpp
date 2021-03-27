@@ -9,8 +9,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+
 #include "utils/convert.h"
 #include "utils/files/file_utils.h"
+#include "utils/number.hpp"
 
 
 namespace utl {
@@ -67,7 +69,7 @@ namespace utl {
         }
 
         BOOL ret = ::WriteConsoleW(
-            console_output_handle_, msg.data(), STLCU32(msg.length()), nullptr, nullptr);
+            console_output_handle_, msg.data(), num_cast<DWORD>(msg.length()), nullptr, nullptr);
         return ret != 0;
     }
 

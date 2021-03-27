@@ -238,6 +238,7 @@
     <ClInclude Include="message\message_pump.h" />
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="message\win\message_pump_win.h" />
+    <ClInclude Include="number.hpp" />
     <ClInclude Include="platform_utils.h" />
     <ClInclude Include="stl_utils.h" />
     <ClInclude Include="stream_utils.h" />

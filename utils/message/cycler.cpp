@@ -17,7 +17,7 @@
 namespace utl {
 
     Cycler::Cycler()
-        : pump_(nullptr),
+        : pump_(MessagePump::getCurrent()),
           listener_(nullptr) {
     }
 
@@ -27,7 +27,7 @@ namespace utl {
     }
 
     Cycler::~Cycler() {
-        getCurrentPump()->getQueue()->remove(this);
+        pump_->getQueue()->remove(this);
     }
 
     void Cycler::setListener(CyclerListener* l) {
@@ -96,29 +96,22 @@ namespace utl {
 
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
-        getCurrentPump()->getQueue()->enqueue(*msg);
-        getCurrentPump()->wakeup();
+        pump_->getQueue()->enqueue(*msg);
+        pump_->wakeup();
     }
 
     bool Cycler::hasMessages(int id) {
-        return getCurrentPump()->getQueue()->contains(this, id);
+        return pump_->getQueue()->contains(this, id);
     }
 
     void Cycler::removeMessages(int id) {
-        getCurrentPump()->getQueue()->remove(this, id);
+        pump_->getQueue()->remove(this, id);
     }
 
     void Cycler::dispatchMessage(const Message& msg) {
         if (listener_) {
             listener_->onHandleMessage(msg);
         }
-    }
-
-    MessagePump* Cycler::getCurrentPump() const {
-        if (!pump_) {
-            return MessagePump::getCurrent();
-        }
-        return pump_;
     }
 
     // static

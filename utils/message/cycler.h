@@ -60,8 +60,6 @@ namespace utl {
         static uint64_t now();
 
     private:
-        MessagePump* getCurrentPump() const;
-
         MessagePump* pump_;
         CyclerListener* listener_;
     };

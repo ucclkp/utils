@@ -153,6 +153,7 @@
     <ClInclude Include="message\win\message_pump_win.h">
       <Filter>message\win</Filter>
     </ClInclude>
+    <ClInclude Include="number.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="message\mac\message_looper_mac.mm">
