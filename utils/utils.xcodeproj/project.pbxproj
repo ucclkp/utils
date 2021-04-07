@@ -146,10 +146,10 @@
 		6724E6DF24A8F200003FA2B2 /* json */ = {
 			isa = PBXGroup;
 			children = (
-				6724E6E024A8F200003FA2B2 /* json_parser.h */,
 				6724E6E124A8F200003FA2B2 /* json_parser.cpp */,
-				6724E6E224A8F200003FA2B2 /* json_structs.h */,
+				6724E6E024A8F200003FA2B2 /* json_parser.h */,
 				6724E6E324A8F201003FA2B2 /* json_structs.cpp */,
+				6724E6E224A8F200003FA2B2 /* json_structs.h */,
 			);
 			path = json;
 			sourceTree = "<group>";
@@ -157,13 +157,13 @@
 		6724E6E824A8F225003FA2B2 /* xml */ = {
 			isa = PBXGroup;
 			children = (
-				6724E6E924A8F225003FA2B2 /* xml_pedometer.h */,
 				6724E6EA24A8F225003FA2B2 /* xml_parser.cpp */,
-				6724E6EB24A8F225003FA2B2 /* xml_writer.cpp */,
-				6724E6EC24A8F225003FA2B2 /* xml_structs.cpp */,
 				6724E6ED24A8F225003FA2B2 /* xml_parser.h */,
 				6724E6EE24A8F225003FA2B2 /* xml_pedometer.cpp */,
+				6724E6E924A8F225003FA2B2 /* xml_pedometer.h */,
+				6724E6EC24A8F225003FA2B2 /* xml_structs.cpp */,
 				6724E6EF24A8F225003FA2B2 /* xml_structs.h */,
+				6724E6EB24A8F225003FA2B2 /* xml_writer.cpp */,
 				6724E6F024A8F225003FA2B2 /* xml_writer.h */,
 			);
 			path = xml;
@@ -181,9 +181,9 @@
 			isa = PBXGroup;
 			children = (
 				6724E6FB24A8F2EB003FA2B2 /* dynamic_matrix.hpp */,
-				6724E6FC24A8F2EB003FA2B2 /* optimization.hpp */,
 				6724E6FD24A8F2EB003FA2B2 /* dynamic_optimization.hpp */,
 				6724E6FE24A8F2EB003FA2B2 /* matrix.hpp */,
+				6724E6FC24A8F2EB003FA2B2 /* optimization.hpp */,
 			);
 			path = algebra;
 			sourceTree = "<group>";
@@ -191,8 +191,8 @@
 		6724E70324A8F318003FA2B2 /* files */ = {
 			isa = PBXGroup;
 			children = (
-				6724E70424A8F318003FA2B2 /* file_utils.h */,
 				6724E70524A8F318003FA2B2 /* file_utils.cpp */,
+				6724E70424A8F318003FA2B2 /* file_utils.h */,
 			);
 			path = files;
 			sourceTree = "<group>";
@@ -201,8 +201,8 @@
 			isa = PBXGroup;
 			children = (
 				6783F41924C4878300056DA1 /* command_line_mac.mm */,
-				6783F41A24C4878300056DA1 /* objc_utils.hpp */,
 				6783F41B24C4878300056DA1 /* log_mac.cpp */,
+				6783F41A24C4878300056DA1 /* objc_utils.hpp */,
 			);
 			path = mac;
 			sourceTree = "<group>";
@@ -210,7 +210,6 @@
 		67B85B7424A60207005C89A9 = {
 			isa = PBXGroup;
 			children = (
-				67950D69261B38960012DE92 /* number.hpp */,
 				67B85BE924A609B9005C89A9 /* command_line.cpp */,
 				67B85BD724A609B8005C89A9 /* command_line.h */,
 				67B85BE724A609B8005C89A9 /* convert.cpp */,
@@ -226,6 +225,7 @@
 				6783F41824C4878300056DA1 /* mac */,
 				6724E6F924A8F2EB003FA2B2 /* math */,
 				67B95DFE24AA3C76005DD0AD /* message */,
+				67950D69261B38960012DE92 /* number.hpp */,
 				67B85BD124A609B8005C89A9 /* platform_utils.cpp */,
 				67B85BE224A609B8005C89A9 /* platform_utils.h */,
 				67B85B7E24A60207005C89A9 /* Products */,
@@ -345,7 +345,7 @@
 		67B85B7524A60207005C89A9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1150;
+				LastUpgradeCheck = 1240;
 				ORGANIZATIONNAME = ucclkp;
 				TargetAttributes = {
 					67B85B7C24A60207005C89A9 = {
@@ -430,6 +430,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -491,6 +492,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;

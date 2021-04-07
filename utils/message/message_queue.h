@@ -56,7 +56,6 @@ namespace utl {
         using List = std::forward_list<Message>;
 
         void enqueueDelayed(const Message& msg);
-        size_t size() const;
 
         void remove(List* head, Cycler* c);
         void remove(List* head, Cycler* c, int id);

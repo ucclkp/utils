@@ -271,15 +271,4 @@ namespace utl {
         has_barrier_ = false;
     }
 
-    size_t MessageQueue::size() const {
-        size_t count = 0;
-        for (const auto& msg : message_) {
-            ++count;
-        }
-        for (const auto& msg : delayed_) {
-            ++count;
-        }
-        return count;
-    }
-
 }

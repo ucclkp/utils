@@ -29,7 +29,7 @@ namespace utl {
                 // int/uint -> uint
                 assert(
                     val >= 0 &&
-                    std::numeric_limits<R>::max() >= std::make_unsigned<Ty>::type(val));
+                    std::numeric_limits<R>::max() >= typename std::make_unsigned<Ty>::type(val));
             } else {
                 if constexpr (std::numeric_limits<Ty>::is_signed) {
                     // int -> int
