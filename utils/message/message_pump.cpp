@@ -14,6 +14,7 @@
 #include "utils/platform_utils.h"
 
 #ifdef OS_WINDOWS
+#include "utils/message/win/message_pump_ui_win.h"
 #include "utils/message/win/message_pump_win.h"
 #elif defined OS_MAC
 #include "utils/message/mac/message_pump_mac.h"
@@ -51,15 +52,23 @@ namespace utl {
 #ifdef OS_WINDOWS
         pump.reset(new MessagePumpWin());
 #elif defined OS_MAC
-        pump.reset(new MessagePumpMac());
+        //pump.reset(new MessagePumpMac());
 #endif
         cur_pump_.push(pump);
     }
 
     // static
-    void MessagePump::createMain() {
-        create();
+    void MessagePump::createForUI() {
         std::lock_guard<std::mutex> lk(sync_);
+
+        std::shared_ptr<MessagePump> pump;
+
+#ifdef OS_WINDOWS
+        pump.reset(new MessagePumpUIWin());
+#elif defined OS_MAC
+        pump.reset(new MessagePumpMac());
+#endif
+        cur_pump_.push(pump);
 
         if (main_pump_) {
             return;

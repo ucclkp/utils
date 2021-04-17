@@ -187,6 +187,7 @@
     <ClCompile Include="message\message.cpp" />
     <ClCompile Include="message\message_pump.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
+    <ClCompile Include="message\win\message_pump_ui_win.cpp" />
     <ClCompile Include="message\win\message_pump_win.cpp" />
     <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
@@ -228,18 +229,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="message\mac\message_looper_mac.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
     <ClInclude Include="message\message.h" />
     <ClInclude Include="message\message_pump.h" />
     <ClInclude Include="message\message_queue.h" />
+    <ClInclude Include="message\win\message_pump_ui_win.h" />
     <ClInclude Include="message\win\message_pump_win.h" />
     <ClInclude Include="number.hpp" />
     <ClInclude Include="platform_utils.h" />
+    <ClInclude Include="scope_utils.h" />
     <ClInclude Include="stl_utils.h" />
     <ClInclude Include="stream_utils.h" />
     <ClInclude Include="string_utils.h" />
@@ -250,14 +247,6 @@
     <ClInclude Include="xml\xml_pedometer.h" />
     <ClInclude Include="xml\xml_structs.h" />
     <ClInclude Include="xml\xml_writer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="message\mac\message_looper_mac.mm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

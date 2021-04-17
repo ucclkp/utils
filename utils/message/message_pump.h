@@ -28,7 +28,7 @@ namespace utl {
         MessageQueue* getQueue();
 
         static void create();
-        static void createMain();
+        static void createForUI();
         static void run();
         static void quit();
         static void quitNow();

@@ -4,7 +4,7 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#include "utils/message/win/message_pump_win.h"
+#include "utils/message/win/message_pump_ui_win.h"
 
 #include "utils/log.h"
 
@@ -13,18 +13,18 @@
 
 namespace utl {
 
-    MessagePumpWin::MessagePumpWin() {
+    MessagePumpUIWin::MessagePumpUIWin() {
         event_ = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
         if (!event_) {
             LOG(Log::ERR) << "Cannot create event: " << ::GetLastError();
         }
     }
 
-    void MessagePumpWin::wakeup() {
+    void MessagePumpUIWin::wakeup() {
         ::SetEvent(event_);
     }
 
-    void MessagePumpWin::loop() {
+    void MessagePumpUIWin::loop() {
         for (;;) {
             bool has_more_work = platformWork();
             if (quit_imm_) {
@@ -54,9 +54,10 @@ namespace utl {
         }
     }
 
-    void MessagePumpWin::wait(int64_t delay) {
+    void MessagePumpUIWin::wait(int64_t delay) {
         DWORD timeout = delay < 0 ? INFINITE : DWORD(delay);
-        DWORD result = ::WaitForSingleObjectEx(event_, timeout, TRUE);
+        DWORD result = ::MsgWaitForMultipleObjectsEx(
+            1, &event_, timeout, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
         if (result == WAIT_OBJECT_0) {
             //
         }
@@ -64,7 +65,21 @@ namespace utl {
         DCHECK(result != WAIT_FAILED);
     }
 
-    bool MessagePumpWin::platformWork() {
+    bool MessagePumpUIWin::platformWork() {
+        /*
+         * 处理所有系统事件，以防止一些持续产生的事件（比如绘制事件）
+         * 拖慢系统事件的处理。
+         */
+        MSG msg;
+        while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                quit_imm_ = true;
+                return false;
+            }
+
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
         return false;
     }
 

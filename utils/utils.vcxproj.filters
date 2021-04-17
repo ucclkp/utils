@@ -22,9 +22,6 @@
     <Filter Include="message\win">
       <UniqueIdentifier>{e0f79b13-a9a1-4afe-b236-bfcb3b54e7a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="message\mac">
-      <UniqueIdentifier>{e3d36d56-5633-457e-b103-dac0989bff01}</UniqueIdentifier>
-    </Filter>
     <Filter Include="mac">
       <UniqueIdentifier>{d10252ab-7f52-4feb-bc36-7ee5ccb3f779}</UniqueIdentifier>
     </Filter>
@@ -82,6 +79,9 @@
     </ClCompile>
     <ClCompile Include="message\message_pump.cpp">
       <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="message\win\message_pump_ui_win.cpp">
+      <Filter>message\win</Filter>
     </ClCompile>
     <ClCompile Include="message\win\message_pump_win.cpp">
       <Filter>message\win</Filter>
@@ -150,18 +150,16 @@
     <ClInclude Include="message\message_pump.h">
       <Filter>message</Filter>
     </ClInclude>
+    <ClInclude Include="number.hpp" />
+    <ClInclude Include="scope_utils.h" />
+    <ClInclude Include="message\win\message_pump_ui_win.h">
+      <Filter>message\win</Filter>
+    </ClInclude>
     <ClInclude Include="message\win\message_pump_win.h">
       <Filter>message\win</Filter>
     </ClInclude>
-    <ClInclude Include="number.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="message\mac\message_looper_mac.mm">
-      <Filter>message\mac</Filter>
-    </None>
-    <None Include="message\mac\message_looper_mac.h">
-      <Filter>message\mac</Filter>
-    </None>
     <None Include="mac\command_line_mac.mm">
       <Filter>mac</Filter>
     </None>
