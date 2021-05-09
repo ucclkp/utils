@@ -158,6 +158,7 @@
     <ClInclude Include="message\win\message_pump_win.h">
       <Filter>message\win</Filter>
     </ClInclude>
+    <ClInclude Include="multi_callbacks.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

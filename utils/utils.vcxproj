@@ -234,6 +234,7 @@
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="message\win\message_pump_ui_win.h" />
     <ClInclude Include="message\win\message_pump_win.h" />
+    <ClInclude Include="multi_callbacks.hpp" />
     <ClInclude Include="number.hpp" />
     <ClInclude Include="platform_utils.h" />
     <ClInclude Include="scope_utils.h" />

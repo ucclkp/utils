@@ -27,18 +27,18 @@ namespace utl {
     void MessagePumpWin::loop() {
         for (;;) {
             bool has_more_work = platformWork();
-            if (quit_imm_) {
+            if (context_.top().quit_imm_) {
                 break;
             }
 
             has_more_work |= cosume();
-            if (quit_imm_) {
+            if (context_.top().quit_imm_) {
                 break;
             }
 
             int64_t delay;
             has_more_work |= cosumeDelayed(&delay);
-            if (quit_imm_) {
+            if (context_.top().quit_imm_) {
                 break;
             }
 
@@ -46,7 +46,7 @@ namespace utl {
                 continue;
             }
 
-            if (quit_when_idle_) {
+            if (context_.top().quit_when_idle_) {
                 break;
             }
 

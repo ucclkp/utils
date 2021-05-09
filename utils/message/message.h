@@ -27,6 +27,9 @@ namespace utl {
         Cycler* target;
         Executable* callback;
         std::function<void()> func;
+
+        uint64_t ui1;
+        uint64_t ui2;
         void* data;
         std::shared_ptr<void> shared_data;
 

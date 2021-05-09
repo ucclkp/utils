@@ -25,7 +25,8 @@ namespace utl {
         virtual void wakeup() = 0;
         virtual void loop() = 0;
 
-        MessageQueue* getQueue();
+        bool isNested() const;
+        MessageQueue* getQueue() const;
 
         static void create();
         static void createForUI();
@@ -39,19 +40,24 @@ namespace utl {
         static MessageQueue* getCurrentQueue();
 
     protected:
+        struct MPContext {
+            bool quit_imm_ = false;
+            bool quit_when_idle_ = false;
+        };
+
         MessagePump();
 
         bool cosume();
         bool cosumeDelayed(int64_t* delay);
 
-        bool quit_imm_;
-        bool quit_when_idle_;
+        int nested_count_ = -1;
         MessageQueue* msg_queue_;
+        std::stack<MPContext> context_;
 
     private:
         static std::mutex sync_;
         static MessagePump* main_pump_;
-        static thread_local std::stack<std::shared_ptr<MessagePump>> cur_pump_;
+        static thread_local std::shared_ptr<MessagePump> cur_pump_;
     };
 
 }
