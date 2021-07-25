@@ -193,6 +193,7 @@
     <ClCompile Include="stl_utils.cpp" />
     <ClCompile Include="stream_utils.cpp" />
     <ClCompile Include="string_utils.cpp" />
+    <ClCompile Include="time_utils.cpp" />
     <ClCompile Include="unicode.cpp" />
     <ClCompile Include="win\command_line_win.cpp" />
     <ClCompile Include="win\log_win.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="stl_utils.h" />
     <ClInclude Include="stream_utils.h" />
     <ClInclude Include="string_utils.h" />
+    <ClInclude Include="time_utils.h" />
     <ClInclude Include="unicode.h" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />

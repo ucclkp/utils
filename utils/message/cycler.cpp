@@ -35,14 +35,14 @@ namespace utl {
     }
 
     void Cycler::post(Executable* exec, int id) {
-        postDelayed(exec, 0, id);
+        postDelayed(exec, ns(0), id);
     }
 
-    void Cycler::postDelayed(Executable* exec, uint64_t delay, int id) {
+    void Cycler::postDelayed(Executable* exec, nsp delay, int id) {
         postAtTime(exec, delay + now(), id);
     }
 
-    void Cycler::postAtTime(Executable* exec, uint64_t at_time, int id) {
+    void Cycler::postAtTime(Executable* exec, nsp at_time, int id) {
         Message msg;
         msg.callback = exec;
         msg.id = id;
@@ -51,14 +51,14 @@ namespace utl {
     }
 
     void Cycler::post(const std::function<void()>& func, int id) {
-        postDelayed(func, 0, id);
+        postDelayed(func, ns(0), id);
     }
 
-    void Cycler::postDelayed(const std::function<void()>& func, uint64_t delay, int id) {
+    void Cycler::postDelayed(const std::function<void()>& func, nsp delay, int id) {
         postAtTime(func, delay + now(), id);
     }
 
-    void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time, int id) {
+    void Cycler::postAtTime(const std::function<void()>& func, nsp at_time, int id) {
         Message msg;
         msg.func = func;
         msg.id = id;
@@ -67,14 +67,14 @@ namespace utl {
     }
 
     void Cycler::post(int id) {
-        postDelayed(id, 0);
+        postDelayed(id, ns(0));
     }
 
-    void Cycler::postDelayed(int id, uint64_t delay) {
+    void Cycler::postDelayed(int id, nsp delay) {
         postAtTime(id, delay + now());
     }
 
-    void Cycler::postAtTime(int id, uint64_t at_time) {
+    void Cycler::postAtTime(int id, nsp at_time) {
         Message msg;
         msg.id = id;
 
@@ -82,15 +82,15 @@ namespace utl {
     }
 
     void Cycler::post(Message* msg) {
-        postDelayed(msg, 0);
+        postDelayed(msg, ns(0));
     }
 
-    void Cycler::postDelayed(Message* msg, uint64_t delay) {
+    void Cycler::postDelayed(Message* msg, nsp delay) {
         postAtTime(msg, delay + now());
     }
 
-    void Cycler::postAtTime(Message* msg, uint64_t at_time) {
-        msg->time = at_time;
+    void Cycler::postAtTime(Message* msg, nsp at_time) {
+        msg->time_ns = at_time.count();
         enqueueMessage(msg);
     }
 
@@ -115,9 +115,8 @@ namespace utl {
     }
 
     // static
-    uint64_t Cycler::now() {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    Cycler::ns Cycler::now() {
+        return TimeUtils::upTime();
     }
 
 }

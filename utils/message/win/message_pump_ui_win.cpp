@@ -106,8 +106,8 @@ namespace utl {
                 break;
             }
 
-            int64_t delay;
-            has_more_work |= cosumeDelayed(&delay);
+            int64_t delay_ns;
+            has_more_work |= cosumeDelayed(&delay_ns);
             if (context_.top().quit_imm_) {
                 break;
             }
@@ -120,7 +120,7 @@ namespace utl {
                 break;
             }
 
-            wait(delay);
+            wait(delay_ns);
         }
     }
 
@@ -153,7 +153,7 @@ namespace utl {
     }
 
     void MessagePumpUIWin::wait(int64_t delay) {
-        DWORD timeout = delay < 0 ? INFINITE : DWORD(delay);
+        DWORD timeout = delay < 0 ? INFINITE : DWORD(delay / 1000000);
         DWORD result = ::MsgWaitForMultipleObjectsEx(
             1, &event_, timeout, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
         if (result == WAIT_OBJECT_0) {
@@ -251,9 +251,9 @@ namespace utl {
                     }
 
                     if (should_process) {
-                        int64_t delay;
+                        int64_t delay_ns;
                         This->cosume();
-                        This->cosumeDelayed(&delay);
+                        This->cosumeDelayed(&delay_ns);
                     }
                 }
             }
@@ -271,13 +271,13 @@ namespace utl {
         auto This = static_cast<MessagePumpUIWin*>(getCurrent());
         if (code == HC_ACTION) {
             if (This->is_in_sml_ || This->is_in_mml_ || This->is_in_dml_) {
-                int64_t delay;
+                int64_t delay_ns;
                 bool has_more_work = This->cosume();
-                has_more_work |= This->cosumeDelayed(&delay);
+                has_more_work |= This->cosumeDelayed(&delay_ns);
                 if (has_more_work) {
                     ::PostThreadMessageW(This->ui_thread_id_, WM_WAKELOOP, 0, 0);
                 } else {
-                    This->waiting_milli_ = delay;
+                    This->waiting_ns_ = delay_ns;
                     ::SetEvent(This->waiting_event_);
                 }
             }
@@ -290,12 +290,12 @@ namespace utl {
     DWORD WINAPI MessagePumpUIWin::waitingThreadProc(LPVOID param) {
         auto This = static_cast<MessagePumpUIWin*>(param);
         for (;;) {
-            DWORD timeout = DWORD(This->waiting_milli_.exchange(-1));
+            int64_t timeout = This->waiting_ns_.exchange(-1);
             if (timeout == -1) {
                 timeout = INFINITE;
             }
 
-            DWORD ret = ::WaitForSingleObject(This->waiting_event_, timeout);
+            DWORD ret = ::WaitForSingleObject(This->waiting_event_, DWORD(timeout));
             if (This->wt_finished_) {
                 break;
             }

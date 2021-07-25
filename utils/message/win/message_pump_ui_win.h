@@ -71,7 +71,7 @@ namespace utl {
         HANDLE waiting_event_;
         DWORD ui_thread_id_;
         std::atomic_bool wt_finished_ = false;
-        std::atomic_int64_t waiting_milli_ = -1;
+        std::atomic_int64_t waiting_ns_ = -1;
 
         HHOOK msg_hook_;
         HHOOK idle_hook_;

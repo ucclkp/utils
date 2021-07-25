@@ -37,13 +37,13 @@ namespace utl {
 
         /**
          * 尝试从延时队列中获取一个消息。
-         * @param delay 如果返回值不为 false，该参数的值未定义。
+         * @param delay_ns 如果返回值不为 false，该参数的值未定义。
          *              否则，当存在延时消息时，该参数的值为剩余延时；
          *              当不存在任何消息时，该参数的值为 -1。
          * @param out 消息
          * @return 如果队列中无消息，或没有达到指定时间的消息，返回 false，否则返回 true。
          */
-        bool dequeueDelayed(int64_t* delay, Message* out);
+        bool dequeueDelayed(int64_t* delay_ns, Message* out);
 
         void remove(Cycler* c);
         void remove(Cycler* c, int id);

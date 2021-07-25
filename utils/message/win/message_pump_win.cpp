@@ -36,8 +36,8 @@ namespace utl {
                 break;
             }
 
-            int64_t delay;
-            has_more_work |= cosumeDelayed(&delay);
+            int64_t delay_ns;
+            has_more_work |= cosumeDelayed(&delay_ns);
             if (context_.top().quit_imm_) {
                 break;
             }
@@ -50,12 +50,12 @@ namespace utl {
                 break;
             }
 
-            wait(delay);
+            wait(delay_ns);
         }
     }
 
-    void MessagePumpWin::wait(int64_t delay) {
-        DWORD timeout = delay < 0 ? INFINITE : DWORD(delay);
+    void MessagePumpWin::wait(int64_t delay_ns) {
+        DWORD timeout = delay_ns < 0 ? INFINITE : DWORD(delay_ns / 1000000);
         DWORD result = ::WaitForSingleObjectEx(event_, timeout, TRUE);
         if (result == WAIT_OBJECT_0) {
             //

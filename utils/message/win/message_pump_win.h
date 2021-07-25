@@ -25,7 +25,7 @@ namespace utl {
 
         MessagePumpWin();
 
-        void wait(int64_t delay);
+        void wait(int64_t delay_ns);
         bool platformWork();
 
         HANDLE event_;

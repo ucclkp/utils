@@ -13,7 +13,7 @@ namespace utl {
 
     Message::Message()
         : id(-1),
-          time(0),
+          time_ns(0),
           target(nullptr),
           callback(nullptr),
           data(nullptr),

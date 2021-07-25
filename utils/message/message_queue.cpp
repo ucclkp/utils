@@ -39,7 +39,7 @@ namespace utl {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
         for (auto it = message_.begin(); it != message_.end(); ++it) {
-            if (it->is_barrier || msg.time == 0 || msg.time < it->time) {
+            if (it->is_barrier || msg.time_ns == 0 || msg.time_ns < it->time_ns) {
                 break;
             }
         }
@@ -48,8 +48,8 @@ namespace utl {
 
         if (ptr == message_.end() ||
             ptr->is_barrier ||
-            msg.time == 0 ||
-            msg.time < ptr->time)
+            msg.time_ns == 0 ||
+            msg.time_ns < ptr->time_ns)
         {
             message_.push_front(msg);
         } else {
@@ -57,7 +57,7 @@ namespace utl {
             for (;;) {
                 prev = ptr;
                 ++ptr;
-                if (ptr == message_.end() || ptr->is_barrier || msg.time < ptr->time) {
+                if (ptr == message_.end() || ptr->is_barrier || msg.time_ns < ptr->time_ns) {
                     break;
                 }
             }
@@ -74,8 +74,8 @@ namespace utl {
         auto ptr = delayed_.begin();
 
         if (ptr == delayed_.end() ||
-            msg.time == 0 ||
-            msg.time < ptr->time)
+            msg.time_ns == 0 ||
+            msg.time_ns < ptr->time_ns)
         {
             delayed_.push_front(msg);
         } else {
@@ -83,7 +83,7 @@ namespace utl {
             for (;;) {
                 prev = ptr;
                 ++ptr;
-                if (ptr == delayed_.end() || msg.time < ptr->time) {
+                if (ptr == delayed_.end() || msg.time_ns < ptr->time_ns) {
                     break;
                 }
             }
@@ -108,7 +108,7 @@ namespace utl {
         auto prev = ptr;
         ++ptr;
 
-        auto cur = Cycler::now();
+        auto cur = Cycler::now().count();
         while (ptr != message_.end()) {
             // 从队列中摘除该消息
             auto msg = *ptr;
@@ -117,7 +117,7 @@ namespace utl {
             // 发现可以执行的消息就立即返回，即使后面可能存在延时消息。
             // 因此外部调用应循环调用 dequeue() 直到消息队列枯竭为止，
             // 否则队列后面的消息可能永远无法执行。
-            if (msg.time <= cur) {
+            if (msg.time_ns <= uint64_t(cur)) {
                 *out = msg;
                 return true;
             }
@@ -130,15 +130,15 @@ namespace utl {
         return false;
     }
 
-    bool MessageQueue::dequeueDelayed(int64_t* delay, Message* out) {
+    bool MessageQueue::dequeueDelayed(int64_t* delay_ns, Message* out) {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
         auto ptr = delayed_.begin();
         auto prev = delayed_.end();
 
         if (ptr != delayed_.end()) {
-            auto cur = Cycler::now();
-            if (ptr->time <= cur) {
+            auto cur = Cycler::now().count();
+            if (ptr->time_ns <= uint64_t(cur)) {
                 // 从队列中摘除该消息
                 *out = *ptr;
                 if (prev != delayed_.end()) {
@@ -149,9 +149,9 @@ namespace utl {
                 return true;
             }
 
-            *delay = ptr->time - cur;
+            *delay_ns = ptr->time_ns - cur;
         } else {
-            *delay = -1;
+            *delay_ns = -1;
         }
 
         return nullptr;

@@ -169,10 +169,10 @@ namespace utl {
         return msg_queue_->hasMessage();
     }
 
-    bool MessagePump::cosumeDelayed(int64_t* delay) {
+    bool MessagePump::cosumeDelayed(int64_t* delay_ns) {
         for (;;) {
             Message msg;
-            if (!msg_queue_->dequeueDelayed(delay, &msg)) {
+            if (!msg_queue_->dequeueDelayed(delay_ns, &msg)) {
                 break;
             }
 

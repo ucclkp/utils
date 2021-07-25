@@ -48,7 +48,7 @@ namespace utl {
         MessagePump();
 
         bool cosume();
-        bool cosumeDelayed(int64_t* delay);
+        bool cosumeDelayed(int64_t* delay_ns);
 
         int nested_count_ = -1;
         MessageQueue* msg_queue_;

@@ -86,6 +86,7 @@
     <ClCompile Include="message\win\message_pump_win.cpp">
       <Filter>message\win</Filter>
     </ClCompile>
+    <ClCompile Include="time_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="convert.h" />
@@ -159,6 +160,7 @@
       <Filter>message\win</Filter>
     </ClInclude>
     <ClInclude Include="multi_callbacks.hpp" />
+    <ClInclude Include="time_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

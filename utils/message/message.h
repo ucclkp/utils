@@ -7,9 +7,7 @@
 #ifndef UTILS_MESSAGE_MESSAGE_H_
 #define UTILS_MESSAGE_MESSAGE_H_
 
-#include <mutex>
 #include <functional>
-#include <list>
 
 
 namespace utl {
@@ -23,7 +21,7 @@ namespace utl {
         ~Message();
 
         int id;
-        uint64_t time;
+        uint64_t time_ns;
         Cycler* target;
         Executable* callback;
         std::function<void()> func;
