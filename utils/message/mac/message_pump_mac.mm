@@ -11,139 +11,101 @@
 #include "utils/log.h"
 #include "utils/message/message_queue.h"
 
-#import <Cocoa/Cocoa.h>
-
 
 namespace utl {
 
     MessagePumpMac::MessagePumpMac() {
-        NSRunLoop* ns_loop = [NSRunLoop currentRunLoop];
-        CFRunLoopRef cf_loop = [ns_loop getCFRunLoop];
-
-        CFRunLoopObserverContext context = {0, this, nullptr, nullptr, nullptr};
-        observer_ = CFRunLoopObserverCreate(
-            kCFAllocatorDefault, kCFRunLoopAllActivities, YES, 0, &runLoopCalback, &context);
-        if (observer_) {
-            CFRunLoopAddObserver(cf_loop, observer_, kCFRunLoopCommonModes);
+        int ret = pthread_cond_init(&cv_, nullptr);
+        if (ret != 0) {
+            LOG(Log::ERR) << "Cannot create pthread cv: " << ret;
+            return;
         }
 
-        CFRunLoopSourceContext source_context = {
-            0, this, nullptr, nullptr, nullptr, nullptr, nullptr,
-            nullptr, nullptr, &onSourcePerform
-        };
-
-        source_ = CFRunLoopSourceCreate(nullptr, 1, &source_context);
-        if (source_) {
-            CFRunLoopAddSource(cf_loop, source_, kCFRunLoopCommonModes);
+        ret = pthread_mutex_init(&cv_mutex_, nullptr);
+        if (ret != 0) {
+            pthread_cond_destroy(&cv_);
+            LOG(Log::ERR) << "Cannot create pthread mutex: " << ret;
+            return;
         }
 
-        CFRunLoopTimerContext timer_context = {0, this, nullptr, nullptr, nullptr};
-        timer_ = CFRunLoopTimerCreate(
-                                      kCFAllocatorDefault,
-                                      std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
-                                      0, 0,
-                                      &onTimerPerform, &timer_context);
-        if (timer_) {
-            CFRunLoopAddTimer(cf_loop, timer_, kCFRunLoopCommonModes);
-        }
+        is_initialized_ = true;
     }
 
     MessagePumpMac::~MessagePumpMac() {
-        if (timer_) {
-            CFRelease(timer_);
-        }
-        if (source_) {
-            CFRelease(source_);
-        }
-        if (observer_) {
-            CFRelease(observer_);
-        }
-    }
-
-    void MessagePumpMac::onSourcePerform(void* info) {
-        auto ptr = static_cast<utl::MessagePumpMac*>(info);
-        if (!ptr->doWork()) {
-            [NSApp stop:nil];
-        }
-    }
-
-    void MessagePumpMac::onTimerPerform(CFRunLoopTimerRef timer, void* info) {
-        auto ptr = static_cast<utl::MessagePumpMac*>(info);
-        if (ptr->source_) {
-            CFRunLoopSourceSignal(ptr->source_);
-        }
-    }
-
-    void MessagePumpMac::runLoopCalback(
-        CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)
-    {
-        //auto ptr = static_cast<utl::MessageLooperMac*>(info);
-        switch (activity) {
-        case kCFRunLoopEntry:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: Entry!";
-            break;
-        case kCFRunLoopBeforeTimers:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: Before Timers!";
-            break;
-        case kCFRunLoopBeforeSources:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: Before Sources!";
-            break;
-        case kCFRunLoopBeforeWaiting:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: Before Waiting!";
-            break;
-        case kCFRunLoopAfterWaiting:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: After Waiting!";
-            break;
-        case kCFRunLoopExit:
-            //LOG(Log::INFO) << "[MessageLooper] Observer: Exit!";
-            break;
+        if (is_initialized_) {
+            pthread_cond_destroy(&cv_);
+            pthread_mutex_destroy(&cv_mutex_);
+            is_initialized_ = false;
         }
     }
 
     void MessagePumpMac::wakeup() {
-        if (source_) {
-            NSRunLoop* ns_loop = [NSRunLoop currentRunLoop];
-            CFRunLoopRef cf_loop = [ns_loop getCFRunLoop];
-            CFRunLoopSourceSignal(source_);
-            CFRunLoopWakeUp(cf_loop);
+        if (is_initialized_) {
+            pthread_mutex_lock(&cv_mutex_);
+            cv_pred_ = true;
+            pthread_mutex_unlock(&cv_mutex_);
+
+            pthread_cond_signal(&cv_);
         }
     }
 
-    bool MessagePumpMac::doWork() {
-        if (quit_imm_) {
-            return false;
-        }
-
-        bool has_more_work = cosume();
-        if (quit_imm_) {
-            return false;
-        }
-
-        int64_t delay;
-        has_more_work |= cosumeDelayed(&delay);
-        if (quit_imm_) {
-            return false;
-        }
-
-        if (!has_more_work && quit_when_idle_) {
-            return false;
-        }
-
-        wait(delay);
-        return true;
+    bool MessagePumpMac::platformWork() {
+        return false;
     }
 
     void MessagePumpMac::wait(int64_t delay) {
+        if (!is_initialized_) {
+            return;
+        }
+
+        pthread_mutex_lock(&cv_mutex_);
+
         if (delay != -1) {
-            if (timer_) {
-                auto next = CFAbsoluteTimeGetCurrent() + delay / 1000.0;
-                CFRunLoopTimerSetNextFireDate(timer_, next);
+            timespec pt;
+            pt.tv_sec = delay / 1000000000;
+            pt.tv_nsec = delay % 1000000000;
+
+            for (; !cv_pred_; ) {
+                pthread_cond_timedwait_relative_np(&cv_, &cv_mutex_, &pt);
+            }
+        } else {
+            for (; !cv_pred_; ) {
+                pthread_cond_wait(&cv_, &cv_mutex_);
             }
         }
+
+        cv_pred_ = false;
+        pthread_mutex_unlock(&cv_mutex_);
     }
 
     void MessagePumpMac::loop() {
-        [NSApp run];
+        for (;;) {
+            bool has_more_work = platformWork();
+            if (context_.top().quit_imm_) {
+                break;
+            }
+
+            has_more_work |= cosume();
+            if (context_.top().quit_imm_) {
+                break;
+            }
+
+            int64_t delay_ns;
+            has_more_work |= cosumeDelayed(&delay_ns);
+            if (context_.top().quit_imm_) {
+                break;
+            }
+
+            if (has_more_work) {
+                continue;
+            }
+
+            if (context_.top().quit_when_idle_) {
+                break;
+            }
+
+            wait(delay_ns);
+        }
     }
 
 }

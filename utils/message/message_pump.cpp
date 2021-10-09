@@ -18,6 +18,7 @@
 #include "utils/message/win/message_pump_win.h"
 #elif defined OS_MAC
 #include "utils/message/mac/message_pump_mac.h"
+#include "utils/message/mac/message_pump_ui_mac.h"
 #endif
 
 
@@ -57,7 +58,7 @@ namespace utl {
 #ifdef OS_WINDOWS
         pump.reset(new MessagePumpWin());
 #elif defined OS_MAC
-        //pump.reset(new MessagePumpMac());
+        pump.reset(new MessagePumpMac());
 #endif
         cur_pump_ = pump;
     }
@@ -75,7 +76,7 @@ namespace utl {
 #ifdef OS_WINDOWS
         pump.reset(new MessagePumpUIWin());
 #elif defined OS_MAC
-        pump.reset(new MessagePumpMac());
+        pump.reset(new MessagePumpUIMac());
 #endif
         cur_pump_ = pump;
 

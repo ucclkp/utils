@@ -9,7 +9,7 @@
 
 #include "utils/message/message_pump.h"
 
-#import <CoreFoundation/CoreFoundation.h>
+#include <pthread.h>
 
 
 namespace utl {
@@ -26,17 +26,13 @@ namespace utl {
 
         MessagePumpMac();
 
-        static void onSourcePerform(void* info);
-        static void onTimerPerform(CFRunLoopTimerRef timer, void* info);
-        static void runLoopCalback(
-            CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info);
-
         void wait(int64_t delay);
-        bool doWork();
+        bool platformWork();
 
-        CFRunLoopSourceRef source_;
-        CFRunLoopTimerRef timer_;
-        CFRunLoopObserverRef observer_;
+        bool cv_pred_ = false;
+        pthread_cond_t cv_;
+        pthread_mutex_t cv_mutex_;
+        bool is_initialized_ = false;
     };
 
 }
