@@ -7,6 +7,7 @@
 #ifndef UTILS_JSON_JSON_PARSER_H_
 #define UTILS_JSON_JSON_PARSER_H_
 
+#include <memory>
 #include <string>
 
 #include "utils/json/json_structs.h"

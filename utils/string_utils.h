@@ -19,18 +19,22 @@ namespace utl {
 
     namespace ascii {
 
-        std::string trim(const std::string& str, bool all = false);
-        std::u16string trim(const std::u16string& str, bool all = false);
+        // 去除 text 中的空格
+        void trim(std::string* text, bool all = false);
+        // 去除 text 中的空格
+        void trim(std::u16string* text, bool all = false);
 
-        std::string trim(const std::string& str, char token, bool all);
-        std::u16string trim(const std::u16string& str, char16_t token, bool all);
+        // 去除 text 中所有在 tokens 中出现的字符
+        void trim(std::string* text, const std::string_view& tokens, bool all);
+        // 去除 text 中所有在 tokens 中出现的字符
+        void trim(std::u16string* text, const std::u16string_view& tokens, bool all);
 
-        // 按照 token 中的每个字符分割字符串 str
+        // 按照 tokens 中的每个字符分割字符串 text
         std::vector<std::string> split(
-            const std::string_view& str, const std::string_view& token, bool filter_empty = false);
-        // 按照 token 中的每个字符分割字符串 str
+            const std::string_view& text, const std::string_view& tokens, bool filter_empty = false);
+        // 按照 tokens 中的每个字符分割字符串 text
         std::vector<std::u16string> split(
-            const std::u16string_view& str, const std::u16string_view& token, bool filter_empty = false);
+            const std::u16string_view& text, const std::u16string_view& tokens, bool filter_empty = false);
 
         bool startWith(
             const std::string_view& base, const std::string_view& match,

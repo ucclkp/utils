@@ -154,7 +154,7 @@ namespace utl {
             *delay_ns = -1;
         }
 
-        return nullptr;
+        return false;
     }
 
     void MessageQueue::remove(Cycler* c) {

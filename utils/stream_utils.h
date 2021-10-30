@@ -15,29 +15,29 @@
 #define RET_FALSE  \
     { return false; }
 
-#define READ_STREAM(mem, size)  \
-    s.read(reinterpret_cast<char*>(&mem), size);  \
+#define READ_STREAM(var, size)  \
+    s.read(reinterpret_cast<char*>(&var), size);  \
     if (!s.good()) RET_FALSE
 
-#define READ_STREAM_BE(mem, size)  \
-    READ_STREAM(mem, size)  \
-    static_assert(size == sizeof(mem), "The size of 'mem' must be equal to 'size'");  \
-    mem = utl::fromToBE(mem);
+#define READ_STREAM_BE(var, size)  \
+    READ_STREAM(var, size)  \
+    static_assert(size == sizeof(var), "The size of 'var' must be equal to 'size'");  \
+    var = utl::fromToBE(var);
 
-#define READ_STREAM_LE(mem, size)  \
-    READ_STREAM(mem, size)  \
-    static_assert(size == sizeof(mem), "The size of 'mem' must be equal to 'size'");  \
-    mem = utl::fromToLE(mem);
+#define READ_STREAM_LE(var, size)  \
+    READ_STREAM(var, size)  \
+    static_assert(size == sizeof(var), "The size of 'var' must be equal to 'size'");  \
+    var = utl::fromToLE(var);
 
-#define READ_STREAM_MLBE(mem, size)  \
-    READ_STREAM(mem, size)  \
-    static_assert(size < sizeof(mem), "The size of 'mem' must be greater than 'size'");  \
-    mem = utl::fromMLBE<size>(mem);
+#define READ_STREAM_MLBE(var, size)  \
+    READ_STREAM(var, size)  \
+    static_assert(size < sizeof(var), "The size of 'var' must be greater than 'size'");  \
+    var = utl::fromMLBE<size>(var);
 
-#define READ_STREAM_MLLE(mem, size)  \
-    READ_STREAM(mem, size)  \
-    static_assert(size < sizeof(mem), "The size of 'mem' must be greater than 'size'");  \
-    mem = utl::fromMLLE<size>(mem);
+#define READ_STREAM_MLLE(var, size)  \
+    READ_STREAM(var, size)  \
+    static_assert(size < sizeof(var), "The size of 'var' must be greater than 'size'");  \
+    var = utl::fromMLLE<size>(var);
 
 #define PEEK_STREAM(buf)  \
     buf = s.peek();       \
@@ -54,22 +54,22 @@
 }
 
 
-#define WRITE_STREAM(mem, size)  \
-    s.write(reinterpret_cast<const char*>(&mem), size);  \
+#define WRITE_STREAM(var, size)  \
+    s.write(reinterpret_cast<const char*>(&var), size);  \
     if (!s.good()) RET_FALSE
 
 #define WRITE_STREAM_STR(str)  \
     WRITE_STREAM(str.data()[0], str.length())
 
-#define WRITE_STREAM_BE(mem, size) {  \
-    static_assert(size == sizeof(mem), "The size of 'mem' must be equal to 'size'");  \
-    auto tmp = utl::fromToBE(mem);  \
+#define WRITE_STREAM_BE(var, size) {  \
+    static_assert(size == sizeof(var), "The size of 'var' must be equal to 'size'");  \
+    auto tmp = utl::fromToBE(var);  \
     WRITE_STREAM(tmp, size)  \
 }
 
-#define WRITE_STREAM_MLBE(mem, size) {  \
-    static_assert(size < sizeof(mem), "The size of 'mem' must be greater than 'size'");  \
-    auto tmp = utl::toMLBE<size>(mem);  \
+#define WRITE_STREAM_MLBE(var, size) {  \
+    static_assert(size < sizeof(var), "The size of 'var' must be greater than 'size'");  \
+    auto tmp = utl::toMLBE<size>(var);  \
     WRITE_STREAM(tmp, size)  \
 }
 

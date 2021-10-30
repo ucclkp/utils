@@ -63,91 +63,109 @@ namespace utl {
 
     namespace ascii {
 
-        std::string trim(const std::string& str, bool all) {
-            return trim(str, ' ', all);
+        void trim(std::string* text, bool all) {
+            trim(text, " ", all);
         }
 
-        std::u16string trim(const std::u16string& str, bool all) {
-            return trim(str, u' ', all);
+        void trim(std::u16string* text, bool all) {
+            trim(text, u" ", all);
         }
 
-        std::string trim(const std::string& str, char token, bool all) {
-            auto result = str;
-            if (all) {
-                for (auto it = result.begin(); it != result.end();) {
-                    if (*it == token) {
-                        it = result.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
-            } else {
-                auto i = result.find_first_not_of(token);
-                if (i == std::string::npos) {
-                    return {};
-                }
-                if (i > 0) {
-                    result.erase(0, i);
-                }
-
-                i = result.find_last_not_of(token);
-                if (i == std::string::npos) {
-                    return {};
-                }
-                if (i + 1 < result.length()) {
-                    result.erase(i + 1);
-                }
+        void trim(std::string* text, const std::string_view& tokens, bool all) {
+            auto i = text->find_first_not_of(tokens);
+            if (i == std::string::npos) {
+                text->clear();
+                return;
+            }
+            if (i > 0) {
+                text->erase(0, i);
             }
 
-            return result;
-        }
-
-        std::u16string trim(const std::u16string& str, char16_t token, bool all) {
-            auto result = str;
-            if (all) {
-                for (auto it = result.begin(); it != result.end();) {
-                    if (*it == token) {
-                        it = result.erase(it);
-                    } else {
-                        ++it;
-                    }
-                }
-            } else {
-                auto i = result.find_first_not_of(token);
-                if (i == std::u16string::npos) {
-                    return {};
-                }
-                if (i > 0) {
-                    result.erase(0, i);
-                }
-
-                i = result.find_last_not_of(token);
-                if (i == std::u16string::npos) {
-                    return {};
-                }
-                if (i + 1 < result.length()) {
-                    result.erase(i + 1);
-                }
+            i = text->find_last_not_of(tokens);
+            if (i == std::string::npos) {
+                text->clear();
+                return;
+            }
+            if (i + 1 < text->length()) {
+                text->erase(i + 1);
             }
 
-            return result;
+            if (!all) {
+                return;
+            }
+
+            for (i = 1;;) {
+                i = text->find_first_of(tokens, i);
+                if (i == std::string::npos) {
+                    break;
+                }
+
+                auto j = text->find_first_not_of(tokens, i);
+                if (j == std::string::npos) {
+                    text->erase(i);
+                    break;
+                }
+
+                text->erase(i, j - i);
+                ++i;
+            }
+        }
+
+        void trim(std::u16string* text, const std::u16string_view& tokens, bool all) {
+            auto i = text->find_first_not_of(tokens);
+            if (i == std::u16string::npos) {
+                text->clear();
+                return;
+            }
+            if (i > 0) {
+                text->erase(0, i);
+            }
+
+            i = text->find_last_not_of(tokens);
+            if (i == std::u16string::npos) {
+                text->clear();
+                return;
+            }
+            if (i + 1 < text->length()) {
+                text->erase(i + 1);
+            }
+
+            if (!all) {
+                return;
+            }
+
+            for (i = 1;;) {
+                i = text->find_first_of(tokens, i);
+                if (i == std::u16string::npos) {
+                    break;
+                }
+
+                auto j = text->find_first_not_of(tokens, i);
+                if (j == std::u16string::npos) {
+                    text->erase(i);
+                    break;
+                }
+
+                text->erase(i, j - i);
+                ++i;
+            }
         }
 
         std::vector<std::string> split(
-            const std::string_view& str, const std::string_view& token, bool filter_empty)
+            const std::string_view& text, const std::string_view& tokens, bool filter_empty)
         {
             std::string::size_type prev_index = 0;
             std::vector<std::string> str_vec;
             for (;;) {
-                auto cur_index = str.find_first_of(token, prev_index);
+                auto cur_index = text.find_first_of(tokens, prev_index);
                 if (cur_index != std::string::npos) {
-                    auto indiv = str.substr(prev_index, cur_index - prev_index);
+                    auto indiv = text.substr(prev_index, cur_index - prev_index);
                     if (!filter_empty || !indiv.empty()) {
                         str_vec.push_back(std::string(indiv));
                     }
                     prev_index = cur_index + 1;
                 } else {
-                    auto indiv = str.substr(prev_index);
+                    auto indiv = text.substr(prev_index);
                     if (!filter_empty || !indiv.empty()) {
                         str_vec.push_back(std::string(indiv));
                     }
@@ -159,20 +177,20 @@ namespace utl {
         }
 
         std::vector<std::u16string> split(
-            const std::u16string_view& str, const std::u16string_view& token, bool filter_empty)
+            const std::u16string_view& text, const std::u16string_view& tokens, bool filter_empty)
         {
             std::u16string::size_type prev_index = 0;
             std::vector<std::u16string> str_vec;
             for (;;) {
-                auto cur_index = str.find_first_of(token, prev_index);
+                auto cur_index = text.find_first_of(tokens, prev_index);
                 if (cur_index != std::u16string::npos) {
-                    auto indiv = str.substr(prev_index, cur_index - prev_index);
+                    auto indiv = text.substr(prev_index, cur_index - prev_index);
                     if (!filter_empty || !indiv.empty()) {
                         str_vec.push_back(std::u16string(indiv));
                     }
                     prev_index = cur_index + 1;
                 } else {
-                    auto indiv = str.substr(prev_index);
+                    auto indiv = text.substr(prev_index);
                     if (!filter_empty || !indiv.empty()) {
                         str_vec.push_back(std::u16string(indiv));
                     }

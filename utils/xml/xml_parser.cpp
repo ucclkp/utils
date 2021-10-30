@@ -131,7 +131,6 @@ namespace utl {
                             cur_element->contents.push_back(content);
                         } else {
                             *out = tmp;
-                            cur_element = tmp.get();
                             doc_stepper_ = DocStepper::Misc;
                         }
                         break;
@@ -465,6 +464,7 @@ namespace utl {
                     SKIP_BYTES(1);
                     PEEK_STREAM(char l_buf);
                     if (l_buf == '>') {
+                        SKIP_BYTES(1);
                         *type = NormTagType::EmptyTag;
                         if (stepper == ElementStepper::TAG_NAME) {
                             if (cur->tag_name.empty()) RET_FALSE;
