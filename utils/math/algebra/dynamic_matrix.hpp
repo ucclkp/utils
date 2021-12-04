@@ -8,6 +8,7 @@
 #define MATH_ALGEBRA_DYNAMIC_MATRIX_HPP_
 
 #include <cassert>
+#include <stdexcept>
 #include <string>
 
 

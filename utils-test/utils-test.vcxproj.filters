@@ -8,5 +8,6 @@
   <ItemGroup>
     <ClInclude Include="endian_unit_test.h" />
     <ClInclude Include="json_unit_test.h" />
+    <ClInclude Include="math_unit_test.hpp" />
   </ItemGroup>
 </Project>

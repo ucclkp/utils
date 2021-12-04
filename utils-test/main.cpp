@@ -10,6 +10,7 @@
 
 #include "utils-test/json_unit_test.h"
 #include "utils-test/endian_unit_test.h"
+#include "utils-test/math_unit_test.hpp"
 
 
 int main() {
@@ -25,6 +26,14 @@ int main() {
 
     //utl::test::TEST_ENDIAN();
     //utl::test::TEST_JSON();
+
+    utl::test::TEST_MATRIX_1x1();
+    utl::test::TEST_MATRIX_2x2();
+    utl::test::TEST_MATRIX_3x3();
+    utl::test::TEST_MATRIX_5x5();
+    utl::test::TEST_MATRIX_3x5();
+    utl::test::TEST_MATRIX_RREF();
+    utl::test::TEST_MATRIX_INVERSE();
 
     LOG(Log::INFO) << "utils-test exit.\n";
 

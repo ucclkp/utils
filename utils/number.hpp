@@ -137,8 +137,26 @@ namespace utl {
 
     template <typename Ty>
     bool is_num_zero(Ty val) {
-        return is_num_equal(val, 0);
+        return is_num_equal(val, Ty(0));
     }
+
+    template <typename Ret, typename Base, typename Exp>
+    Ret powi(Base base, Exp exp) {
+        static_assert(std::is_integral<Ret>::value &&
+            std::is_integral<Base>::value &&
+            std::is_integral<Exp>::value);
+
+        Ret result = 1;
+        while (exp) {
+            if (exp & 1) {
+                result *= base;
+            }
+            exp >>= 1;
+            result *= result;
+        }
+        return result;
+    }
+
 }
 
 #endif  // UTILS_NUMBER_HPP_
