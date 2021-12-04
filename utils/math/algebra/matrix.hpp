@@ -11,15 +11,14 @@
 #include <string>
 #include <type_traits>
 
+#include "utils/type_utils.hpp"
+
 
 namespace math {
 
     template <typename Ty, size_t Row, size_t Col>
     class MatrixT {
     public:
-        template <typename Y>
-        class CheckingStub : public std::false_type {};
-
         static MatrixT Z() {
             MatrixT m;
             m.zero();
@@ -41,7 +40,7 @@ namespace math {
 
         explicit operator Ty() const {
             if constexpr (Row != 1 || Col != 1) {
-                static_assert(CheckingStub<Ty>::value, "Row and Col must be equal to 1!");
+                static_assert(utl::sat_stub<Ty>::value, "Row and Col must be equal to 1!");
             }
             return data[0];
         }
@@ -89,7 +88,7 @@ namespace math {
 
         Ty operator()(size_t index) const {
             if constexpr (Col != 1) {
-                static_assert(CheckingStub<Ty>::value, "Col must be equal to 1!");
+                static_assert(utl::sat_stub<Ty>::value, "Col must be equal to 1!");
             }
             assert(index < Row);
             return data[index];
@@ -97,7 +96,7 @@ namespace math {
 
         Ty& operator()(size_t index) {
             if constexpr (Col != 1) {
-                static_assert(CheckingStub<Ty>::value, "Col must be equal to 1!");
+                static_assert(utl::sat_stub<Ty>::value, "Col must be equal to 1!");
             }
             assert(index < Row);
             return data[index];
@@ -168,7 +167,7 @@ namespace math {
                     data[i] = (i % (Row + 1) == 0 ? 1 : 0);
                 }
             } else {
-                static_assert(CheckingStub<Ty>::value, "Row must be equal to Col!");
+                static_assert(utl::sat_stub<Ty>::value, "Row must be equal to Col!");
             }
         }
 
@@ -185,7 +184,7 @@ namespace math {
                 assert(index < Row);
                 data[index] = val;
             } else {
-                static_assert(CheckingStub<Ty>::value, "Col must be equal to 1!");
+                static_assert(utl::sat_stub<Ty>::value, "Col must be equal to 1!");
             }
         }
 
@@ -196,7 +195,7 @@ namespace math {
 
         Ty get(size_t index) const {
             if constexpr (Col != 1) {
-                static_assert(CheckingStub<Ty>::value, "Col must be equal to 1!");
+                static_assert(utl::sat_stub<Ty>::value, "Col must be equal to 1!");
             }
             assert(index < Row);
             return data[index];

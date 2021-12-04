@@ -161,6 +161,8 @@
     </ClInclude>
     <ClInclude Include="multi_callbacks.hpp" />
     <ClInclude Include="time_utils.h" />
+    <ClInclude Include="aligment.hpp" />
+    <ClInclude Include="type_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

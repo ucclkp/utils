@@ -203,6 +203,7 @@
     <ClCompile Include="xml\xml_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aligment.hpp" />
     <ClInclude Include="command_line.h" />
     <ClInclude Include="convert.h" />
     <ClInclude Include="endian.hpp" />
@@ -243,6 +244,7 @@
     <ClInclude Include="stream_utils.h" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="time_utils.h" />
+    <ClInclude Include="type_utils.hpp" />
     <ClInclude Include="unicode.h" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />

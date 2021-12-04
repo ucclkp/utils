@@ -4,18 +4,16 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_ENDIAN_ML_H_
-#define UTILS_ENDIAN_ML_H_
+#ifndef UTILS_ENDIAN_ML_HPP_
+#define UTILS_ENDIAN_ML_HPP_
 
 #include <cstdint>
 #include <type_traits>
 
+#include "utils/type_utils.hpp"
+
 
 namespace utl {
-
-    // 用于防止编译器直接触发下面的 static_assert
-    template <typename T>
-    class CheckingStub : public std::false_type {};
 
     /**
      * MLBExLE 的通用版本。
@@ -23,7 +21,7 @@ namespace utl {
      */
     template <int N, typename T>
     T MLBExLE(T val) {
-        static_assert(CheckingStub<T>::value, "unavailable type!");
+        static_assert(sat_stub<T>::value, "unavailable type!");
         return 0;
     }
 
@@ -89,7 +87,7 @@ namespace utl {
      */
     template <int N, typename T>
     T MLLExBE(T val) {
-        static_assert(CheckingStub<T>::value, "unavailable type!");
+        static_assert(sat_stub<T>::value, "unavailable type!");
         return 0;
     }
 
@@ -215,4 +213,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_ENDIAN_ML_H_
+#endif  // UTILS_ENDIAN_ML_HPP_
