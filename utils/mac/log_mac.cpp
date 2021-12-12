@@ -47,10 +47,8 @@ namespace utl {
     }
 
     // static
-    void Log::debugBreakIfInDebugger() {
-        if (IsDebuggerPresent()) {
-            debugBreak();
-        }
+    bool Log::isDebuggerPresent() {
+        return IsDebuggerPresent();
     }
 
     // static
@@ -86,6 +84,10 @@ namespace utl {
         if ((*target & DEBUGGER) && (*target & STANDARD)) {
             *target &= ~DEBUGGER;
         }
+    }
+
+    // static
+    void Log::setVTEnabled(bool enabled) {
     }
 
     // static

@@ -6,6 +6,8 @@
 
 #include "utils/xml/xml_parser.h"
 
+#include <cassert>
+
 #include "utils/convert.h"
 #include "utils/log.h"
 #include "utils/stream_utils.h"
@@ -38,7 +40,7 @@ namespace utl {
         : doc_stepper_(DocStepper::None) {}
 
     bool XMLParser::parse(std::istream& s, std::shared_ptr<Element>* out) {
-        DCHECK(out && !*out);
+        assert(out && !*out);
 
         prolog_.version.clear();
         prolog_.charset.clear();

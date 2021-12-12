@@ -195,6 +195,9 @@
     <ClCompile Include="string_utils.cpp" />
     <ClCompile Include="time_utils.cpp" />
     <ClCompile Include="unicode.cpp" />
+    <ClCompile Include="unit_test\test_case.cpp" />
+    <ClCompile Include="unit_test\test_collector.cpp" />
+    <ClCompile Include="unit_test\test_suite.cpp" />
     <ClCompile Include="win\command_line_win.cpp" />
     <ClCompile Include="win\log_win.cpp" />
     <ClCompile Include="xml\xml_parser.cpp" />
@@ -206,6 +209,7 @@
     <ClInclude Include="aligment.hpp" />
     <ClInclude Include="command_line.h" />
     <ClInclude Include="convert.h" />
+    <ClInclude Include="define_utils.hpp" />
     <ClInclude Include="endian.hpp" />
     <ClInclude Include="endian_ml.hpp" />
     <ClInclude Include="event_handler.hpp" />
@@ -239,13 +243,16 @@
     <ClInclude Include="multi_callbacks.hpp" />
     <ClInclude Include="number.hpp" />
     <ClInclude Include="platform_utils.h" />
-    <ClInclude Include="scope_utils.h" />
+    <ClInclude Include="scope_utils.hpp" />
     <ClInclude Include="stl_utils.h" />
     <ClInclude Include="stream_utils.h" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="time_utils.h" />
     <ClInclude Include="type_utils.hpp" />
     <ClInclude Include="unicode.h" />
+    <ClInclude Include="unit_test\test_case.h" />
+    <ClInclude Include="unit_test\test_collector.h" />
+    <ClInclude Include="unit_test\test_suite.h" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />
     <ClInclude Include="xml\xml_parser.h" />

@@ -6,6 +6,8 @@
 
 #include "utils/message/message_pump.h"
 
+#include <cassert>
+
 #include "utils/log.h"
 #include "utils/executable.h"
 #include "utils/message/cycler.h"
@@ -119,7 +121,7 @@ namespace utl {
     void MessagePump::quitNow() {
         MessagePump* pump = getCurrent();
         if (!pump) {
-            CHECK(false) << "MessagePump::create() wasn't called on this thread!";
+            THROW << "MessagePump::create() wasn't called on this thread!";
             return;
         }
 
@@ -140,7 +142,7 @@ namespace utl {
 
     // static
     MessagePump* MessagePump::getCurrent() {
-        DCHECK(cur_pump_);
+        assert(cur_pump_);
         return cur_pump_.get();
     }
 

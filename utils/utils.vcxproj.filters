@@ -28,6 +28,9 @@
     <Filter Include="win">
       <UniqueIdentifier>{9defd63e-4b58-49f8-b731-faf62f089847}</UniqueIdentifier>
     </Filter>
+    <Filter Include="unit_test">
+      <UniqueIdentifier>{0584489f-c14f-4843-80d8-f14bb8847e4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="convert.cpp" />
@@ -87,6 +90,15 @@
       <Filter>message\win</Filter>
     </ClCompile>
     <ClCompile Include="time_utils.cpp" />
+    <ClCompile Include="unit_test\test_case.cpp">
+      <Filter>unit_test</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_test\test_suite.cpp">
+      <Filter>unit_test</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_test\test_collector.cpp">
+      <Filter>unit_test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="convert.h" />
@@ -152,7 +164,7 @@
       <Filter>message</Filter>
     </ClInclude>
     <ClInclude Include="number.hpp" />
-    <ClInclude Include="scope_utils.h" />
+    <ClInclude Include="scope_utils.hpp" />
     <ClInclude Include="message\win\message_pump_ui_win.h">
       <Filter>message\win</Filter>
     </ClInclude>
@@ -163,6 +175,16 @@
     <ClInclude Include="time_utils.h" />
     <ClInclude Include="aligment.hpp" />
     <ClInclude Include="type_utils.hpp" />
+    <ClInclude Include="unit_test\test_case.h">
+      <Filter>unit_test</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_test\test_suite.h">
+      <Filter>unit_test</Filter>
+    </ClInclude>
+    <ClInclude Include="unit_test\test_collector.h">
+      <Filter>unit_test</Filter>
+    </ClInclude>
+    <ClInclude Include="define_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

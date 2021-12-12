@@ -6,8 +6,9 @@
 
 #include "utils/message/win/message_pump_win.h"
 
-#include "utils/log.h"
+#include <cassert>
 
+#include "utils/log.h"
 #include "utils/message/message_queue.h"
 
 
@@ -61,7 +62,7 @@ namespace utl {
             //
         }
         ::ResetEvent(event_);
-        DCHECK(result != WAIT_FAILED);
+        DBREAK(result != WAIT_FAILED);
     }
 
     bool MessagePumpWin::platformWork() {

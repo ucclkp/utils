@@ -9,6 +9,8 @@
 
 #include <utility>
 
+#include "utils/define_utils.hpp"
+
 
 namespace utl::internal {
     template <typename F>
@@ -45,16 +47,16 @@ namespace utl::internal {
         F func_;
     };
 
-    class ObjectStub {};
-
-    template <typename F>
-    ObjectXXX<F> operator+(ObjectStub&&, F&& f) {
-        return ObjectXXX<F>(std::forward<F>(f));
-    }
+    class ObjectStub {
+    public:
+        ObjectStub() = default;
+        template <typename F>
+        ObjectXXX<F> operator+(F&& f) {
+            return ObjectXXX<F>(std::forward<F>(f));
+        }
+    };
 }
 
-#define CONCAT_STR(left, right) left##right
-#define ANONYMOUS_VAR(prefix) CONCAT_STR(prefix, __LINE__)
 #define SCOPED_CONVERTER utl::internal::ObjectStub() + [&] ()
 #define ESC_FROM_SCOPE auto ANONYMOUS_VAR(_anonymous_var_) = SCOPED_CONVERTER
 

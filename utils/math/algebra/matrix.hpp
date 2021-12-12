@@ -7,6 +7,7 @@
 #ifndef MATH_ALGEBRA_MATRIX_HPP_
 #define MATH_ALGEBRA_MATRIX_HPP_
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <type_traits>
@@ -69,7 +70,7 @@ namespace internal {
         }
 
         MatrixT() {}
-        MatrixT(std::initializer_list<Ty> vals) {
+        MatrixT(const std::initializer_list<Ty>& vals) {
             std::copy(vals.begin(), vals.end(), data);
         }
         MatrixT(const MatrixT& rhs) {

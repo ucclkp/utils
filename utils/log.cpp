@@ -6,6 +6,7 @@
 
 #include "utils/log.h"
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 
@@ -20,6 +21,9 @@ namespace utl {
     Log::Params log_params_;
     std::ofstream log_file_stream_;
 
+    // static
+    bool Log::is_vt_enabled_ = false;
+
     void InitLogging(const Log::Params& params) {
         log_params_ = params;
         if (log_params_.file_name.empty()) {
@@ -33,11 +37,13 @@ namespace utl {
                 Log::getDefaultLogPath(&log_params_.log_path);
             }
             log_file_stream_.open(log_params_.log_path / log_params_.file_name, std::ios::out | std::ios::app);
-            DCHECK(!log_file_stream_.fail());
+            assert(!log_file_stream_.fail());
         }
         if (log_params_.target & Log::OutputTarget::CONSOLE) {
             Log::openConsole();
         }
+
+        Log::setVTEnabled(params.enable_vt);
     }
 
     void UninitLogging() {
@@ -68,6 +74,15 @@ namespace utl {
             .append(stream_.str())
             .append(u8"\n");
 
+        logMessage(level_, msg);
+    }
+
+    std::ostringstream& Log::stream() {
+        return stream_;
+    }
+
+    // static
+    void Log::logMessage(Severity level, const std::string& msg) {
         if (log_params_.target & DEBUGGER) {
             outputDebugString(msg);
         }
@@ -83,22 +98,49 @@ namespace utl {
             std::cout << msg;
         }
 
-        switch (level_) {
+        switch (level) {
         case INFO:
             break;
         case WARNING:
             break;
         case ERR:
-            debugBreakIfInDebugger();
             break;
         case FATAL:
-            debugBreak();
-            break;
+            throw std::runtime_error(msg);
         }
     }
 
-    std::ostringstream& Log::stream() {
-        return stream_;
+    // static
+    const char* Log::vt_format(VTFormat f) {
+        if (!is_vt_enabled_) {
+            return "";
+        }
+
+        switch (f) {
+        case VT_DEFAULT:      return "\x1b[m";
+        case VT_UNDERLINE:    return "\x1b[4m";
+        case VT_NO_UNDERLINE: return "\x1b[24m";
+        case VT_NEGATIVE:     return "\x1b[7m";
+        case VT_POSITIVE:     return "\x1b[27m";
+        case VT_FG_BLACK:     return "\x1b[30m";
+        case VT_FG_WHITE:     return "\x1b[37m";
+        case VT_FG_RED:       return "\x1b[31m";
+        case VT_FG_GREEN:     return "\x1b[32m";
+        case VT_FG_YELLOW:    return "\x1b[33m";
+        case VT_FG_BLUE:      return "\x1b[34m";
+        case VT_FG_DEFAULT:   return "\x1b[39m";
+        case VT_BG_BLACK:     return "\x1b[40m";
+        case VT_BG_WHITE:     return "\x1b[47m";
+        case VT_BG_RED:       return "\x1b[41m";
+        case VT_BG_GREEN:     return "\x1b[42m";
+        case VT_BG_YELLOW:    return "\x1b[43m";
+        case VT_BG_BLUE:      return "\x1b[44m";
+        case VT_BG_DEFAULT:   return "\x1b[49m";
+
+        default:
+            return "";
+        }
+
     }
 
 }

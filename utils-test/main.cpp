@@ -10,30 +10,30 @@
 
 #include "utils-test/json_unit_test.h"
 #include "utils-test/endian_unit_test.h"
-#include "utils-test/math_unit_test.hpp"
+#include "utils/unit_test/test_collector.h"
 
 
 int main() {
     utl::Log::Params log_params;
     log_params.file_name = u"utils-debug.log";
     log_params.short_file_name = true;
-    log_params.target = utl::Log::OutputTarget::DEBUGGER | utl::Log::OutputTarget::FILE;
+    log_params.enable_vt = true;
+    log_params.target = utl::Log::OutputTarget::STANDARD;
     utl::InitLogging(log_params);
 
     utl::CommandLine::initialize();
 
     LOG(Log::INFO) << "utils-test start.";
 
+    LOG(Log::WARNING) << "Test LOG_WARNING";
+    LOG(Log::ERR) << "Test LOG_ERR";
+    //LOG(Log::FATAL) << "Test LOG_FATAL";
+    DBREAK(false);
+
     //utl::test::TEST_ENDIAN();
     //utl::test::TEST_JSON();
 
-    utl::test::TEST_MATRIX_1x1();
-    utl::test::TEST_MATRIX_2x2();
-    utl::test::TEST_MATRIX_3x3();
-    utl::test::TEST_MATRIX_5x5();
-    utl::test::TEST_MATRIX_3x5();
-    utl::test::TEST_MATRIX_RREF();
-    utl::test::TEST_MATRIX_INVERSE();
+    RUN_TESTS;
 
     LOG(Log::INFO) << "utils-test exit.\n";
 

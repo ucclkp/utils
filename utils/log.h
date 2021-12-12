@@ -7,48 +7,47 @@
 #ifndef UTILS_LOG_H_
 #define UTILS_LOG_H_
 
+#include <cassert>
 #include <filesystem>
 #include <string>
 #include <sstream>
+#include <signal.h>
 
+#include "utils/define_utils.hpp"
 
-#define TO_WIDE_STRING(x) L##x
-#define _TO_WIDE_STRING(x) TO_WIDE_STRING(x)
-#define __WFILE__ _TO_WIDE_STRING(__FILE__)
+#ifdef _MSC_VER
+#define DEBUG_BREAK  __debugbreak()
+#else
+#define DEBUG_BREAK  (void)raise(SIGTRAP)
+#endif
 
+#define NEED_EARLY_BREAK(level)  \
+    (level == ::utl::Log::FATAL || level == ::utl::Log::ERR)
+
+#define EARLY_BREAK(level)  \
+    (((level == ::utl::Log::FATAL || level == ::utl::Log::ERR) &&  \
+        ::utl::Log::isDebuggerPresent()) ? DEBUG_BREAK : (void)0)
 
 #define LOG_STREAM(level) \
     ::utl::Log(__WFILE__, __LINE__, level).stream()
 
-#define VOIDABLE_STREAM(stream, condition) \
-    !(condition) ? (void) 0 : ::utl::LogVoidify() & (stream)
-
-#define IS_LOG_ON   true
-#define IS_CHECK_ON true
+#define EARLY_BREAK_STREAM(level, condition) \
+    !(condition) ? (void) 0 : EARLY_BREAK(level), ::utl::LogVoidify() & (LOG_STREAM(level))
 
 #ifndef NDEBUG
-
-#define IS_DLOG_ON   true
-#define IS_DCHECK_ON true
-
+#define IS_DEBUG_ON  true
 #else
-
-#define IS_DLOG_ON   false
-#define IS_DCHECK_ON false
-
+#define IS_DEBUG_ON  false
 #endif
 
-#define LOG(level) \
-    VOIDABLE_STREAM(LOG_STREAM(level), IS_LOG_ON)
+#define LOG(level)         EARLY_BREAK_STREAM(level, true)
+#define DLOG(level)        EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
+#define DBREAK(condition)  EARLY_BREAK_STREAM(::utl::Log::ERR, IS_DEBUG_ON && !(condition))
 
-#define CHECK(condition) \
-    VOIDABLE_STREAM(LOG_STREAM(::utl::Log::FATAL), IS_CHECK_ON && !(condition))
-
-#define DLOG(level) \
-    VOIDABLE_STREAM(LOG_STREAM(level), IS_DLOG_ON)
-
-#define DCHECK(condition) \
-    VOIDABLE_STREAM(LOG_STREAM(::utl::Log::FATAL), IS_DCHECK_ON && !(condition))
+#define THROW  \
+    assert(false); LOG_STREAM(::utl::Log::FATAL)
+#define THROW_IF(condition)  \
+    !(condition) ? (void) 0 : assert(false), ::utl::LogVoidify() & (LOG_STREAM(::utl::Log::FATAL))
 
 
 namespace utl {
@@ -69,20 +68,44 @@ namespace utl {
             STANDARD = 1 << 3,
         };
 
+        enum VTFormat {
+            VT_DEFAULT,
+            VT_UNDERLINE,
+            VT_NO_UNDERLINE,
+            VT_NEGATIVE,
+            VT_POSITIVE,
+            VT_FG_BLACK,
+            VT_FG_WHITE,
+            VT_FG_RED,
+            VT_FG_GREEN,
+            VT_FG_YELLOW,
+            VT_FG_BLUE,
+            VT_FG_DEFAULT,
+            VT_BG_BLACK,
+            VT_BG_WHITE,
+            VT_BG_RED,
+            VT_BG_GREEN,
+            VT_BG_YELLOW,
+            VT_BG_BLUE,
+            VT_BG_DEFAULT,
+        };
+
         struct Params {
-            unsigned int target;
-            bool short_file_name;
+            unsigned int target = STANDARD;
+            bool short_file_name = true;
+            bool enable_vt = false;
             std::u16string file_name;
             std::filesystem::path log_path;
         };
 
         static void debugBreak();
-        static void debugBreakIfInDebugger();
+        static bool isDebuggerPresent();
 
         static bool openConsole();
         static bool closeConsole();
         static bool writeConsole(const std::string& msg);
         static void modifyTarget(unsigned int* target);
+        static void setVTEnabled(bool enabled);
         static void getDefaultLogPath(std::filesystem::path* path);
 
         Log(const wchar_t* file_name, int line_number, Severity level);
@@ -90,8 +113,13 @@ namespace utl {
 
         std::ostringstream& stream();
 
+        static void logMessage(Severity level, const std::string& msg);
+        static const char* vt_format(VTFormat f);
+
     private:
         static void outputDebugString(const std::string& msg);
+
+        static bool is_vt_enabled_;
 
         Severity level_;
         int line_number_;

@@ -6,6 +6,8 @@
 
 #include "utils/message/message_queue.h"
 
+#include <cassert>
+
 #include "utils/log.h"
 #include "utils/message/cycler.h"
 #include "utils/message/message.h"
@@ -32,7 +34,7 @@ namespace utl {
 
     bool MessageQueue::enqueue(const Message& msg) {
         if (msg.is_barrier) {
-            DCHECK(false) << "Illegal msg!";
+            LOG(Log::ERR) << "Illegal msg!";
             return false;
         }
 
@@ -69,7 +71,7 @@ namespace utl {
     }
 
     void MessageQueue::enqueueDelayed(const Message& msg) {
-        DCHECK(!msg.is_barrier);
+        assert(!msg.is_barrier);
 
         auto ptr = delayed_.begin();
 
@@ -102,7 +104,7 @@ namespace utl {
             ++ptr;
         }
 
-        CHECK(ptr != message_.end()) << "Cannot find barrier!";
+        THROW_IF(ptr == message_.end()) << "Cannot find barrier!";
 
         // over the barrier
         auto prev = ptr;

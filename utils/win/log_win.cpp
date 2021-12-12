@@ -9,11 +9,35 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-
 #include "utils/convert.h"
 #include "utils/files/file_utils.h"
 #include "utils/number.hpp"
 
+
+namespace {
+
+    bool enableVT(HANDLE console, bool enabled) {
+        if (enabled) {
+            DWORD mode;
+            if (::GetConsoleMode(console, &mode) != 0) {
+                mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (::SetConsoleMode(console, mode) != 0) {
+                    return true;
+                }
+            }
+        } else {
+            DWORD mode;
+            if (::GetConsoleMode(console, &mode) != 0) {
+                mode &= ~ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                if (::SetConsoleMode(console, mode) != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+}
 
 namespace utl {
 
@@ -27,10 +51,8 @@ namespace utl {
     }
 
     // static
-    void Log::debugBreakIfInDebugger() {
-        if (::IsDebuggerPresent() != 0) {
-            __debugbreak();
-        }
+    bool Log::isDebuggerPresent() {
+        return ::IsDebuggerPresent() != 0;
     }
 
     // static
@@ -45,6 +67,9 @@ namespace utl {
 
         is_alloc_console_ = true;
         console_output_handle_ = ::GetStdHandle(STD_OUTPUT_HANDLE);
+        if (console_output_handle_) {
+            enableVT(console_output_handle_, true);
+        }
         return true;
     }
 
@@ -75,6 +100,18 @@ namespace utl {
 
     // static
     void Log::modifyTarget(unsigned int* target) {
+    }
+
+    // static
+    void Log::setVTEnabled(bool enabled) {
+        if (enabled == is_vt_enabled_) {
+            return;
+        }
+
+        is_vt_enabled_ = enabled;
+        if (console_output_handle_) {
+            enableVT(console_output_handle_, enabled);
+        }
     }
 
     // static
