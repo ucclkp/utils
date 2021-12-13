@@ -289,39 +289,6 @@ namespace internal {
             adj.transpose(out);
         }
 
-        bool inverse(MatrixT* out) const {
-            if constexpr (Col != Row) {
-                static_assert(utl::sat_stub<Ty>::value, "Row must be equal to Col!");
-            }
-
-            Ty detr = 0;
-            MatrixT adjoint;
-            auto& od = adjoint.data;
-            for (size_t i = 0; i < Col; ++i) {
-                auto val = data[i];
-                MatrixT<Ty, Row - 1, Col - 1> mt;
-                internal::cofactor(*this, 0, i, &mt);
-                od[i] = internal::detTrans(mt) * (int((i + 0) % 2) * -2 + 1);
-                detr += val * od[i];
-            }
-
-            if (utl::is_num_zero(detr)) {
-                return false;
-            }
-
-            for (size_t i = 1; i < Row; ++i) {
-                for (size_t j = 0; j < Col; ++j) {
-                    MatrixT<Ty, Row - 1, Col - 1> mt;
-                    internal::cofactor(*this, i, j, &mt);
-                    od[i * Col + j] = internal::detTrans(mt) * (int((i + j) % 2) * -2 + 1);
-                }
-            }
-
-            adjoint.transpose(out);
-            out->mul(1 / detr);
-            return true;
-        }
-
         void swapCol(size_t c1_index, size_t c2_index) {
             assert(c1_index < Col && c2_index < Col);
             if (c1_index == c2_index) {
@@ -454,7 +421,7 @@ namespace internal {
             *out = m;
         }
 
-        bool inverse2(MatrixT* out) const {
+        bool inverse(MatrixT* out) const {
             if constexpr (Col != Row) {
                 static_assert(utl::sat_stub<Ty>::value, "Row must be equal to Col!");
             }
@@ -690,14 +657,6 @@ namespace internal {
             out->data[0] = 1;
         }
 
-        bool inverse(MatrixT* out) const {
-            if (utl::is_num_zero(data[0])) {
-                return false;
-            }
-            out->data[0] = 1 / data[0];
-            return true;
-        }
-
         void swapCol(size_t c1_index, size_t c2_index) {
             assert(c1_index < 1 && c2_index < 1);
         }
@@ -720,6 +679,14 @@ namespace internal {
             } else {
                 out->data[0] = 1;
             }
+        }
+
+        bool inverse(MatrixT* out) const {
+            if (utl::is_num_zero(data[0])) {
+                return false;
+            }
+            out->data[0] = 1 / data[0];
+            return true;
         }
 
         size_t getRow() const { return 1; }

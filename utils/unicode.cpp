@@ -60,6 +60,64 @@
 
 namespace utl {
 
+    bool Unicode::UTF8ToUTF16(char ch, char16_t* out) {
+        if (ch >= 0x00 && ch <= 0x7F) {
+            *out = ch;
+            return true;
+        }
+        return false;
+    }
+
+    bool Unicode::UTF8ToUTF32(char ch, char32_t* out) {
+        if (ch >= 0x00 && ch <= 0x7F) {
+            *out = ch;
+            return true;
+        }
+        return false;
+    }
+
+    bool Unicode::UTF16ToUTF8(char16_t ch, std::string* dst) {
+        if ((ch >= 0x0000 && ch <= 0xD7FF) ||
+            (ch >= 0xE000 && ch <= 0xFFFF))
+        {
+            char buf[4];
+            uint8_t count;
+            SVToUTF8(uint32_t(ch), buf, &count);
+            dst->resize(count);
+            dst->assign(buf, count);
+            return true;
+        }
+        return false;
+    }
+
+    bool Unicode::UTF16ToUTF32(char16_t ch, char32_t* out) {
+        if ((ch >= 0x0000 && ch <= 0xD7FF) ||
+            (ch >= 0xE000 && ch <= 0xFFFF))
+        {
+            *out = ch;
+            return true;
+        }
+        return false;
+    }
+
+    void Unicode::UTF32ToUTF8(char32_t ch, std::string* dst) {
+        char buf[4];
+        uint8_t count;
+        SVToUTF8(uint32_t(ch), buf, &count);
+        dst->resize(count);
+        dst->assign(buf, count);
+    }
+
+    void Unicode::UTF32ToUTF16(char32_t ch, std::u16string* dst) {
+        dst->clear();
+
+        char16_t buf[2];
+        uint8_t count;
+        SVToUTF16(uint32_t(ch), buf, &count);
+        dst->resize(count);
+        dst->assign(buf, count);
+    }
+
     bool Unicode::UTF8ToUTF16(const std::string_view& src, std::u16string* dst) {
         return UTF8ToOthers(src, dst, nullptr);
     }
@@ -77,6 +135,8 @@ namespace utl {
     }
 
     void Unicode::UTF32ToUTF8(const std::u32string_view& src, std::string* dst) {
+        dst->clear();
+
         char buf[4];
         uint8_t count;
         for (const auto& u32 : src) {
@@ -86,6 +146,8 @@ namespace utl {
     }
 
     void Unicode::UTF32ToUTF16(const std::u32string_view& src, std::u16string* dst) {
+        dst->clear();
+
         char16_t buf[2];
         uint8_t count;
         for (const auto& u32 : src) {

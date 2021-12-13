@@ -4,16 +4,18 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_TEST_ENDIAN_UNIT_TEST_H_
-#define UTILS_TEST_ENDIAN_UNIT_TEST_H_
+#ifndef UTILS_FLOAT_CONV_H_
+#define UTILS_FLOAT_CONV_H_
+
+#include <string>
 
 
 namespace utl {
-namespace test {
 
-    void TEST_ENDIAN();
+    void testBigFloat();
+
+    void floatToString(double val, std::string* out);
 
 }
-}
 
-#endif  // UTILS_TEST_ENDIAN_UNIT_TEST_H_
+#endif  // UTILS_FLOAT_CONV_H_

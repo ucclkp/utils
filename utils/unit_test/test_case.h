@@ -61,8 +61,9 @@ namespace test {
         virtual ~TestCase();
 
         virtual void run();
-
         virtual bool isSuite() const;
+        virtual size_t getTotal() const;
+        virtual size_t getError() const;
 
         size_t getFuncCount() const;
         const std::string& getName() const;
@@ -93,6 +94,8 @@ namespace test {
 
         void runTests();
 
+        size_t total_ = 0;
+        size_t error_ = 0;
         std::vector<TestFunction> test_funcs_;
 
     private:

@@ -8,28 +8,8 @@
 
 #include "utils/log.h"
 #include "utils/unit_test/test_collector.h"
+#include "utils/unit_test/test_log.hpp"
 
-#define UTLOG  UTLog().stream()
-
-namespace {
-
-    class UTLog {
-    public:
-        UTLog() {}
-        ~UTLog() {
-            utl::Log::logMessage(
-                Log::Severity::INFO, oss_.str());
-        }
-
-        std::ostringstream& stream() {
-            return oss_;
-        }
-
-    private:
-        std::ostringstream oss_;
-    };
-
-}
 
 namespace utl {
 namespace test {
@@ -42,12 +22,15 @@ namespace test {
         const std::string& name, TestCollector* collector)
         : name_(name)
     {
-        collector->addCase(this);
+        collector->add(this);
     }
 
     TestCase::~TestCase() {}
 
     void TestCase::run() {
+        total_ = 0;
+        error_ = 0;
+
         if (test_funcs_.empty()) {
             return;
         }
@@ -72,6 +55,7 @@ namespace test {
 
             UTLOG << Log::vt_format(Log::VT_FG_YELLOW)
                 << "[测] " << Log::vt_format(Log::VT_DEFAULT) << desc;
+            ++total_;
 
             if (t.func()) {
                 UTLOG << "\r" << Log::vt_format(Log::VT_FG_GREEN)
@@ -79,6 +63,7 @@ namespace test {
             } else {
                 UTLOG << "\r" << Log::vt_format(Log::VT_FG_RED)
                     << "[否] " << Log::vt_format(Log::VT_DEFAULT) << desc << "\n";
+                ++error_;
             }
         }
 
@@ -87,6 +72,14 @@ namespace test {
 
     bool TestCase::isSuite() const {
         return false;
+    }
+
+    size_t TestCase::getTotal() const {
+        return total_;
+    }
+
+    size_t TestCase::getError() const {
+        return error_;
     }
 
     size_t TestCase::getFuncCount() const {

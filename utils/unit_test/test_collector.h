@@ -24,11 +24,13 @@ namespace test {
 
         void run();
 
-        void addCase(TestCase* c);
-        void removeCase(TestCase* c, bool del = true);
-        void clearCase(bool del = true);
+        void add(TestCase* c);
+        void remove(TestCase* c, bool del = true);
+        void clear(bool del = true);
 
-        size_t getCaseCount() const;
+        size_t getTotal() const;
+        size_t getError() const;
+        size_t getChildCount() const;
 
     private:
         std::vector<TestCase*> children_;

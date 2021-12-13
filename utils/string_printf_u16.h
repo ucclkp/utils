@@ -4,16 +4,16 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_TEST_JSON_UNIT_TEST_H_
-#define UTILS_TEST_JSON_UNIT_TEST_H_
+#ifndef UTILS_STRING_PRINTF_U16_H_
+#define UTILS_STRING_PRINTF_U16_H_
+
+#include <string>
 
 
 namespace utl {
-namespace test {
 
-    void TEST_JSON();
+    std::u16string stringPrintf_u16(const char16_t* format, ...);
 
 }
-}
 
-#endif  // UTILS_TEST_JSON_UNIT_TEST_H_
+#endif  // UTILS_STRING_PRINTF_U16_H_

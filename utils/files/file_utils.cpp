@@ -40,11 +40,11 @@ namespace utl {
 
         std::u16string file_name;
         if (heap_buff) {
-            file_name = reinterpret_cast<char16_t*>(heap_buff.get());
+            file_name.append(heap_buff.get(), heap_buff.get() + result);
         } else {
-            file_name = reinterpret_cast<char16_t*>(buffer);
+            file_name.append(buffer, buffer + result);
         }
-        std::filesystem::path file_path(file_name);
+        std::filesystem::path file_path(std::move(file_name));
 
         if (dir) {
             file_path = file_path.parent_path();

@@ -6,7 +6,6 @@
 
 #include "utils/convert.h"
 
-#include "utils/platform_utils.h"
 #include "utils/unicode.h"
 
 
@@ -31,25 +30,31 @@ namespace utl {
     }
 
     std::string WideToUTF8(const std::wstring_view& str) {
+        /**
+         * wchar_t 转换为 char16_t 或 char32_t。
+         * 逐个转换，以防止强制类型转换出现未定义行为。
+         */
 #ifdef OS_WINDOWS
-        return UTF16ToUTF8(
-            std::u16string_view(
-                reinterpret_cast<const char16_t*>(str.data()), str.length()));
+        return UTF16ToUTF8(std::u16string(str.begin(), str.end()));
 #elif defined OS_MAC
         std::string out;
         Unicode::UTF32ToUTF8(
-            std::u32string(reinterpret_cast<const char32_t*>(str.data()), str.size()), &out);
+            std::u32string(str.begin(), str.end()), &out);
         return out;
 #endif
     }
 
     std::u16string WideToUTF16(const std::wstring_view& str) {
+        /**
+         * wchar_t 转换为 char16_t 或 char32_t。
+         * 逐个转换，以防止强制类型转换出现未定义行为。
+         */
 #ifdef OS_WINDOWS
         return std::u16string(str.begin(), str.end());
 #elif defined OS_MAC
         std::u16string out;
         Unicode::UTF32ToUTF16(
-            std::u32string(reinterpret_cast<const char32_t*>(str.data()), str.size()), &out);
+            std::u32string(str.begin(), str.end()), &out);
         return out;
 #endif
     }

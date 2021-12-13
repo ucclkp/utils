@@ -121,8 +121,9 @@ namespace utl {
 
     // static
     void Log::outputDebugString(const std::string& msg) {
-        ::OutputDebugStringW(
-            reinterpret_cast<LPCWSTR>(UTF8ToUTF16(msg).c_str()));
+        auto u16_msg = UTF8ToUTF16(msg);
+        std::wstring w_msg(u16_msg.begin(), u16_msg.end());
+        ::OutputDebugStringW(w_msg.c_str());
     }
 
 }

@@ -22,6 +22,8 @@ namespace test {
     TestSuite::~TestSuite() {}
 
     void TestSuite::run() {
+        total_ = 0;
+        error_ = 0;
         if (test_funcs_.empty() && children_.empty()) {
             return;
         }
@@ -32,8 +34,8 @@ namespace test {
             runTests();
         }
 
-        for (auto child : children_) {
-            child.second->run();
+        for (auto& pair : children_) {
+            pair.second->run();
         }
 
         onFinished();
@@ -41,6 +43,22 @@ namespace test {
 
     bool TestSuite::isSuite() const {
         return true;
+    }
+
+    size_t TestSuite::getTotal() const {
+        size_t total = total_;
+        for (auto& pair : children_) {
+            total += pair.second->getTotal();
+        }
+        return total;
+    }
+
+    size_t TestSuite::getError() const {
+        size_t _error = error_;
+        for (auto& pair : children_) {
+            _error += pair.second->getError();
+        }
+        return _error;
     }
 
     void TestSuite::addCase(TestCase* c) {

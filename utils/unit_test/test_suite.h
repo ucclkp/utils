@@ -24,8 +24,9 @@ namespace test {
         ~TestSuite();
 
         void run() override;
-
         bool isSuite() const override;
+        size_t getTotal() const override;
+        size_t getError() const override;
 
         void addCase(TestCase* c);
         void removeCase(TestCase* c, bool del = true);

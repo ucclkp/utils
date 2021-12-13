@@ -282,6 +282,9 @@ namespace internal {
         }
 
         bool equal(const DMatrixT& rhs) const {
+            if (col != rhs.col || row != rhs.row) {
+                return false;
+            }
             for (size_t i = 0; i < row * col; ++i) {
                 if (!utl::is_num_equal(data[i], rhs.data[i])) {
                     return false;
@@ -316,47 +319,6 @@ namespace internal {
                 }
             }
             adj.transpose(out);
-        }
-
-        bool inverse(DMatrixT* out) const {
-            if (col != row) {
-                throw std::runtime_error("Row must be equal to Col!");
-            }
-
-            if (col == 1) {
-                if (utl::is_num_zero(data[0])) {
-                    return false;
-                }
-                out->data[0] = 1 / data[0];
-                return true;
-            }
-
-            Ty detr = 0;
-            DMatrixT adjoint(row, col);
-            auto& od = adjoint.data;
-            for (size_t i = 0; i < col; ++i) {
-                auto val = data[i];
-                DMatrixT<Ty> mt(row - 1, col - 1);
-                internal::cofactor(*this, 0, i, &mt);
-                od[i] = internal::detTrans(mt) * (int((i + 0) % 2) * -2 + 1);
-                detr += val * od[i];
-            }
-
-            if (utl::is_num_zero(detr)) {
-                return false;
-            }
-
-            for (size_t i = 1; i < row; ++i) {
-                for (size_t j = 0; j < col; ++j) {
-                    DMatrixT<Ty> mt(row - 1, col - 1);
-                    internal::cofactor(*this, i, j, &mt);
-                    od[i * col + j] = internal::detTrans(mt) * (int((i + j) % 2) * -2 + 1);
-                }
-            }
-
-            adjoint.transpose(out);
-            out->mul(1 / detr);
-            return true;
         }
 
         void swapCol(size_t c1_index, size_t c2_index) {
@@ -493,7 +455,7 @@ namespace internal {
             *out = m;
         }
 
-        bool inverse2(DMatrixT* out) const {
+        bool inverse(DMatrixT* out) const {
             if (col != row) {
                 throw std::runtime_error("Row must be equal to Col!");
             }

@@ -6,9 +6,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix_unit_test.cpp" />
     <ClCompile Include="dynamic_matrix_unit_test.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="endian_unit_test.h" />
-    <ClInclude Include="json_unit_test.h" />
+    <ClCompile Include="string_utils_unit_test.cpp" />
+    <ClCompile Include="unicode_unit_test.cpp" />
+    <ClCompile Include="convert_unit_test.cpp" />
+    <ClCompile Include="file_unit_test.cpp" />
   </ItemGroup>
 </Project>

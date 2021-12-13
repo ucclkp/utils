@@ -19,7 +19,31 @@ namespace utl {
         if (!argv) {
             return;
         }
-        initialize(argc, reinterpret_cast<char16_t**>(argv));
+
+        if (argc > 0) {
+            char16_t** c_strs = new char16_t*[argc];
+            for (int i = 0; i < argc; ++i) {
+                auto w_str = argv[i];
+                if (w_str) {
+                    auto len = std::wcslen(w_str);
+                    char16_t* c_str = new char16_t[len + 1];
+                    for (size_t n = 0; n < len; ++n) {
+                        c_str[n] = w_str[n];
+                    }
+                    c_str[len] = u'\0';
+                    c_strs[i] = c_str;
+                } else {
+                    c_strs[i] = nullptr;
+                }
+            }
+
+            initialize(argc, c_strs);
+
+            for (int i = 0; i < argc; ++i) {
+                delete[] c_strs[i];
+            }
+            delete[] c_strs;
+        }
 
         ::LocalFree(argv);
     }

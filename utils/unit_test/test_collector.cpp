@@ -8,6 +8,8 @@
 
 #include <memory>
 
+#include "utils/unit_test/test_log.hpp"
+
 
 namespace utl {
 namespace test {
@@ -32,16 +34,20 @@ namespace test {
         for (auto child : children_) {
             child->run();
         }
+
+        UTLOG << "Total: " << getTotal()
+            << ", Passed: " << (getTotal() - getError())
+            << ", Error: " << getError() << "\n\n";
     }
 
-    void TestCollector::addCase(TestCase* c) {
+    void TestCollector::add(TestCase* c) {
         if (!c) {
             return;
         }
         children_.push_back(c);
     }
 
-    void TestCollector::removeCase(TestCase* c, bool del) {
+    void TestCollector::remove(TestCase* c, bool del) {
         for (auto it = children_.begin(); it != children_.end(); ++it) {
             if (*it == c) {
                 if (del) {
@@ -53,7 +59,7 @@ namespace test {
         }
     }
 
-    void TestCollector::clearCase(bool del) {
+    void TestCollector::clear(bool del) {
         if (del) {
             for (auto child : children_) {
                 delete child;
@@ -62,7 +68,23 @@ namespace test {
         children_.clear();
     }
 
-    size_t TestCollector::getCaseCount() const {
+    size_t TestCollector::getTotal() const {
+        size_t total = 0;
+        for (auto child : children_) {
+            total += child->getTotal();
+        }
+        return total;
+    }
+
+    size_t TestCollector::getError() const {
+        size_t _error = 0;
+        for (auto child : children_) {
+            _error += child->getError();
+        }
+        return _error;
+    }
+
+    size_t TestCollector::getChildCount() const {
         return children_.size();
     }
 

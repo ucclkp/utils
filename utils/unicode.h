@@ -18,6 +18,13 @@ namespace utl {
 
     class Unicode {
     public:
+        static bool UTF8ToUTF16(char ch, char16_t* out);
+        static bool UTF8ToUTF32(char ch, char32_t* out);
+        static bool UTF16ToUTF8(char16_t ch, std::string* dst);
+        static bool UTF16ToUTF32(char16_t ch, char32_t* out);
+        static void UTF32ToUTF8(char32_t ch, std::string* dst);
+        static void UTF32ToUTF16(char32_t ch, std::u16string* dst);
+
         static bool UTF8ToUTF16(const std::string_view& src, std::u16string* dst);
         static bool UTF8ToUTF32(const std::string_view& src, std::u32string* dst);
         static bool UTF16ToUTF8(const std::u16string_view& src, std::string* dst);
