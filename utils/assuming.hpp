@@ -19,9 +19,13 @@ namespace utl {
                 static_cast<unsigned char>(~0u)) == static_cast<unsigned char>(~0u));
         assert(CHAR_BIT == 8);
         assert('A' == 65);
+        assert(std::numeric_limits<float>::radix == 2);
         assert(std::numeric_limits<float>::is_iec559);
+        assert(std::numeric_limits<double>::radix == 2);
         assert(std::numeric_limits<double>::is_iec559);
+        assert(std::numeric_limits<long double>::radix == 2);
         assert(std::numeric_limits<long double>::is_iec559);
+        assert(sizeof(long double) <= sizeof(uint_fast64_t));
     }
 
 }

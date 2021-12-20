@@ -15,7 +15,7 @@ namespace utl {
 
 namespace internal {
 
-    inline const char kDigitChar[]{
+    inline const char kDigitCharUpper[]{
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
         'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -23,57 +23,104 @@ namespace internal {
         'W', 'X', 'Y', 'Z',
     };
 
-    inline char itoc8(uint_fast8_t val) {
-        return kDigitChar[val];
-    }
+    inline const char kDigitCharLower[]{
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z',
+    };
 
-    inline char16_t itoc16(uint_fast8_t val) {
-        return char16_t(kDigitChar[val]);
-    }
-
-    inline char32_t itoc32(uint_fast8_t val) {
-        return char32_t(kDigitChar[val]);
-    }
-
-    inline uint_fast8_t ctoi(char c) {
-        switch (c) {
-        case '0': return 0; case '1': return 1; case '2': return 2; case '3': return 3;
-        case '4': return 4; case '5': return 5; case '6': return 6; case '7': return 7;
-        case '8': return 8; case '9': return 9;
-
-        case 'A': return 10; case 'B': return 11; case 'C': return 12; case 'D': return 13;
-        case 'E': return 14; case 'F': return 15; case 'G': return 16; case 'H': return 17;
-        case 'I': return 18; case 'J': return 19; case 'K': return 20; case 'L': return 21;
-        case 'M': return 22; case 'N': return 23; case 'O': return 24; case 'P': return 25;
-        case 'Q': return 26; case 'R': return 27; case 'S': return 28; case 'T': return 29;
-        case 'U': return 30; case 'V': return 31; case 'W': return 32; case 'X': return 33;
-        case 'Y': return 34; case 'Z': return 35;
-
-        case 'a': return 10; case 'b': return 11; case 'c': return 12; case 'd': return 13;
-        case 'e': return 14; case 'f': return 15; case 'g': return 16; case 'h': return 17;
-        case 'i': return 18; case 'j': return 19; case 'k': return 20; case 'l': return 21;
-        case 'm': return 22; case 'n': return 23; case 'o': return 24; case 'p': return 25;
-        case 'q': return 26; case 'r': return 27; case 's': return 28; case 't': return 29;
-        case 'u': return 30; case 'v': return 31; case 'w': return 32; case 'x': return 33;
-        case 'y': return 34; case 'z': return 35;
-
-        default: return std::uint_fast8_t(-1);
+    template <typename Ty>
+    int decd_slow(Ty v, int base) {
+        int r = 0;
+        while (v) {
+            v /= base;
+            ++r;
         }
+        return r;
     }
 
-    inline uint_fast8_t ctoi(char16_t c) {
-        return ctoi(char(c));
-    }
+    template <typename Ty>
+    int decd(Ty v, int base) {
+        static_assert(
+            std::is_unsigned<Ty>::value,
+            "Ty must be unsigned type!");
 
-    inline uint_fast8_t ctoi(char32_t c) {
-        return ctoi(char(c));
+        if (v < 10) return 1;
+        if (v < 100) return 2;
+        if (v < 1000) return 3;
+        if (v < 10000) return 4;
+        if (v < 100000) return 5;
+        if (v < 1000000) return 6;
+        if (v < 10000000) return 7;
+        if (v < 100000000) return 8;
+        if (v < 1000000000) return 9;
+        if (v < 10000000000) return 10;
+        if (v < 100000000000) return 11;
+        if (v < 1000000000000) return 12;
+        if (v < 10000000000000) return 13;
+        if (v < 100000000000000) return 14;
+        if (v < 1000000000000000) return 15;
+        if (v < 10000000000000000) return 16;
+        if (v < 100000000000000000) return 17;
+        if (v < 1000000000000000000) return 18;
+        if (v < 10000000000000000000) return 19;
+        return decd_slow(v / 10000000000000000000, base) + 19;
     }
 
 }
 
+    template <typename Cy>
+    Cy itocu(uint_fast8_t val) {
+        assert(val < 36);
+        return Cy(internal::kDigitCharUpper[val]);
+    }
+
+    template <typename Cy>
+    Cy itocl(uint_fast8_t val) {
+        assert(val < 36);
+        return Cy(internal::kDigitCharLower[val]);
+    }
+
+    template <typename Cy>
+    uint_fast8_t ctoi(Cy c) {
+        static_assert(
+            std::is_integral<Cy>::value, "Cy must be intergral types!");
+
+        switch (c) {
+        case Cy('0'): return 0; case Cy('1'): return 1; case Cy('2'): return 2; case Cy('3'): return 3;
+        case Cy('4'): return 4; case Cy('5'): return 5; case Cy('6'): return 6; case Cy('7'): return 7;
+        case Cy('8'): return 8; case Cy('9'): return 9;
+
+        case Cy('A'): case Cy('a'): return 10; case Cy('B'): case Cy('b'): return 11;
+        case Cy('C'): case Cy('c'): return 12; case Cy('D'): case Cy('d'): return 13;
+        case Cy('E'): case Cy('e'): return 14; case Cy('F'): case Cy('f'): return 15;
+        case Cy('G'): case Cy('g'): return 16; case Cy('H'): case Cy('h'): return 17;
+        case Cy('I'): case Cy('i'): return 18; case Cy('J'): case Cy('j'): return 19;
+        case Cy('K'): case Cy('k'): return 20; case Cy('L'): case Cy('l'): return 21;
+        case Cy('M'): case Cy('m'): return 22; case Cy('N'): case Cy('n'): return 23;
+        case Cy('O'): case Cy('o'): return 24; case Cy('P'): case Cy('p'): return 25;
+        case Cy('Q'): case Cy('q'): return 26; case Cy('R'): case Cy('r'): return 27;
+        case Cy('S'): case Cy('s'): return 28; case Cy('T'): case Cy('t'): return 29;
+        case Cy('U'): case Cy('u'): return 30; case Cy('V'): case Cy('v'): return 31;
+        case Cy('W'): case Cy('w'): return 32; case Cy('X'): case Cy('x'): return 33;
+        case Cy('Y'): case Cy('y'): return 34; case Cy('Z'): case Cy('z'): return 35;
+
+        default: return uint_fast8_t(-1);
+        }
+    }
+
+    template <typename Cy>
+    bool isdigit(Cy c, int radix) {
+        auto i = int(ctoi(c));
+        return i >= 0 && i < radix;
+    }
+
+
     template <typename Ty, typename Cy>
-    size_t itos(Ty val, int radix, Cy* buf, size_t len) {
-        typedef std::make_unsigned<Ty> UTy;
+    bool itos(Ty val, Cy* buf, size_t* len, int radix = 10, bool upper = false) {
+        typedef std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
 
@@ -82,6 +129,7 @@ namespace internal {
 
         UTy value;
         auto _buf = buf;
+        size_t sign_len = 0;
         if constexpr (std::is_signed<Ty>::value) {
             if (val < 0) {
                 // 防止溢出
@@ -90,8 +138,11 @@ namespace internal {
                 } else {
                     value = -val;
                 }
-                *_buf = Cy('-');
-                ++_buf;
+                if (*len > 0 && buf) {
+                    *_buf = Cy('-');
+                    ++_buf;
+                }
+                sign_len = 1u;
             } else {
                 value = val;
             }
@@ -99,24 +150,28 @@ namespace internal {
             value = val;
         }
 
+        const char* lut = upper ? internal::kDigitCharUpper : internal::kDigitCharLower;
+
         do {
             --_t_buf;
-            *_t_buf = Cy(internal::kDigitChar[value % radix]);
+            *_t_buf = Cy(lut[value % radix]);
             value /= radix;
         } while (value);
 
-        auto act_size = t_buf + bc - _t_buf;
-        std::memcpy(_buf, _t_buf, std::min(act_size, len));
-        return act_size;
+        auto act_size = size_t(t_buf + bc - _t_buf);
+        if (act_size + sign_len > *len) {
+            *len = act_size + sign_len;
+            return false;
+        }
+        if (_buf) {
+            std::memcpy(_buf, _t_buf, act_size * sizeof(Cy));
+        }
+        *len = act_size + sign_len;
+        return true;
     }
 
     template <typename Ty, typename Cy>
-    size_t itos(Ty val, Cy* buf, size_t len) {
-        return itos(val, 10, buf, len);
-    }
-
-    template <typename Ty, typename Cy>
-    void itos(Ty val, int radix, std::basic_string<Cy>* out) {
+    void itos(Ty val, std::basic_string<Cy>* out, int radix = 10, bool upper = false) {
         typedef std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
@@ -144,9 +199,11 @@ namespace internal {
             value = val;
         }
 
+        const char* lut = upper ? internal::kDigitCharUpper : internal::kDigitCharLower;
+
         do {
             --_t_buf;
-            *_t_buf = Cy(internal::kDigitChar[value % radix]);
+            *_t_buf = Cy(lut[value % radix]);
             value /= radix;
         } while (value);
 
@@ -156,17 +213,19 @@ namespace internal {
     }
 
     template <typename Ty, typename Cy>
-    void itos(Ty val, std::basic_string<Cy>* out) {
-        itos(val, 10, out);
+    std::basic_string<Cy> itos(Ty val, int radix = 10, bool upper = false) {
+        std::basic_string<Cy> result;
+        itos(val, &result, radix, upper);
+        return result;
     }
 
 
     template <typename Ty, typename Cy>
-    bool stoi(const Cy* buf, size_t len, int radix, Ty* out, const Cy** p = nullptr) {
+    bool stoi(const Cy* buf, size_t len, Ty* out, int radix = 10, const Cy** p = nullptr) {
         typedef std::make_unsigned<Ty>::type UTy;
         assert(radix >= 2 && radix <= 36);
 
-        if (len == 0) {
+        if (len == 0 || !buf) {
             if (p) *p = buf;
             return false;
         }
@@ -196,7 +255,7 @@ namespace internal {
 
         UTy result = 0;
         for (; i < len; ++i) {
-            auto c = internal::ctoi(*_buf);
+            auto c = ctoi(*_buf);
             if (c == uint8_t(-1) || c >= radix) {
                 break;
             }
@@ -253,28 +312,13 @@ namespace internal {
     }
 
     template <typename Ty, typename Cy>
-    bool stoi(const Cy* buf, size_t len, Ty* out, const Cy** p = nullptr) {
-        return stoi(buf, len, 10, out, p);
+    bool stoi(const std::basic_string<Cy>& str, Ty* out, int radix = 10) {
+        return stoi(str.data(), str.size(), out, radix);
     }
 
     template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string<Cy>& str, int radix, Ty* out) {
-        return stoi(str.data(), str.size(), radix, out);
-    }
-
-    template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string_view<Cy>& str, int radix, Ty* out) {
-        return stoi(str.data(), str.size(), radix, out);
-    }
-
-    template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string<Cy>& str, Ty* out) {
-        return stoi(str.data(), str.size(), 10, out);
-    }
-
-    template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string_view<Cy>& str, Ty* out) {
-        return stoi(str.data(), str.size(), 10, out);
+    bool stoi(const std::basic_string_view<Cy>& str, Ty* out, int radix = 10) {
+        return stoi(str.data(), str.size(), out, radix);
     }
 
 }

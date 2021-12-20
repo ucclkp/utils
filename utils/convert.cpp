@@ -6,14 +6,14 @@
 
 #include "utils/convert.h"
 
-#include "utils/unicode.h"
+#include "utils/unicode_conv.h"
 
 
 namespace utl {
 
     std::string UTF16ToUTF8(const std::u16string_view& str) {
         std::string utf8_str;
-        if (Unicode::UTF16ToUTF8(str, &utf8_str)) {
+        if (utf16_to_utf8(str, &utf8_str)) {
             return utf8_str;
         }
 
@@ -22,7 +22,7 @@ namespace utl {
 
     std::u16string UTF8ToUTF16(const std::string_view& str) {
         std::u16string utf16_str;
-        if (Unicode::UTF8ToUTF16(str, &utf16_str)) {
+        if (utf8_to_utf16(str, &utf16_str)) {
             return utf16_str;
         }
 
@@ -38,7 +38,7 @@ namespace utl {
         return UTF16ToUTF8(std::u16string(str.begin(), str.end()));
 #elif defined OS_MAC
         std::string out;
-        Unicode::UTF32ToUTF8(
+        utf32_to_utf8(
             std::u32string(str.begin(), str.end()), &out);
         return out;
 #endif
@@ -53,78 +53,10 @@ namespace utl {
         return std::u16string(str.begin(), str.end());
 #elif defined OS_MAC
         std::u16string out;
-        Unicode::UTF32ToUTF16(
+        utf32_to_utf16(
             std::u32string(str.begin(), str.end()), &out);
         return out;
 #endif
-    }
-
-    char toASCIIUpper(char ch) {
-        if (ch >= 'a' && ch <= 'z') {
-            return ch - u'a' + u'A';
-        }
-        return ch;
-    }
-
-    char toASCIILower(char ch) {
-        if (ch >= 'A' && ch <= 'Z') {
-            return ch - 'A' + 'a';
-        }
-        return ch;
-    }
-
-    std::string toASCIIUpper(const std::string_view& str) {
-        std::string result(str.size(), 0);
-        auto it = result.begin();
-        for (auto c : str) {
-            *it = toASCIIUpper(c);
-            ++it;
-        }
-        return result;
-    }
-
-    std::string toASCIILower(const std::string_view& str) {
-        std::string result(str.size(), 0);
-        auto it = result.begin();
-        for (auto c : str) {
-            *it = toASCIILower(c);
-            ++it;
-        }
-        return result;
-    }
-
-    char16_t toASCIIUpper(char16_t ch) {
-        if (ch >= u'a' && ch <= u'z') {
-            return ch - u'a' + u'A';
-        }
-        return ch;
-    }
-
-    char16_t toASCIILower(char16_t ch) {
-        if (ch >= u'A' && ch <= u'Z') {
-            return ch - u'A' + u'a';
-        }
-        return ch;
-    }
-
-    std::u16string toASCIIUpper(const std::u16string_view& str) {
-        std::u16string result(str.size(), 0);
-        auto it = result.begin();
-        for (auto c : str) {
-            *it = toASCIIUpper(c);
-            ++it;
-        }
-        return result;
-    }
-
-    std::u16string toASCIILower(const std::u16string_view& str) {
-        std::u16string result(str.size(), 0);
-        auto it = result.begin();
-        for (auto c : str) {
-            *it = toASCIILower(c);
-            ++it;
-        }
-        return result;
     }
 
 }

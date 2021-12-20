@@ -141,17 +141,17 @@ namespace utl {
     }
 
     template <typename Ret, typename Base, typename Exp>
-    Ret powi(Base base, Exp exp) {
-        static_assert(std::is_integral<Ret>::value &&
-            std::is_integral<Base>::value &&
-            std::is_integral<Exp>::value);
+    Ret powui(Base base, Exp exp) {
+        static_assert(std::is_unsigned<Ret>::value &&
+            std::is_unsigned<Base>::value &&
+            std::is_unsigned<Exp>::value);
 
-        Ret result = 1;
+        Ret result = 1u;
         while (exp) {
-            if (exp & 1) {
+            if (exp & 1u) {
                 result *= base;
             }
-            exp >>= 1;
+            exp >>= 1u;
             result *= result;
         }
         return result;

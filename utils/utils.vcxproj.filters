@@ -37,8 +37,7 @@
     <ClCompile Include="log.cpp" />
     <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
-    <ClCompile Include="string_utils.cpp" />
-    <ClCompile Include="unicode.cpp" />
+    <ClCompile Include="unicode_conv.cpp" />
     <ClCompile Include="json\json_parser.cpp">
       <Filter>json</Filter>
     </ClCompile>
@@ -99,9 +98,6 @@
     <ClCompile Include="unit_test\test_collector.cpp">
       <Filter>unit_test</Filter>
     </ClCompile>
-    <ClCompile Include="string_printf_u16.cpp" />
-    <ClCompile Include="float_conv.cpp" />
-    <ClCompile Include="int_conv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="convert.h" />
@@ -110,8 +106,8 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="platform_utils.h" />
     <ClInclude Include="stl_utils.h" />
-    <ClInclude Include="string_utils.h" />
-    <ClInclude Include="unicode.h" />
+    <ClInclude Include="string_utils.hpp" />
+    <ClInclude Include="unicode_conv.h" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />
     <ClInclude Include="json\json_parser.h">
@@ -188,14 +184,19 @@
       <Filter>unit_test</Filter>
     </ClInclude>
     <ClInclude Include="define_utils.hpp" />
-    <ClInclude Include="string_printf_u16.h" />
-    <ClInclude Include="float_conv.h" />
-    <ClInclude Include="int_conv.h" />
+    <ClInclude Include="float_conv.hpp" />
+    <ClInclude Include="int_conv.hpp" />
     <ClInclude Include="assuming.hpp" />
     <ClInclude Include="endian_internal.hpp" />
     <ClInclude Include="unit_test\test_log.hpp">
       <Filter>unit_test</Filter>
     </ClInclude>
+    <ClInclude Include="float_conv_big_num.hpp" />
+    <ClInclude Include="float_conv_internal.hpp" />
+    <ClInclude Include="float_conv_types.hpp" />
+    <ClInclude Include="usprintf_internal.hpp" />
+    <ClInclude Include="usprintf.hpp" />
+    <ClInclude Include="conv_types.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

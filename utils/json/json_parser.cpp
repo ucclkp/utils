@@ -9,8 +9,8 @@
 #include <cmath>
 #include <sstream>
 
-#include "utils/unicode.h"
 #include "utils/stream_utils.h"
+#include "utils/unicode_conv.h"
 
 
 namespace utl {
@@ -290,7 +290,7 @@ namespace utl {
                 READ_STREAM(ch, 1);
                 if (ch != 'u' && !u16_tmp.empty()) {
                     std::string tmp;
-                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    utf16_to_utf8(u16_tmp, &tmp);
                     str.append(tmp); u16_tmp.clear();
                 }
 
@@ -333,14 +333,14 @@ namespace utl {
             } else if (ch == '"') {
                 if (!u16_tmp.empty()) {
                     std::string tmp;
-                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    utf16_to_utf8(u16_tmp, &tmp);
                     str.append(tmp); u16_tmp.clear();
                 }
                 break;
             } else {
                 if (!u16_tmp.empty()) {
                     std::string tmp;
-                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    utf16_to_utf8(u16_tmp, &tmp);
                     str.append(tmp); u16_tmp.clear();
                 }
 

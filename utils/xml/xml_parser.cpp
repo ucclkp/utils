@@ -666,7 +666,7 @@ namespace utl {
     }
 
     bool XMLParser::checkTagName(const std::string& str) const {
-        return toASCIILower(str) != "xml";
+        return tolatl(str) != "xml";
     }
 
 }
