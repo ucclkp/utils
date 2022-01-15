@@ -25,7 +25,9 @@ namespace utl {
         for (NSInteger i = 0; i < str_num; ++i) {
             NSString* ns_str = args[i];
             char16_t* c_str = new char16_t[ns_str.length + 1];
-            [ns_str getCharacters:reinterpret_cast<unichar*>(c_str)];
+            for (NSUInteger j = 0; j < ns_str.length; ++j) {
+                c_str[j] = [ns_str characterAtIndex:j];
+            }
             c_str[ns_str.length] = u'\0';
             c_strs[i] = c_str;
         }
