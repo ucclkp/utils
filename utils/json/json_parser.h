@@ -35,11 +35,6 @@ namespace utl {
         bool parseNumber(std::istream& s, json::Value** v);
         bool parseString(std::istream& s, std::string* val);
         bool eatWhitespace(std::istream& s);
-
-        bool isDigit(char ch) const;
-        bool isDigit1_9(char ch) const;
-        bool isHexDigit(char ch) const;
-        uint8_t getHexVal(char ch) const;
     };
 
 }

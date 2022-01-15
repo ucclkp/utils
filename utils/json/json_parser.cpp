@@ -7,10 +7,10 @@
 #include "utils/json/json_parser.h"
 
 #include <cmath>
-#include <sstream>
 
 #include "utils/stream_utils.h"
 #include "utils/unicode_conv.h"
+#include "utils/float_conv.hpp"
 
 
 namespace utl {
@@ -196,11 +196,11 @@ namespace utl {
 
         // integer
         if (ch != '0') {
-            if (!isDigit1_9(ch)) return false;
+            if (!utl::isdigit(ch, 10)) return false;
             str.push_back(ch);
             for (;;) {
                 PEEK_STREAM(ch);
-                if (!isDigit(ch)) break;
+                if (!utl::isdigit(ch, 10)) break;
                 str.push_back(ch);
                 SKIP_BYTES(1);
             }
@@ -215,12 +215,12 @@ namespace utl {
             str.push_back(ch);
             SKIP_BYTES(1);
             PEEK_STREAM(ch);
-            if (!isDigit(ch)) return false;
+            if (!utl::isdigit(ch, 10)) return false;
             str.push_back(ch);
             SKIP_BYTES(1);
             for (;;) {
                 PEEK_STREAM(ch);
-                if (!isDigit(ch)) break;
+                if (!utl::isdigit(ch, 10)) break;
                 str.push_back(ch);
                 SKIP_BYTES(1);
             }
@@ -240,12 +240,12 @@ namespace utl {
                 PEEK_STREAM(ch);
             }
 
-            if (!isDigit(ch)) return false;
+            if (!utl::isdigit(ch, 10)) return false;
             exp_str.push_back(ch);
             SKIP_BYTES(1);
             for (;;) {
                 PEEK_STREAM(ch);
-                if (!isDigit(ch)) break;
+                if (!utl::isdigit(ch, 10)) break;
                 exp_str.push_back(ch);
                 SKIP_BYTES(1);
             }
@@ -253,24 +253,14 @@ namespace utl {
 
         if (is_frac) {
             double result;
-            std::istringstream ss(str);
-            if (!(ss >> result)) {
+            int ret = utl::stof(str, &result, FF_SCI);
+            if (ret != UCR_OK) {
                 return false;
-            }
-
-            if (!exp_str.empty()) {
-                int64_t exp;
-                std::istringstream exp_ss(exp_str);
-                if (!(exp_ss >> exp)) {
-                    return false;
-                }
-                result *= std::pow(10, exp);
             }
             *v = new json::DoubleValue(result);
         } else {
             int64_t result;
-            std::istringstream ss(str);
-            if (!(ss >> result)) {
+            if (!utl::stoi(str, &result)) {
                 return false;
             }
             *v = new json::IntegerValue(result);
@@ -309,20 +299,20 @@ namespace utl {
 
                     // To UTF-16 LE
                     READ_STREAM(ch, 1);
-                    if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch)) << 12;
+                    if (!utl::isdigit(ch, 16)) return false;
+                    code |= uint16_t(utl::ctoi(ch)) << 12;
 
                     READ_STREAM(ch, 1);
-                    if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch)) << 8;
+                    if (!utl::isdigit(ch, 16)) return false;
+                    code |= uint16_t(utl::ctoi(ch)) << 8;
 
                     READ_STREAM(ch, 1);
-                    if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch)) << 4;
+                    if (!utl::isdigit(ch, 16)) return false;
+                    code |= uint16_t(utl::ctoi(ch)) << 4;
 
                     READ_STREAM(ch, 1);
-                    if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch)) << 0;
+                    if (!utl::isdigit(ch, 16)) return false;
+                    code |= uint16_t(utl::ctoi(ch)) << 0;
 
                     u16_tmp.append({ code });
                     break;
@@ -362,28 +352,6 @@ namespace utl {
             SKIP_BYTES(1);
         }
         return true;
-    }
-
-    bool JSONParser::isDigit(char ch) const {
-        return ch >= '0' && ch <= '9';
-    }
-
-    bool JSONParser::isDigit1_9(char ch) const {
-        return ch >= '1' && ch <= '9';
-    }
-
-    bool JSONParser::isHexDigit(char ch) const {
-        return isDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
-    }
-
-    uint8_t JSONParser::getHexVal(char ch) const {
-        if (ch >= '0' && ch <= '9') {
-            return ch - '0';
-        }
-        if (ch >= 'a' && ch <= 'f') {
-            return 10 + (ch - 'a');
-        }
-        return 10 + (ch - 'A');
     }
 
 }

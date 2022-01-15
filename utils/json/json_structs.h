@@ -26,13 +26,13 @@ namespace json {
     class Value {
     public:
         enum Type {
-            OBJECT,
-            ARRAY,
-            INTEGER,
-            DOUBLE,
-            STRING,
-            BOOL,
-            NULL_VAL,
+            JT_OBJECT,
+            JT_ARRAY,
+            JT_INTEGER,
+            JT_DOUBLE,
+            JT_STRING,
+            JT_BOOL,
+            JT_NULL,
         };
 
         virtual ~Value() = default;
@@ -40,31 +40,31 @@ namespace json {
         virtual Type getType() const = 0;
 
         IntegerValue* asInteger() {
-            if (getType() != INTEGER) { return nullptr; }
+            if (getType() != JT_INTEGER) { return nullptr; }
             return reinterpret_cast<IntegerValue*>(this);
         }
         DoubleValue* asDouble() {
-            if (getType() != DOUBLE) { return nullptr; }
+            if (getType() != JT_DOUBLE) { return nullptr; }
             return reinterpret_cast<DoubleValue*>(this);
         }
         StringValue* asString() {
-            if (getType() != STRING) { return nullptr; }
+            if (getType() != JT_STRING) { return nullptr; }
             return reinterpret_cast<StringValue*>(this);
         }
         BoolValue* asBool() {
-            if (getType() != BOOL) { return nullptr; }
+            if (getType() != JT_BOOL) { return nullptr; }
             return reinterpret_cast<BoolValue*>(this);
         }
         NullValue* asNull() {
-            if (getType() != NULL_VAL) { return nullptr; }
+            if (getType() != JT_NULL) { return nullptr; }
             return reinterpret_cast<NullValue*>(this);
         }
         ArrayValue* asArray() {
-            if (getType() != ARRAY) { return nullptr; }
+            if (getType() != JT_ARRAY) { return nullptr; }
             return reinterpret_cast<ArrayValue*>(this);
         }
         ObjectValue* asObject() {
-            if (getType() != OBJECT) { return nullptr; }
+            if (getType() != JT_OBJECT) { return nullptr; }
             return reinterpret_cast<ObjectValue*>(this);
         }
     };
@@ -74,7 +74,7 @@ namespace json {
     public:
         explicit IntegerValue(int64_t val);
 
-        Type getType() const override { return INTEGER; }
+        Type getType() const override { return JT_INTEGER; }
 
         int64_t getValue() const { return val_; }
 
@@ -87,7 +87,7 @@ namespace json {
     public:
       explicit DoubleValue(double val);
 
-      Type getType() const override { return DOUBLE; }
+      Type getType() const override { return JT_DOUBLE; }
 
       double getValue() const { return val_; }
 
@@ -100,7 +100,7 @@ namespace json {
     public:
         explicit StringValue(const std::string& val);
 
-        Type getType() const override { return STRING; }
+        Type getType() const override { return JT_STRING; }
 
         void getValue(std::string* val) const { *val = val_; }
 
@@ -113,7 +113,7 @@ namespace json {
     public:
         explicit BoolValue(bool val);
 
-        Type getType() const override { return BOOL; }
+        Type getType() const override { return JT_BOOL; }
 
         bool getValue() const { return val_; }
 
@@ -126,7 +126,7 @@ namespace json {
     public:
         NullValue() = default;
 
-        Type getType() const override { return NULL_VAL; }
+        Type getType() const override { return JT_NULL; }
     };
 
 
@@ -135,11 +135,17 @@ namespace json {
         ArrayValue();
         ~ArrayValue();
 
-        Type getType() const override { return ARRAY; }
+        Type getType() const override { return JT_ARRAY; }
 
         size_t getCount() const;
 
         void put(Value* v);
+        void put(int64_t val);
+        void put(double val);
+        void put(const std::string& val);
+        void put(bool val);
+        void put(ArrayValue* val);
+        void put(ObjectValue* val);
 
         bool get(size_t index, Value** v) const;
         bool getInteger(size_t index, int64_t* out) const;
@@ -148,6 +154,14 @@ namespace json {
         bool getBoolean(size_t index, bool* out) const;
         bool getArray(size_t index, ArrayValue** out) const;
         bool getObject(size_t index, ObjectValue** out) const;
+
+        Value* get(size_t index) const;
+        int64_t getInteger(size_t index, int64_t def_val = 0) const;
+        double getDouble(size_t index, double def_val = 0.0) const;
+        std::string getString(size_t index, const std::string& def_val = {}) const;
+        bool getBoolean(size_t index, bool def_val = false) const;
+        ArrayValue* getArray(size_t index) const;
+        ObjectValue* getObject(size_t index) const;
 
     private:
         std::vector<Value*> values_;
@@ -159,22 +173,37 @@ namespace json {
         ObjectValue();
         ~ObjectValue();
 
-        Type getType() const override { return OBJECT; }
+        Type getType() const override { return JT_OBJECT; }
 
-        void put(const std::string& path, Value* v);
+        void put(const std::string_view& path, Value* v);
+        void put(const std::string_view& path, int64_t val);
+        void put(const std::string_view& path, double val);
+        void put(const std::string_view& path, const std::string& val);
+        void put(const std::string_view& path, bool val);
+        void put(const std::string_view& path, ArrayValue* val);
+        void put(const std::string_view& path, ObjectValue* val);
 
-        bool get(const std::string& path, Value** out) const;
-        bool getInteger(const std::string& path, int64_t* out) const;
-        bool getDouble(const std::string& path, double* out) const;
-        bool getString(const std::string& path, std::string* out) const;
-        bool getBoolean(const std::string& path, bool* out) const;
-        bool getArray(const std::string& path, ArrayValue** out) const;
-        bool getObject(const std::string& path, ObjectValue** out) const;
+        bool get(const std::string_view& path, Value** out) const;
+        bool getInteger(const std::string_view& path, int64_t* out) const;
+        bool getDouble(const std::string_view& path, double* out) const;
+        bool getString(const std::string_view& path, std::string* out) const;
+        bool getBoolean(const std::string_view& path, bool* out) const;
+        bool getArray(const std::string_view& path, ArrayValue** out) const;
+        bool getObject(const std::string_view& path, ObjectValue** out) const;
+
+        Value* get(const std::string_view& path) const;
+        int64_t getInteger(const std::string_view& path, int64_t def_val = 0) const;
+        double getDouble(const std::string_view& path, double def_val = 0.0) const;
+        std::string getString(const std::string_view& path, const std::string& def_val = {}) const;
+        bool getBoolean(const std::string_view& path, bool def_val = false) const;
+        ArrayValue* getArray(const std::string_view& path) const;
+        ObjectValue* getObject(const std::string_view& path) const;
 
     private:
-        using ValMap = std::map<std::string, Value*>;
+        using ValMap = std::map<std::string, Value*, std::less<>>;
 
-        bool getWne(const std::string& key, Value** out) const;
+        void putWne(const std::string_view& key, Value* val);
+        bool getWne(const std::string_view& key, Value** out) const;
 
         ValMap map_;
     };
