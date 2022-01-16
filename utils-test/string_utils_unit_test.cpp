@@ -143,13 +143,13 @@ TEST_CASE(StringUtilsUnitTest) {
 
     TEST_DEF("stringPrintf -> buf    test.") {
         auto _TEST_FUNC = [](const std::string& r, const char* format, ...) -> bool {
-            va_list vars;
-            va_start(vars, format);
+            internal::vlw vars;
+            va_start(vars.args, format);
             char buf[200];
             size_t len = 200;
             int ret = internal::usprintf_base(
-                format, std::char_traits<char>::length(format), buf, &len, vars);
-            va_end(vars);
+                format, std::char_traits<char>::length(format), buf, &len, &vars);
+            va_end(vars.args);
             TEST_E(ret, 0);
             TEST_E(len, r.size());
             TEST_E(std::string(buf, len), r);

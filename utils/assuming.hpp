@@ -25,7 +25,6 @@ namespace utl {
         assert(std::numeric_limits<double>::is_iec559);
         assert(std::numeric_limits<long double>::radix == 2);
         assert(std::numeric_limits<long double>::is_iec559);
-        assert(sizeof(long double) <= sizeof(uint_fast64_t));
     }
 
 }

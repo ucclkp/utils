@@ -135,7 +135,7 @@ namespace utl {
         if constexpr (std::is_unsigned<Ty>::value) {
             return val & ((Ty(1u) << (N * CHAR_BIT)) - 1);
         } else {
-            typedef std::make_unsigned<Ty>::type UTy;
+            typedef typename std::make_unsigned<Ty>::type UTy;
             auto tmp = UTy(val) & ((UTy(1u) << (N * CHAR_BIT)) - 1);
             return reinterpret_cast<Ty&>(tmp);
         }
@@ -169,7 +169,7 @@ namespace utl {
         if constexpr (std::is_unsigned<Ty>::value) {
             return val & ((Ty(1u) << (N * CHAR_BIT)) - 1);
         } else {
-            typedef std::make_unsigned<Ty>::type UTy;
+            typedef typename std::make_unsigned<Ty>::type UTy;
             auto tmp = UTy(val) & ((UTy(1u) << (N * CHAR_BIT)) - 1);
             return reinterpret_cast<Ty&>(tmp);
         }
@@ -203,7 +203,7 @@ namespace utl {
         if constexpr (std::is_unsigned<Ty>::value) {
             return val & ((Ty(1u) << (N * CHAR_BIT)) - 1);
         } else {
-            typedef std::make_unsigned<Ty>::type UTy;
+            typedef typename std::make_unsigned<Ty>::type UTy;
             auto tmp = UTy(val) & ((UTy(1u) << (N * CHAR_BIT)) - 1);
             return reinterpret_cast<Ty&>(tmp);
         }

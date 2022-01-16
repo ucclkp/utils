@@ -222,6 +222,7 @@
     <ClInclude Include="float_conv_big_num.hpp" />
     <ClInclude Include="float_conv_types.hpp" />
     <ClInclude Include="int_conv.hpp" />
+    <ClInclude Include="uint_exp.hpp" />
     <ClInclude Include="json\json_parser.h" />
     <ClInclude Include="json\json_structs.h" />
     <ClInclude Include="log.h" />

@@ -16,6 +16,20 @@ namespace utl {
     template <typename Ty>
     class sat_stub : public std::false_type {};
 
+    template <typename Ty>
+    struct upromote {
+        using type = typename std::conditional<
+            sizeof(Ty) <= sizeof(unsigned int),
+            unsigned int,
+            typename std::conditional<
+            sizeof(Ty) <= sizeof(unsigned long),
+            unsigned long,
+            typename std::conditional<
+            sizeof(Ty) <= sizeof(unsigned long long),
+            unsigned long long,
+            Ty>::type>::type>::type;
+    };
+
 }
 
 #endif  // UTILS_TYPE_UTILS_HPP_

@@ -41,34 +41,6 @@ namespace internal {
         return r;
     }
 
-    template <typename Ty>
-    int decd(Ty v, int base) {
-        static_assert(
-            std::is_unsigned<Ty>::value,
-            "Ty must be unsigned type!");
-
-        if (v < 10) return 1;
-        if (v < 100) return 2;
-        if (v < 1000) return 3;
-        if (v < 10000) return 4;
-        if (v < 100000) return 5;
-        if (v < 1000000) return 6;
-        if (v < 10000000) return 7;
-        if (v < 100000000) return 8;
-        if (v < 1000000000) return 9;
-        if (v < 10000000000) return 10;
-        if (v < 100000000000) return 11;
-        if (v < 1000000000000) return 12;
-        if (v < 10000000000000) return 13;
-        if (v < 100000000000000) return 14;
-        if (v < 1000000000000000) return 15;
-        if (v < 10000000000000000) return 16;
-        if (v < 100000000000000000) return 17;
-        if (v < 1000000000000000000) return 18;
-        if (v < 10000000000000000000) return 19;
-        return decd_slow(v / 10000000000000000000, base) + 19;
-    }
-
 }
 
     template <typename Cy>
@@ -120,7 +92,7 @@ namespace internal {
 
     template <typename Ty, typename Cy>
     bool itos(Ty val, Cy* buf, size_t* len, int radix = 10, bool upper = false) {
-        typedef std::make_unsigned<Ty>::type UTy;
+        typedef typename std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
 
@@ -172,7 +144,7 @@ namespace internal {
 
     template <typename Ty, typename Cy>
     void itos(Ty val, std::basic_string<Cy>* out, int radix = 10, bool upper = false) {
-        typedef std::make_unsigned<Ty>::type UTy;
+        typedef typename std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
 
@@ -222,7 +194,7 @@ namespace internal {
 
     template <typename Ty, typename Cy>
     bool stoi(const Cy* buf, size_t len, Ty* out, int radix = 10, const Cy** p = nullptr) {
-        typedef std::make_unsigned<Ty>::type UTy;
+        typedef typename std::make_unsigned<Ty>::type UTy;
         assert(radix >= 2 && radix <= 36);
 
         if (len == 0 || !buf) {

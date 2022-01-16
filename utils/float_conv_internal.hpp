@@ -8,58 +8,66 @@
 #define UTILS_FLOAT_CONV_INTERNAL_HPP_
 
 #include "utils/float_conv_big_num.hpp"
+#include "utils/uint_exp.hpp"
+
+#define SELECT_IF(u, f)  \
+    if (uuc <= u && fuc <= f)
+
+#define dftos_buf_INVOKE(u, f)  \
+    return dftos<FTy, UTy, Cy, bN, u, f>(fra, exp_shift, sign, fmt, round, precision, buf, len);
+
+#define dftos_str_INVOKE(u, f)  \
+    {dftos<FTy, UTy, Cy, bN, u, f>(fra, exp_shift, sign, fmt, round, precision, out); return;}
+
+#define dscistof_INVOKE(u, f)  \
+    return dscistof<FTy, UTy, Cy, bN, u, f>(str, len, di, de, sign, exp, fmt, round, out, p);
+
+#define dnorstof_INVOKE(u, f)  \
+    return dnorstof<FTy, UTy, Cy, bN, u, f>(str, len, di, sign, round, out, p);
+
+#define dftos_buf_IF_INVOKE(u, f)  SELECT_IF(u, f) dftos_buf_INVOKE(u, f)
+#define dftos_str_IF_INVOKE(u, f)  SELECT_IF(u, f) dftos_str_INVOKE(u, f)
+#define dscistof_IF_INVOKE(u, f)   SELECT_IF(u, f) dscistof_INVOKE(u, f)
+#define dnorstof_IF_INVOKE(u, f)   SELECT_IF(u, f) dnorstof_INVOKE(u, f)
 
 
 namespace utl {
 namespace internal {
 
     template <typename FTy>
-    void bit_conv(uint_fast64_t v, FTy* out) {
-        if constexpr (sizeof(FTy) == 2) {
-            auto _v = uint16_t(v);
-            std::memcpy(out, &_v, sizeof(FTy));
-            return;
-        }
-        if constexpr (sizeof(FTy) == 4) {
-            auto _v = uint32_t(v);
-            std::memcpy(out, &_v, sizeof(FTy));
-            return;
-        }
-        if constexpr (sizeof(FTy) == 8) {
-            auto _v = uint64_t(v);
-            std::memcpy(out, &_v, sizeof(FTy));
-            return;
-        }
+    void ftodf(
+        FTy val,
+        uint_fast8_t& sign, uint_fast32_t& exp_shift, uint_e<FTy>& fra)
+    {
+        using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
+        constexpr auto bexp = FT::bexp();
+        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
+        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        static_assert(
-            sizeof(FTy) == 2 || sizeof(FTy) == 4 || sizeof(FTy) == 8,
-            "unavailable type!");
+        uint_e uv;
+        uv.from(val);
+
+        fra = uv & (uint_e::bitAt(FT::mant) - 1u);
+        exp_shift = ((uv >> FT::sexp()) & exp_mask).uf32();
+        sign = uv.getBit(FT::ssign());
     }
 
     template <typename FTy>
-    void bit_conv(FTy v, uint_fast64_t* out) {
-        if constexpr (sizeof(FTy) == 2) {
-            uint16_t _v;
-            std::memcpy(&_v, &v, sizeof(FTy));
-            *out = _v;
-            return;
-        }
-        if constexpr (sizeof(FTy) == 4) {
-            uint32_t _v;
-            std::memcpy(&_v, &v, sizeof(FTy));
-            *out = _v;
-            return;
-        }
-        if constexpr (sizeof(FTy) == 8) {
-            uint64_t _v;
-            std::memcpy(&_v, &v, sizeof(FTy));
-            *out = _v;
-            return;
+    void dftof(
+        uint_fast8_t sign, uint_fast32_t exp_shift, const uint_e<FTy>& fra,
+        FTy* val)
+    {
+        using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
+
+        uint_e uv(fra);
+        uv |= uint_e(exp_shift) << FT::sexp();
+        if (sign) {
+            uv.setBit(FT::ssign());
         }
 
-        static_assert(
-            sizeof(FTy) == 2 || sizeof(FTy) == 4 || sizeof(FTy) == 8,
-            "unavailable type!");
+        uv.to(val);
     }
 
     template <typename FTy>
@@ -80,30 +88,20 @@ namespace internal {
         // 0|1 << 51 - 1: nan(snan)
         // 1|1 << 51 - 1: -nan(snan)
         using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
         constexpr auto mant_1 = FT::mant - 1u;
-        constexpr auto bexp = sizeof(FTy) * CHAR_BIT - FT::mant - 1u;
-        constexpr auto exp_mask = (uint_fast64_t(1u) << bexp) - 1u;
+        constexpr auto bexp = FT::bexp();
+        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        uint_fast64_t v;
         if (type == 2) {
             // nan(snan)/-nan(snan)
-            v = uint_fast64_t(exp_mask) << FT::mant;
-            if (sign) {
-                v |= uint_fast64_t(1u) << (sizeof(FTy) * CHAR_BIT - 1);
-            }
-            v |= 1u;
-            bit_conv(v, out);
+            dftof(sign, exp_mask, uint_e(1u), out);
         } else if (type == 1 || sign) {
             // -nan(ind)
-            v = uint_fast64_t(exp_mask) << FT::mant;
-            v |= uint_fast64_t(1u) << mant_1;
-            v |= uint_fast64_t(1u) << (sizeof(FTy) * CHAR_BIT - 1);
-            bit_conv(v, out);
+            dftof(sign, exp_mask, uint_e::bitAt(mant_1), out);
         } else {
             // nan
-            v = uint_fast64_t(exp_mask) << FT::mant;
-            v |= uint_fast64_t(1u) << mant_1;
-            bit_conv(v, out);
+            dftof(0, exp_mask, uint_e::bitAt(mant_1), out);
         }
     }
 
@@ -191,7 +189,7 @@ namespace internal {
 
     template <typename FTy, typename UTy, size_t bN, size_t UUnit, size_t FUnit>
     void bn_round(
-        uint_fast64_t fra, int_fast32_t exp_shf, uint_fast8_t sign,
+        int_fast32_t exp_shf, uint_fast8_t sign,
         int& fmt, int round, int& precision,
         BigUInt_bN<FTy, UTy, bN, UUnit>& bi,
         BigFloat_bN<FTy, UTy, bN, FUnit>& bf)
@@ -275,7 +273,7 @@ namespace internal {
 
     template <typename FTy, typename UTy, size_t bN, size_t UUnit, size_t FUnit>
     void dftobn(
-        uint_fast64_t fra, int_fast32_t exp_shf,
+        const uint_e<FTy>& fra, int_fast32_t exp_shf,
         BigUInt_bN<FTy, UTy, bN, UUnit>& bi,
         BigFloat_bN<FTy, UTy, bN, FUnit>& bf,
         int* bi_available)
@@ -283,6 +281,7 @@ namespace internal {
         using BigUInt = BigUInt_bN<FTy, UTy, bN, UUnit>;
         using BigFloat = BigFloat_bN<FTy, UTy, bN, FUnit>;
         using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
 
         if (exp_shf != 0) {
@@ -291,7 +290,7 @@ namespace internal {
             BigUInt bi_tmp(5);
             for (int_fast32_t i = exp; i >= 0; --i) {
                 bi_tmp.mul2();
-                if (i == 0 || (i <= FT::mant && (fra & (uint_fast64_t(1u) << (FT::mant - i))))) {
+                if (i == 0 || (i <= FT::mant && fra.getBit(FT::mant - i))) {
                     bi.add(bi_tmp);
                 }
             }
@@ -299,7 +298,7 @@ namespace internal {
             BigFloat bf_tmp(1);
             for (int_fast32_t i = exp + 1; i <= int_fast32_t(FT::mant); ++i) {
                 bf_tmp.div2();
-                if (i == 0 || (i > 0 && (fra & (uint_fast64_t(1u) << (FT::mant - i))))) {
+                if (i == 0 || (i > 0 && fra.getBit(FT::mant - i))) {
                     bf.add(bf_tmp);
                 }
             }
@@ -310,7 +309,7 @@ namespace internal {
             BigFloat bf_tmp(1);
             for (int_fast32_t i = exp + 1; i <= int_fast32_t(FT::mant); ++i) {
                 bf_tmp.div2();
-                if (i > 0 && (fra & (uint_fast64_t(1) << (FT::mant - i)))) {
+                if (i > 0 && fra.getBit(FT::mant - i)) {
                     bf.add(bf_tmp);
                 }
             }
@@ -334,9 +333,9 @@ namespace internal {
                 auto exp = bi.getSignDigitPos();
                 size_t len = *u_len;
                 if (fmt & FF_UPP) {
-                    bi.toChars<true>(ubuf, &len, exp);
+                    bi.template toChars<true>(ubuf, &len, exp);
                 } else {
-                    bi.toChars<false>(ubuf, &len, exp);
+                    bi.template toChars<false>(ubuf, &len, exp);
                 }
                 *u_len = len;
 
@@ -351,9 +350,9 @@ namespace internal {
                 len = _len >= *f_len ? *f_len : _len;
                 if (len) {
                     if (fmt & FF_UPP) {
-                        bi.toChars<true>(fbuf, &len, exp - len);
+                        bi.template toChars<true>(fbuf, &len, exp - len);
                     } else {
-                        bi.toChars<false>(fbuf, &len, exp - len);
+                        bi.template toChars<false>(fbuf, &len, exp - len);
                     }
                     i += len;
                 }
@@ -368,9 +367,9 @@ namespace internal {
 
                 if (len) {
                     if (fmt & FF_UPP) {
-                        bf.toChars<true>(fbuf + i, &len, 0);
+                        bf.template toChars<true>(fbuf + i, &len, 0);
                     } else {
-                        bf.toChars<false>(fbuf + i, &len, 0);
+                        bf.template toChars<false>(fbuf + i, &len, 0);
                     }
                     i += len;
                 }
@@ -380,9 +379,9 @@ namespace internal {
                 auto exp = bf.getSignDigitPos();
                 size_t len = *u_len;
                 if (fmt & FF_UPP) {
-                    bf.toChars<true>(ubuf, &len, exp);
+                    bf.template toChars<true>(ubuf, &len, exp);
                 } else {
-                    bf.toChars<false>(ubuf, &len, exp);
+                    bf.template toChars<false>(ubuf, &len, exp);
                 }
                 *u_len = len;
 
@@ -394,9 +393,9 @@ namespace internal {
                 }
 
                 if (fmt & FF_UPP) {
-                    bf.toChars<true>(fbuf, &len, exp + 1);
+                    bf.template toChars<true>(fbuf, &len, exp + 1);
                 } else {
-                    bf.toChars<false>(fbuf, &len, exp + 1);
+                    bf.template toChars<false>(fbuf, &len, exp + 1);
                 }
                 i += len;
                 *f_len = i;
@@ -406,9 +405,9 @@ namespace internal {
             if (bi_available) {
                 size_t i_cs_len = *u_len;
                 if (fmt & FF_UPP) {
-                    bi.toChars<true>(ubuf, &i_cs_len, 0);
+                    bi.template toChars<true>(ubuf, &i_cs_len, 0);
                 } else {
-                    bi.toChars<false>(ubuf, &i_cs_len, 0);
+                    bi.template toChars<false>(ubuf, &i_cs_len, 0);
                 }
                 *u_len = i_cs_len;
 
@@ -420,9 +419,9 @@ namespace internal {
                 }
 
                 if (fmt & FF_UPP) {
-                    bf.toChars<true>(fbuf, &f_cs_len, 0);
+                    bf.template toChars<true>(fbuf, &f_cs_len, 0);
                 } else {
-                    bf.toChars<false>(fbuf, &f_cs_len, 0);
+                    bf.template toChars<false>(fbuf, &f_cs_len, 0);
                 }
                 *f_len = f_cs_len;
             } else {
@@ -445,9 +444,9 @@ namespace internal {
                 }
 
                 if (fmt & FF_UPP) {
-                    bf.toChars<true>(fbuf, &f_cs_len, 0);
+                    bf.template toChars<true>(fbuf, &f_cs_len, 0);
                 } else {
-                    bf.toChars<false>(fbuf, &f_cs_len, 0);
+                    bf.template toChars<false>(fbuf, &f_cs_len, 0);
                 }
                 *f_len = f_cs_len;
             }
@@ -656,7 +655,7 @@ namespace internal {
 
     template <typename FTy, typename UTy, typename Cy, size_t bN, size_t UUnit, size_t FUnit>
     void dftos(
-        uint_fast64_t fra, int_fast32_t exp_shf, uint_fast8_t sign,
+        const uint_e<FTy>& fra, int_fast32_t exp_shf, uint_fast8_t sign,
         int fmt, int round, int precision, std::basic_string<Cy>* out)
     {
         using UCTraits = UCeilTraits<UTy, bN>;
@@ -677,7 +676,7 @@ namespace internal {
 
         if (!(fmt & FF_EXA)) {
             bn_round(
-                fra, exp_shf, sign,
+                exp_shf, sign,
                 fmt, round, precision,
                 bi, bf);
         }
@@ -737,7 +736,7 @@ namespace internal {
 
     template <typename FTy, typename UTy, typename Cy, size_t bN, size_t UUnit, size_t FUnit>
     bool dftos(
-        uint_fast64_t fra, int_fast32_t exp_shf, uint_fast8_t sign,
+        const uint_e<FTy>& fra, int_fast32_t exp_shf, uint_fast8_t sign,
         int fmt, int round, int precision, Cy* buf, size_t* len)
     {
         using UCTraits = UCeilTraits<UTy, bN>;
@@ -758,7 +757,7 @@ namespace internal {
 
         if (!(fmt & FF_EXA)) {
             bn_round(
-                fra, exp_shf, sign,
+                exp_shf, sign,
                 fmt, round, precision,
                 bi, bf);
         }
@@ -860,6 +859,7 @@ namespace internal {
         BigFloat_bN<FTy, UTy, bN, FUnit>& bf,
         uint_fast8_t sign, int round, FTy* out)
     {
+        using uint_e = uint_e<FTy>;
         using FT = FloatTraits_base<FTy>;
         constexpr size_t kSpace = 8u;
         constexpr auto mant_1 = FT::mant - 1u;
@@ -872,7 +872,7 @@ namespace internal {
         }
 
         int_fast32_t exp = 0;
-        uint_fast64_t fra = 0;
+        uint_e fra = 0;
         for (size_t j = 0; j < FT::maxe; ++j) {
             if (bu.isZero()) {
                 break;
@@ -886,7 +886,7 @@ namespace internal {
                     break;
                 }
                 fra >>= 1u;
-                fra |= uint_fast64_t(1u) << (mant_1 + kSpace);
+                fra.setBit(mant_1 + kSpace);
             } else {
                 fra >>= 1u;
             }
@@ -923,7 +923,7 @@ namespace internal {
                 }
 
                 if (b_shf <= mant_1 + kSpace && !update_exp) {
-                    fra |= uint_fast64_t(1u) << (mant_1 + kSpace - b_shf);
+                    fra.setBit(mant_1 + kSpace - b_shf);
                 }
 
                 bf.setTop(0);
@@ -944,31 +944,26 @@ namespace internal {
 
         if (round == FR_CEIL) {
             if (!sign) {
-                if (fra & (uint_fast64_t(1u) << kSpace) - 1u) {
-                    fra += uint_fast64_t(1u) << kSpace;
+                if (fra & (uint_e::bitAt(kSpace) - 1u)) {
+                    fra += uint_e::bitAt(kSpace);
                 }
             }
         } else if (round == FR_FLOOR) {
             if (sign) {
-                if (fra & (uint_fast64_t(1u) << kSpace) - 1u) {
-                    fra += uint_fast64_t(1u) << kSpace;
+                if (fra & (uint_e::bitAt(kSpace) - 1u)) {
+                    fra += uint_e::bitAt(kSpace);
                 }
             }
         } else if (round == FR_ZERO) {
         } else {
-            if (fra & (uint_fast64_t(1u) << (kSpace - 1))) {
-                fra += uint_fast64_t(1u) << kSpace;
+            if (fra.getBit(kSpace - 1)) {
+                fra += uint_e::bitAt(kSpace);
             }
         }
         fra >>= kSpace;
 
         uint_fast32_t exp_shift = exp + int_fast32_t(maxe_1);
-
-        fra |= uint_fast64_t(exp_shift) << FT::mant;
-        if (sign) {
-            fra |= uint_fast64_t(1u) << (sizeof(FTy) * CHAR_BIT - 1);
-        }
-        bit_conv(fra, out);
+        dftof(sign, exp_shift, fra, out);
         return true;
     }
 
@@ -1175,25 +1170,17 @@ namespace internal {
             fuc = 1;
         }
 
-        if (uuc < 1 && fuc < 1) {
-            return dnorstof<FTy, UTy, Cy, bN, 1, 1>(str, len, di, sign, round, out, p);
-        }
-        if (uuc < 2 && fuc < 2) {
-            return dnorstof<FTy, UTy, Cy, bN, 2, 2>(str, len, di, sign, round, out, p);
-        }
-        if (uuc < 4 && fuc < 4) {
-            return dnorstof<FTy, UTy, Cy, bN, 4, 4>(str, len, di, sign, round, out, p);
-        }
-        if (uuc < 8 && fuc < 8) {
-            return dnorstof<FTy, UTy, Cy, bN, 8, 8>(str, len, di, sign, round, out, p);
-        }
-        if (uuc < 16 && fuc < 16) {
-            return dnorstof<FTy, UTy, Cy, bN, 16, 16>(str, len, di, sign, round, out, p);
-        }
-        if (uuc < 32 && fuc < 32) {
-            return dnorstof<FTy, UTy, Cy, bN, 32, 32>(str, len, di, sign, round, out, p);
-        }
-        return dnorstof<FTy, UTy, Cy, bN, 64, 64>(str, len, di, sign, round, out, p);
+        dnorstof_IF_INVOKE(1, 1);
+        dnorstof_IF_INVOKE(2, 2);
+        dnorstof_IF_INVOKE(4, 4);
+        dnorstof_IF_INVOKE(8, 8);
+        dnorstof_IF_INVOKE(16, 16);
+        dnorstof_IF_INVOKE(32, 32);
+        dnorstof_IF_INVOKE(64, 64);
+        dnorstof_IF_INVOKE(128, 128);
+        dnorstof_IF_INVOKE(256, 256);
+        dnorstof_IF_INVOKE(512, 512);
+        dnorstof_INVOKE(1024, 1024);
     }
 
     template <typename FTy, typename UTy, typename Cy, size_t bN>
@@ -1299,49 +1286,17 @@ namespace internal {
             fuc = ((de - str) - (exp_d + ul) + UCTraits::udig - 1) / UCTraits::udig + 1;
         }
 
-        if (uuc < 1 && fuc < 1) {
-            return dscistof<FTy, UTy, Cy, bN, 1, 1>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        if (uuc < 2 && fuc < 2) {
-            return dscistof<FTy, UTy, Cy, bN, 2, 2>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        if (uuc < 4 && fuc < 4) {
-            return dscistof<FTy, UTy, Cy, bN, 4, 4>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        if (uuc < 8 && fuc < 8) {
-            return dscistof<FTy, UTy, Cy, bN, 8, 8>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        if (uuc < 16 && fuc < 16) {
-            return dscistof<FTy, UTy, Cy, bN, 16, 16>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        if (uuc < 32 && fuc < 32) {
-            return dscistof<FTy, UTy, Cy, bN, 32, 32>(
-                str, len, di, de, sign, exp, fmt, round, out, p);
-        }
-        return dscistof<FTy, UTy, Cy, bN, 64, 64>(
-            str, len, di, de, sign, exp, fmt, round, out, p);
-    }
-
-    template <typename FTy>
-    void ftodf(
-        FTy val,
-        uint_fast8_t& sign, uint_fast32_t& exp_shift, uint_fast64_t& fra)
-    {
-        using FT = FloatTraits_base<FTy>;
-        constexpr auto bexp = sizeof(FTy) * CHAR_BIT - FT::mant - 1u;
-        constexpr auto exp_mask = (uint_fast64_t(1u) << bexp) - 1u;
-
-        uint_fast64_t uv;
-        bit_conv(val, &uv);
-
-        fra = uv & ((uint_fast64_t(1u) << FT::mant) - 1u);
-        exp_shift = (uv >> FT::mant) & exp_mask;
-        sign = uint_fast8_t(uv >> (sizeof(FTy) * CHAR_BIT - 1u));
+        dscistof_IF_INVOKE(1, 1);
+        dscistof_IF_INVOKE(2, 2);
+        dscistof_IF_INVOKE(4, 4);
+        dscistof_IF_INVOKE(8, 8);
+        dscistof_IF_INVOKE(16, 16);
+        dscistof_IF_INVOKE(32, 32);
+        dscistof_IF_INVOKE(64, 64);
+        dscistof_IF_INVOKE(128, 128);
+        dscistof_IF_INVOKE(256, 256);
+        dscistof_IF_INVOKE(512, 512);
+        dscistof_INVOKE(1024, 1024);
     }
 
     template <typename FTy, typename UTy, size_t bN>
@@ -1369,11 +1324,13 @@ namespace internal {
     template <typename FTy, typename UTy, typename Cy, size_t bN>
     void ftos_base(FTy val, int fmt, int round, int precision, std::basic_string<Cy>* out) {
         using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = sizeof(FTy) * CHAR_BIT - FT::mant - 1u;
-        constexpr auto exp_mask = (uint_fast64_t(1u) << bexp) - 1u;
+        constexpr auto bexp = FT::bexp();
+        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
+        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        uint_fast64_t fra;
+        uint_e fra;
         uint_fast32_t exp_shift;
         uint_fast8_t sign;
         ftodf(val, sign, exp_shift, fra);
@@ -1409,7 +1366,7 @@ namespace internal {
             return;
         }
         if (fra != 0 && exp_shift == exp_mask) {
-            if (fra & (uint_fast64_t(1u) << (FT::mant - 1u))) {
+            if (fra.getBit(FT::mant - 1u)) {
                 if (sign) {
                     out->push_back(Cy('-'));
                 }
@@ -1444,21 +1401,17 @@ namespace internal {
         size_t fuc;
         predict<FTy, UTy, bN>(exp_shift, precision, fmt, uuc, fuc);
 
-        if (uuc < 1 && fuc < 1) {
-            dftos<FTy, UTy, Cy, bN, 1, 1>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else if (uuc < 2 && fuc < 2) {
-            dftos<FTy, UTy, Cy, bN, 2, 2>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else if (uuc < 4 && fuc < 4) {
-            dftos<FTy, UTy, Cy, bN, 4, 4>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else if (uuc < 8 && fuc < 8) {
-            dftos<FTy, UTy, Cy, bN, 8, 8>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else if (uuc < 16 && fuc < 16) {
-            dftos<FTy, UTy, Cy, bN, 16, 16>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else if (uuc < 32 && fuc < 32) {
-            dftos<FTy, UTy, Cy, bN, 32, 32>(fra, exp_shift, sign, fmt, round, precision, out);
-        } else {
-            dftos<FTy, UTy, Cy, bN, 64, 64>(fra, exp_shift, sign, fmt, round, precision, out);
-        }
+        dftos_str_IF_INVOKE(1, 1);
+        dftos_str_IF_INVOKE(2, 2);
+        dftos_str_IF_INVOKE(4, 4);
+        dftos_str_IF_INVOKE(8, 8);
+        dftos_str_IF_INVOKE(16, 16);
+        dftos_str_IF_INVOKE(32, 32);
+        dftos_str_IF_INVOKE(64, 64);
+        dftos_str_IF_INVOKE(128, 128);
+        dftos_str_IF_INVOKE(256, 256);
+        dftos_str_IF_INVOKE(512, 512);
+        dftos_str_INVOKE(1024, 1024);
     }
 
     template <typename FTy, typename UTy, typename Cy, size_t bN>
@@ -1466,11 +1419,13 @@ namespace internal {
         FTy val, int fmt, int round, int precision, Cy* buf, size_t* len)
     {
         using FT = FloatTraits_base<FTy>;
+        using uint_e = uint_e<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = sizeof(FTy) * CHAR_BIT - FT::mant - 1u;
-        constexpr auto exp_mask = (uint_fast64_t(1u) << bexp) - 1u;
+        constexpr auto bexp = FT::bexp();
+        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
+        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        uint_fast64_t fra;
+        uint_e fra;
         uint_fast32_t exp_shift;
         uint_fast8_t sign;
         ftodf(val, sign, exp_shift, fra);
@@ -1534,7 +1489,7 @@ namespace internal {
         }
         if (fra != 0 && exp_shift == exp_mask) {
             auto s = buf;
-            if (fra & (uint_fast64_t(1u) << (FT::mant - 1u))) {
+            if (fra.getBit(FT::mant - 1u)) {
                 if (sign) {
                     if (!s || *len < 9) { *len = 9u; return false; }
                     *s++ = Cy('-');
@@ -1576,23 +1531,17 @@ namespace internal {
         size_t fuc;
         predict<FTy, UTy, bN>(exp_shift, precision, fmt, uuc, fuc);
 
-        bool ret;
-        if (uuc < 1 && fuc < 1) {
-            ret = dftos<FTy, UTy, Cy, bN, 1, 1>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else if (uuc < 2 && fuc < 2) {
-            ret = dftos<FTy, UTy, Cy, bN, 2, 2>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else if (uuc < 4 && fuc < 4) {
-            ret = dftos<FTy, UTy, Cy, bN, 4, 4>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else if (uuc < 8 && fuc < 8) {
-            ret = dftos<FTy, UTy, Cy, bN, 8, 8>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else if (uuc < 16 && fuc < 16) {
-            ret = dftos<FTy, UTy, Cy, bN, 16, 16>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else if (uuc < 32 && fuc < 32) {
-            ret = dftos<FTy, UTy, Cy, bN, 32, 32>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        } else {
-            ret = dftos<FTy, UTy, Cy, bN, 64, 64>(fra, exp_shift, sign, fmt, round, precision, buf, len);
-        }
-        return ret;
+        dftos_buf_IF_INVOKE(1, 1);
+        dftos_buf_IF_INVOKE(2, 2);
+        dftos_buf_IF_INVOKE(4, 4);
+        dftos_buf_IF_INVOKE(8, 8);
+        dftos_buf_IF_INVOKE(16, 16);
+        dftos_buf_IF_INVOKE(32, 32);
+        dftos_buf_IF_INVOKE(64, 64);
+        dftos_buf_IF_INVOKE(128, 128);
+        dftos_buf_IF_INVOKE(256, 256);
+        dftos_buf_IF_INVOKE(512, 512);
+        dftos_buf_INVOKE(1024, 1024);
     }
 
     template <typename FTy, typename UTy, typename Cy, size_t bN>

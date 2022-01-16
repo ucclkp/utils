@@ -13,62 +13,62 @@
 namespace utl {
 
     inline int usprintf(char* buf, size_t* len, const char* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t f_len = std::char_traits<char>::length(format);
-        int ret = internal::usprintf_base(format, f_len, buf, len, vars);
-        va_end(vars);
+        int ret = internal::usprintf_base(format, f_len, buf, len, &args);
+        va_end(args.args);
         return ret;
     }
 
     inline std::string usprintf(const char* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t len = std::char_traits<char>::length(format);
 
         std::string out;
-        internal::usprintf_base(format, len, &out, vars);
-        va_end(vars);
+        internal::usprintf_base(format, len, &out, &args);
+        va_end(args.args);
         return out;
     }
 
     inline int usprintf(char16_t* buf, size_t* len, const char16_t* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t f_len = std::char_traits<char16_t>::length(format);
-        int ret = internal::usprintf_base(format, f_len, buf, len, vars);
-        va_end(vars);
+        int ret = internal::usprintf_base(format, f_len, buf, len, &args);
+        va_end(args.args);
         return ret;
     }
 
     inline std::u16string usprintf(const char16_t* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t len = std::char_traits<char16_t>::length(format);
 
         std::u16string out;
-        auto ret = internal::usprintf_base(format, len, &out, vars);
-        va_end(vars);
+        auto ret = internal::usprintf_base(format, len, &out, &args);
+        va_end(args.args);
         return out;
     }
 
     inline int usprintf(char32_t* buf, size_t* len, const char32_t* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t f_len = std::char_traits<char32_t>::length(format);
-        int ret = internal::usprintf_base(format, f_len, buf, len, vars);
-        va_end(vars);
+        int ret = internal::usprintf_base(format, f_len, buf, len, &args);
+        va_end(args.args);
         return ret;
     }
 
     inline std::u32string usprintf(const char32_t* format, ...) {
-        va_list vars;
-        va_start(vars, format);
+        internal::vlw args;
+        va_start(args.args, format);
         size_t len = std::char_traits<char32_t>::length(format);
 
         std::u32string out;
-        auto ret = internal::usprintf_base(format, len, &out, vars);
-        va_end(vars);
+        auto ret = internal::usprintf_base(format, len, &out, &args);
+        va_end(args.args);
         return out;
     }
 

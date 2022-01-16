@@ -197,6 +197,7 @@
     <ClInclude Include="usprintf_internal.hpp" />
     <ClInclude Include="usprintf.hpp" />
     <ClInclude Include="conv_types.hpp" />
+    <ClInclude Include="uint_exp.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

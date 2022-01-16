@@ -8,9 +8,10 @@
 
 #include "utils/float_conv.hpp"
 #include "utils/int_conv.hpp"
+#include "utils/uint_exp.hpp"
 #include "utils/unit_test/test_collector.h"
 
-#define USING_CHARCONV
+//#define USING_CHARCONV
 
 #ifdef USING_CHARCONV
 #include <charconv>
@@ -155,20 +156,42 @@ TEST_CASE(InternalBigNum) {
             bi1.muld(8);
             bi1.muld(8);
             bi1.muld(8);
-            TEST_E(bi1.raw[bi1.uic - 1], 131072u);
+            bi1.muld(8);
+            bi1.muld(8);
+            bi1.muld(8);
+            TEST_E(bi1.raw[bi1.uic - 1], 67108864u);
+
+            BigUInt_b10 bi2(bi1);
+            bi2.add(bi1);
+            TEST_E(bi2.raw[bi2.uic - 1], 34217728u);
+            TEST_E(bi2.raw[bi2.uic - 2], 1u);
 
             char cs[100];
-            size_t cs_l = 6;
+            size_t cs_l = 8;
             bi1.toChars<false>(cs, &cs_l, 0);
-            TEST_E(std::string(cs, cs_l), "131072");
+            TEST_E(std::string(cs, cs_l), "67108864");
 
             cs_l = 3;
             bi1.toChars<false>(cs, &cs_l, 1);
-            TEST_E(std::string(cs, cs_l), "107");
+            TEST_E(std::string(cs, cs_l), "886");
 
             cs_l = 3;
             bi1.toChars<false>(cs, &cs_l, 2);
-            TEST_E(std::string(cs, cs_l), "310");
+            TEST_E(std::string(cs, cs_l), "088");
+        }
+        {
+            BigUInt_b10 bi1(5);
+            for (int i = 0; i < 62; ++i) {
+                bi1.mul2();
+            }
+
+            BigUInt_b10 bi2(0);
+            bi2.add(bi1);
+
+            TEST_E(bi1.effect, bi2.effect);
+            TEST_E(bi1.raw[bi1.uic - 1], bi2.raw[bi2.uic - 1]);
+            TEST_E(bi1.raw[bi1.uic - 2], bi2.raw[bi2.uic - 2]);
+            TEST_E(bi1.raw[bi1.uic - 3], bi2.raw[bi2.uic - 3]);
         }
         {
             char bins[] = "1234567890";
@@ -191,7 +214,7 @@ TEST_CASE(InternalBigNum) {
             bi.fromChars(bins, std::size(bins) - 1, 9, true, &r);
             TEST_E(bi.raw[bi.uic - 1], 0u);
             TEST_E(bi.raw[bi.uic - 2], 12350u);
-            TEST_E(bi.raw[bi.uic - 3], 0u);
+            TEST_E(bi.effect, 2u);
             TEST_E(r, bins + 5);
         }
         {
@@ -201,7 +224,7 @@ TEST_CASE(InternalBigNum) {
             bi.fromChars(bins, std::size(bins) - 1, 0, true, &r);
             TEST_E(bi.raw[bi.uic - 1], 78901234u);
             TEST_E(bi.raw[bi.uic - 2], 16u);
-            TEST_E(bi.raw[bi.uic - 3], 0u);
+            TEST_E(bi.effect, 2u);
         }
         {
             char bins[] = "123";
@@ -222,6 +245,7 @@ TEST_CASE(InternalBigNum) {
             bi2.fromChars(bins, std::size(bins) - 1, &r);
             TEST_E(bi2.raw[bi2.uic - 1], 34567890u);
             TEST_E(bi2.raw[bi2.uic - 2], 12u);
+            TEST_E(bi2.effect, 2u);
 
             std::string str;
             for (size_t i = 0; i < 1000; ++i) {
@@ -366,7 +390,7 @@ TEST_CASE(InternalBigNum) {
             TEST_E(bf.raw[4], 80847263u);
             TEST_E(bf.raw[5], 33618164u);
             TEST_E(bf.raw[6], 6250000u);
-            TEST_E(bf.raw[7], 0);
+            TEST_E(bf.effect, 7u);
         }
         {
             char bfns[] = "123456789";
@@ -395,7 +419,7 @@ TEST_CASE(InternalBigNum) {
             bfn.fromChars(bfns, std::size(bfns) - 1, &r);
 
             TEST_E(bfn.raw[0], 10000000);
-            TEST_E(bfn.raw[1], 0);
+            TEST_E(bfn.effect, 1);
 
             std::string b_2;
             for (size_t i = 0; i < 1000; ++i) {
@@ -471,11 +495,7 @@ TEST_CASE(InternalBigNum) {
         TEST_E(bf.raw[0], 0);
         TEST_E(bf.raw[1], 0);
         TEST_E(bf.raw[2], 0x100000);
-        TEST_E(bf.raw[3], 0);
-        TEST_E(bf.raw[4], 0);
-        TEST_E(bf.raw[5], 0);
-        TEST_E(bf.raw[6], 0);
-        TEST_E(bf.raw[7], 0);
+        TEST_E(bf.effect, 3);
 
         char bfns[] = "1";
         const char* r;
@@ -483,7 +503,7 @@ TEST_CASE(InternalBigNum) {
         bfn.fromChars(bfns, std::size(bfns) - 1, &r);
 
         TEST_E(bfn.raw[0], 0x100000);
-        TEST_E(bfn.raw[1], 0);
+        TEST_E(bfn.effect, 1);
 
         std::string b_2;
         for (size_t i = 0; i < 1000; ++i) {
@@ -519,6 +539,94 @@ TEST_CASE(InternalBigNum) {
 
 }
 
+TEST_CASE(InternalUIntExp) {
+
+    TEST_DEF("UIntExp tests.") {
+        using uint128_t = utl::internal::UIntExp<double, 2>;
+        uint128_t uv = 0x1234'5678;
+        TEST_E(uv, 0x1234'5678);
+        uv <<= 96;
+        TEST_E(uv.d[1], 0);
+        TEST_E(uv.d[0], 0x1234'5678'0000'0000u);
+        TEST_FALSE(uv & 1u);
+        uv >>= 96;
+        TEST_E(uv, 0x1234'5678);
+        TEST_FALSE(uv & 1u);
+        uv <<= 96;
+        uv -= 1;
+
+        return true;
+    };
+
+}
+
+TEST_CASE(FloatingConv_Float_Dec) {
+
+    TEST_DEF("Float -> String. (Dec, Nor)") {
+        auto _TEST_FUNC = [](float val, int precision, const std::string& r) -> bool {
+            char buf[1000]{ 0 };
+            size_t buf_len = 1000;
+
+            std::string result;
+            utl::ftos(val, &result, precision);
+            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
+#ifdef USING_CHARCONV
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
+#endif
+            TEST_E(std::string(buf, buf_len), r);
+            TEST_E(result, r);
+            return true;
+        };
+
+        TEST_TRUE(_TEST_FUNC(0.0f, 0, "0"));
+        TEST_TRUE(_TEST_FUNC(-0.0f, 0, "-0"));
+        TEST_TRUE(_TEST_FUNC(0.1f, 0, "0"));
+        TEST_TRUE(_TEST_FUNC(0.1f, 1, "0.1"));
+        TEST_TRUE(_TEST_FUNC(0.34578f, 5, "0.34578"));
+        TEST_TRUE(_TEST_FUNC(1.0f, 3, "1.000"));
+        TEST_TRUE(_TEST_FUNC(1.666666666f, 0, "2"));
+        TEST_TRUE(_TEST_FUNC(1.666666666f, 2, "1.67"));
+        TEST_TRUE(_TEST_FUNC(8.1f, 0, "8"));
+        TEST_TRUE(_TEST_FUNC(8.1f, 2, "8.10"));
+        TEST_TRUE(_TEST_FUNC(-8.1f, 2, "-8.10"));
+        TEST_TRUE(_TEST_FUNC(999.999f, 3, "999.999"));
+        TEST_TRUE(_TEST_FUNC(1234567.0f, 2, "1234567.00"));
+        TEST_TRUE(_TEST_FUNC(1.0 / (uint64_t(1) << 32), 40, "0.0000000002328306436538696289062500000000"));
+
+        TEST_TRUE(_TEST_FUNC(1234567978598848646898790.0f, 2, "1234567946798590058299392.00"));
+        TEST_TRUE(_TEST_FUNC(1234567978598848646898790.3f, 2, "1234567946798590058299392.00"));
+        TEST_TRUE(_TEST_FUNC(-1234567978598848646898790.3f, 2, "-1234567946798590058299392.00"));
+        TEST_TRUE(_TEST_FUNC(8945745684576845845.45764856784578456f, 2, "8945745900597149696.00"));
+        TEST_TRUE(_TEST_FUNC(0.000000000000000000000000000000000003f, 10, "0.0000000000"));
+        TEST_TRUE(_TEST_FUNC(1.23456789e-6f, 5, "0.00000"));
+        TEST_TRUE(_TEST_FUNC(-1.23456789e-6f, 5, "-0.00000"));
+        TEST_TRUE(_TEST_FUNC(std::numeric_limits<float>::quiet_NaN(), 0, "nan"));
+
+        TEST_TRUE(_TEST_FUNC(0.000000000000000000000000000000000000666666666f, 100, "0.0000000000000000000000000000000000006666666457845356908353807450461843001623376951223899472250601785"));
+        TEST_TRUE(_TEST_FUNC(0.000000000000000000000000000000000000000000001f, 100, "0.0000000000000000000000000000000000000000000014012984643248170709237295832899161312802619418765157718"));
+        TEST_TRUE(_TEST_FUNC(0.000000000000000000000000000001f, 200, "0.00000000000000000000000000000100000000317107685097105134713526475381475147564611094530562240834115073084831237792968750000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+        TEST_TRUE(_TEST_FUNC(99999999999999999999999999999999999999.0f, 100, "99999996802856924650656260769173209088.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+        TEST_TRUE(_TEST_FUNC(3.4e38f, 2, "339999995214436424907732413799364296704.00"));
+        TEST_TRUE(_TEST_FUNC((std::numeric_limits<float>::min)(), 200, "0.00000000000000000000000000000000000001175494350822287507968736537222245677818665556772087521508751706278417259454727172851562500000000000000000000000000000000000000000000000000000000000000000000000000"));
+        TEST_TRUE(_TEST_FUNC((std::numeric_limits<float>::denorm_min)(), 200, "0.00000000000000000000000000000000000000000000140129846432481707092372958328991613128026194187651577175706828388979108268586060148663818836212158203125000000000000000000000000000000000000000000000000000"));
+        TEST_TRUE(_TEST_FUNC((std::numeric_limits<float>::max)(), 200, "340282346638528859811704183484516925440.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+
+        {
+            float t = -0.65852354f;
+            for (size_t i = 0; i < 10; ++i) {
+                size_t buf_size = i;
+                bool ret1 = utl::ftos<float, char16_t>(t, nullptr, &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
+                TEST_E(buf_size, 10);
+                TEST_FALSE(ret1);
+            }
+        }
+
+        return true;
+    };
+
+}
+
 TEST_CASE(FloatingConv_Double_Dec) {
 
     TEST_DEF("Double -> String. (Dec, Nor)") {
@@ -529,10 +637,11 @@ TEST_CASE(FloatingConv_Double_Dec) {
             std::string result;
             utl::ftos(val, &result, precision);
             TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
-            TEST_E(std::string(buf, buf_len), r);
 #ifdef USING_CHARCONV
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::fixed, precision);
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
 #endif
+            TEST_E(std::string(buf, buf_len), r);
             TEST_E(result, r);
             return true;
         };
@@ -570,6 +679,16 @@ TEST_CASE(FloatingConv_Double_Dec) {
         TEST_TRUE(_TEST_FUNC((std::numeric_limits<double>::denorm_min)(), 360, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004940656458412465441765687928682213724"));
         TEST_TRUE(_TEST_FUNC((std::numeric_limits<double>::max)(), 360, "179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
 
+        {
+            double t = -0.65852354;
+            for (size_t i = 0; i < 10; ++i) {
+                size_t buf_size = i;
+                bool ret1 = utl::ftos<double, char16_t>(t, nullptr, &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
+                TEST_E(buf_size, 10);
+                TEST_FALSE(ret1);
+            }
+        }
+
         return true;
     };
 
@@ -581,10 +700,11 @@ TEST_CASE(FloatingConv_Double_Dec) {
             std::string result;
             utl::ftos(val, &result, precision, utl::FF_SCI);
             TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::FF_SCI));
-            TEST_E(std::string(buf, buf_len), r);
 #ifdef USING_CHARCONV
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::scientific, precision);
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::scientific, precision);
 #endif
+            TEST_E(std::string(buf, buf_len), r);
             TEST_E(result, r);
             return true;
         };
@@ -769,10 +889,11 @@ TEST_CASE(FloatingConv_Double_Hex) {
             std::string result;
             utl::ftos(val, &result, precision, utl::FF_HEX);
             TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::FF_HEX));
-            TEST_E(std::string(buf, buf_len), r);
 #ifdef USING_CHARCONV
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::hex, precision);
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
 #endif
+            TEST_E(std::string(buf, buf_len), r);
             TEST_E(result, r);
             return true;
         };
@@ -805,10 +926,11 @@ TEST_CASE(FloatingConv_Double_Hex) {
             std::string result;
             utl::ftos(val, &result, precision, utl::FF_SCI | utl::FF_HEX);
             TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::FF_SCI | utl::FF_HEX));
-            TEST_E(std::string(buf, buf_len), r);
 #ifdef USING_CHARCONV
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::hex, precision);
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
 #endif
+            TEST_E(std::string(buf, buf_len), r);
             TEST_E(result, r);
             return true;
         };
@@ -819,10 +941,11 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
             utl::ftos(val, &result, precision, utl::FF_HEX2);
             TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::FF_HEX2));
-            TEST_E(std::string(buf, buf_len), r);
 #ifdef USING_CHARCONV
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::hex, precision);
+            char buf2[1000]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
 #endif
+            TEST_E(std::string(buf, buf_len), r);
             TEST_E(result, r);
             return true;
         };
@@ -979,17 +1102,59 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
 }
 
-TEST_CASE(FloatingConv_Float_Dec) {
+TEST_CASE(FloatingConv_LongDouble_Dec) {
 
-    TEST_DEF("Float -> String. (Dec, Nor)") {
-        char16_t buf[10]{ 0 };
-        float t = -0.65852354f;
-        for (size_t i = 0; i < 10; ++i) {
-            size_t buf_size = i;
-            bool ret1 = utl::ftos<float, char16_t>(t, nullptr, &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
-            TEST_E(buf_size, 10);
-            TEST_FALSE(ret1);
-        }
+    TEST_DEF("LongDouble -> String. (Dec, Nor)") {
+        auto _TEST_FUNC = [](long double val, int precision, const std::string& r) -> bool {
+            char buf[16384]{ 0 };
+            size_t buf_len = 16384;
+
+            std::string result;
+            utl::ftos(val, &result, precision);
+            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
+#ifdef USING_CHARCONV
+            char buf2[16384]{ 0 };
+            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
+#endif
+            TEST_E(std::string(buf, buf_len), r);
+            TEST_E(result, r);
+            return true;
+        };
+
+        TEST_TRUE(_TEST_FUNC(0.0, 0, "0"));
+        TEST_TRUE(_TEST_FUNC(-0.0, 0, "-0"));
+        TEST_TRUE(_TEST_FUNC(0.1, 0, "0"));
+        TEST_TRUE(_TEST_FUNC(0.1, 1, "0.1"));
+        TEST_TRUE(_TEST_FUNC(0.34578, 5, "0.34578"));
+        TEST_TRUE(_TEST_FUNC(1.0, 3, "1.000"));
+        TEST_TRUE(_TEST_FUNC(1.666666666, 0, "2"));
+        TEST_TRUE(_TEST_FUNC(1.666666666, 2, "1.67"));
+        TEST_TRUE(_TEST_FUNC(8.1, 0, "8"));
+        TEST_TRUE(_TEST_FUNC(8.1, 2, "8.10"));
+        TEST_TRUE(_TEST_FUNC(-8.1, 2, "-8.10"));
+        TEST_TRUE(_TEST_FUNC(999.999, 3, "999.999"));
+        TEST_TRUE(_TEST_FUNC(1234567.0, 2, "1234567.00"));
+        TEST_TRUE(_TEST_FUNC(1.0 / (uint64_t(1) << 32), 40, "0.0000000002328306436538696289062500000000"));
+
+        TEST_TRUE(_TEST_FUNC(1234567978598848646898790.0, 2, "1234567978598848698253312.00"));
+        TEST_TRUE(_TEST_FUNC(1234567978598848646898790.3, 2, "1234567978598848698253312.00"));
+        TEST_TRUE(_TEST_FUNC(-1234567978598848646898790.3, 2, "-1234567978598848698253312.00"));
+        TEST_TRUE(_TEST_FUNC(8945745684576845845.45764856784578456, 2, "8945745684576845824.00"));
+        TEST_TRUE(_TEST_FUNC(0.000000000000000000000000000000000003, 10, "0.0000000000"));
+        TEST_TRUE(_TEST_FUNC(1.23456789e-6, 5, "0.00000"));
+        TEST_TRUE(_TEST_FUNC(-1.23456789e-6, 5, "-0.00000"));
+        TEST_TRUE(_TEST_FUNC(std::numeric_limits<long double>::quiet_NaN(), 0, "nan"));
+
+        TEST_TRUE(_TEST_FUNC(0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000666666666, 322, "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000067"));
+        TEST_TRUE(_TEST_FUNC(0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001, 360, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000099999998365971443346061920956311959264775925"));
+        TEST_TRUE(_TEST_FUNC(0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001, 360, "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009881312916824930883531375857364427447"));
+        TEST_TRUE(_TEST_FUNC(99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999.0, 100, "100000000000000005250476025520442024870446858110815915491585411551180245798890819578637137508044786404370444383288387817694252323536043057564479218478670698284838720092657580373783023379478809005936895323497079994508111903896764088007465274278014249457925878882005684283811566947219638686545940054016.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+        TEST_TRUE(_TEST_FUNC(1.7e308, 2, "169999999999999993883079578865998174333346074304075874502773119193537729178160565864330091787584707988572262467983188919169916105593357174268369962062473635296474636515660464935663040684957844303524367815028553272712298986386310828644513212353921123253311675499856875650512437415429217994623324794855339589632.00"));
+
+        std::string result;
+        utl::ftos((std::numeric_limits<long double>::max)(), &result, 5000);
+        utl::ftos((std::numeric_limits<long double>::min)(), &result, 5000);
+        utl::ftos(std::numeric_limits<long double>::denorm_min(), &result, 5000);
 
         return true;
     };

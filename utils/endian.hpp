@@ -32,7 +32,7 @@ namespace utl {
             if constexpr (std::is_unsigned<Ty>::value) {
                 return internal::swap_ui2b(val);
             } else {
-                typedef std::make_unsigned<Ty>::type UTy;
+                typedef typename std::make_unsigned<Ty>::type UTy;
                 auto tmp = internal::swap_ui2b(UTy(val));
                 return reinterpret_cast<Ty&>(tmp);
             }
@@ -41,7 +41,7 @@ namespace utl {
             if constexpr (std::is_unsigned<Ty>::value) {
                 return internal::swap_ui4b(val);
             } else {
-                typedef std::make_unsigned<Ty>::type UTy;
+                typedef typename std::make_unsigned<Ty>::type UTy;
                 auto tmp = internal::swap_ui4b(UTy(val));
                 return reinterpret_cast<Ty&>(tmp);
             }
@@ -50,7 +50,7 @@ namespace utl {
             if constexpr (std::is_unsigned<Ty>::value) {
                 return internal::swap_ui8b(val);
             } else {
-                typedef std::make_unsigned<Ty>::type UTy;
+                typedef typename std::make_unsigned<Ty>::type UTy;
                 auto tmp = internal::swap_ui8b(UTy(val));
                 return reinterpret_cast<Ty&>(tmp);
             }

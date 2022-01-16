@@ -7,7 +7,10 @@
 #ifndef UTILS_USPRINTF_INTERNAL_HPP_
 #define UTILS_USPRINTF_INTERNAL_HPP_
 
+#include <cstdarg>
+
 #include "utils/float_conv.hpp"
+#include "utils/type_utils.hpp"
 #include "utils/unicode_conv.h"
 
 
@@ -34,6 +37,10 @@ namespace internal {
         MOD_L,
     };
 
+    struct vlw {
+        va_list args;
+    };
+
     template <typename Cy>
     void fill_c(
         const Cy* buf, size_t len,
@@ -53,19 +60,19 @@ namespace internal {
     }
 
     inline bool extract_c(
-        va_list& args, std::string& r,
-        int flags, int modifier, int width)
+        std::string& r,
+        int flags, int modifier, int width, vlw* args)
     {
         char buf[4];
         size_t len;
         if (modifier == MOD_ll) {
-            utf32_to_utf8(va_arg(args, char32_t), buf, &len);
+            utf32_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len);
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf8(va_arg(args, char16_t), buf, &len)) {
+            if (!utf16_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &len)) {
                 return false;
             }
         } else {
-            buf[0] = char(va_arg(args, int));
+            buf[0] = char(va_arg(args->args, int));
             len = 1;
         }
 
@@ -74,19 +81,19 @@ namespace internal {
     }
 
     inline bool extract_c(
-        va_list& args, std::u16string& r,
-        int flags, int modifier, int width)
+        std::u16string& r,
+        int flags, int modifier, int width, vlw* args)
     {
         char16_t buf[2];
         size_t len;
         if (modifier == MOD_ll) {
-            utf32_to_utf16(va_arg(args, char32_t), buf, &len);
+            utf32_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len);
         } else if (modifier == MOD_l) {
-            buf[0] = va_arg(args, char16_t);
+            buf[0] = va_arg(args->args, utl::upromote<char16_t>::type);
             len = 1;
         } else {
             if (!utf8_to_utf16(
-                char(va_arg(args, int)), buf))
+                char(va_arg(args->args, int)), buf))
             {
                 return false;
             }
@@ -98,21 +105,21 @@ namespace internal {
     }
 
     inline bool extract_c(
-        va_list& args, std::u32string& r,
-        int flags, int modifier, int width)
+        std::u32string& r,
+        int flags, int modifier, int width, vlw* args)
     {
         char32_t ch;
         if (modifier == MOD_ll) {
-            ch = va_arg(args, char32_t);
+            ch = va_arg(args->args, utl::upromote<char32_t>::type);
         } else if (modifier == MOD_l) {
             if (!utf16_to_utf32(
-                va_arg(args, char16_t), &ch))
+                va_arg(args->args, utl::upromote<char16_t>::type), &ch))
             {
                 return false;
             }
         } else {
             if (!utf8_to_utf32(
-                char(va_arg(args, int)), &ch))
+                char(va_arg(args->args, int)), &ch))
             {
                 return false;
             }
@@ -164,19 +171,19 @@ namespace internal {
     }
 
     inline int extract_c(
-        va_list& args, char* r, size_t* len,
-        int flags, int modifier, int width)
+        char* r, size_t* len,
+        int flags, int modifier, int width, vlw* args)
     {
         char buf[4];
         size_t _len;
         if (modifier == MOD_ll) {
-            utf32_to_utf8(va_arg(args, char32_t), buf, &_len);
+            utf32_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len);
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf8(va_arg(args, char16_t), buf, &_len)) {
+            if (!utf16_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &_len)) {
                 return UCR_FAILED;
             }
         } else {
-            buf[0] = char(va_arg(args, int));
+            buf[0] = char(va_arg(args->args, int));
             _len = 1;
         }
 
@@ -192,19 +199,19 @@ namespace internal {
     }
 
     inline int extract_c(
-        va_list& args, char16_t* r, size_t* len,
-        int flags, int modifier, int width)
+        char16_t* r, size_t* len,
+        int flags, int modifier, int width, vlw* args)
     {
         char16_t buf[2];
         size_t _len;
         if (modifier == MOD_ll) {
-            utf32_to_utf16(va_arg(args, char32_t), buf, &_len);
+            utf32_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len);
         } else if (modifier == MOD_l) {
-            buf[0] = va_arg(args, char16_t);
+            buf[0] = va_arg(args->args, utl::upromote<char16_t>::type);
             _len = 1;
         } else {
             if (!utf8_to_utf16(
-                char(va_arg(args, int)), buf))
+                char(va_arg(args->args, int)), buf))
             {
                 return false;
             }
@@ -223,21 +230,21 @@ namespace internal {
     }
 
     inline int extract_c(
-        va_list& args, char32_t* r, size_t* len,
-        int flags, int modifier, int width)
+        char32_t* r, size_t* len,
+        int flags, int modifier, int width, vlw* args)
     {
         char32_t ch;
         if (modifier == MOD_ll) {
-            ch = va_arg(args, char32_t);
+            ch = va_arg(args->args, utl::upromote<char32_t>::type);
         } else if (modifier == MOD_l) {
             if (!utf16_to_utf32(
-                va_arg(args, char16_t), &ch))
+                va_arg(args->args, utl::upromote<char16_t>::type), &ch))
             {
                 return false;
             }
         } else {
             if (!utf8_to_utf32(
-                char(va_arg(args, int)), &ch))
+                char(va_arg(args->args, int)), &ch))
             {
                 return false;
             }
@@ -276,23 +283,23 @@ namespace internal {
     }
 
     inline bool extract_s(
-        va_list& args, std::string& r,
-        int flags, int precision, int modifier, int width)
+        std::string& r,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         std::string u8_str;
         std::string_view sv;
         if (modifier == MOD_ll) {
-            std::u32string_view u32_s(va_arg(args, char32_t*));
+            std::u32string_view u32_s(va_arg(args->args, char32_t*));
             utf32_to_utf8(u32_s, &u8_str);
             sv = u8_str;
         } else if (modifier == MOD_l) {
-            std::u16string_view u16_s(va_arg(args, char16_t*));
+            std::u16string_view u16_s(va_arg(args->args, char16_t*));
             if (!utf16_to_utf8(u16_s, &u8_str)) {
                 return false;
             }
             sv = u8_str;
         } else {
-            sv = va_arg(args, char*);
+            sv = va_arg(args->args, char*);
         }
 
         if (precision != -2) {
@@ -304,19 +311,19 @@ namespace internal {
     }
 
     inline bool extract_s(
-        va_list& args, std::u16string& r,
-        int flags, int precision, int modifier, int width)
+        std::u16string& r,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         std::u16string u16_str;
         std::u16string_view sv;
         if (modifier == MOD_ll) {
-            std::u32string_view u32_s(va_arg(args, char32_t*));
+            std::u32string_view u32_s(va_arg(args->args, char32_t*));
             utf32_to_utf16(u32_s, &u16_str);
             sv = u16_str;
         } else if (modifier == MOD_l) {
-            sv = va_arg(args, char16_t*);
+            sv = va_arg(args->args, char16_t*);
         } else {
-            std::string_view u8_s(va_arg(args, char*));
+            std::string_view u8_s(va_arg(args->args, char*));
             if (!utf8_to_utf16(u8_s, &u16_str)) {
                 return false;
             }
@@ -332,21 +339,21 @@ namespace internal {
     }
 
     inline bool extract_s(
-        va_list& args, std::u32string& r,
-        int flags, int precision, int modifier, int width)
+        std::u32string& r,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         std::u32string u32_str;
         std::u32string_view sv;
         if (modifier == MOD_ll) {
-            sv = va_arg(args, char32_t*);
+            sv = va_arg(args->args, char32_t*);
         } else if (modifier == MOD_l) {
-            std::u16string_view u16_s(va_arg(args, char16_t*));
+            std::u16string_view u16_s(va_arg(args->args, char16_t*));
             if (!utf16_to_utf32(u16_s, &u32_str)) {
                 return false;
             }
             sv = u32_str;
         } else {
-            std::string_view u8_s(va_arg(args, char*));
+            std::string_view u8_s(va_arg(args->args, char*));
             if (!utf8_to_utf32(u8_s, &u32_str)) {
                 return false;
             }
@@ -416,20 +423,20 @@ namespace internal {
     }
 
     inline int extract_s(
-        va_list& args, char* r, size_t* len,
-        int flags, int precision, int modifier, int width)
+        char* r, size_t* len,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         char* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
-            std::u32string_view u32_s(va_arg(args, char32_t*));
+            std::u32string_view u32_s(va_arg(args->args, char32_t*));
             if (utf32_to_utf8(u32_s, r, &_len)) {
                 dig = r;
             } else {
                 dig = nullptr;
             }
         } else if (modifier == MOD_l) {
-            std::u16string_view u16_s(va_arg(args, char16_t*));
+            std::u16string_view u16_s(va_arg(args->args, char16_t*));
             int ret = utf16_to_utf8(u16_s, r, &_len);
             if (ret == UCR_FAILED) {
                 return UCR_FAILED;
@@ -440,7 +447,7 @@ namespace internal {
                 dig = nullptr;
             }
         } else {
-            dig = va_arg(args, char*);
+            dig = va_arg(args->args, char*);
             _len = std::char_traits<char>::length(dig);
         }
 
@@ -459,23 +466,23 @@ namespace internal {
     }
 
     inline int extract_s(
-        va_list& args, char16_t* r, size_t* len,
-        int flags, int precision, int modifier, int width)
+        char16_t* r, size_t* len,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         char16_t* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
-            std::u32string_view u32_s(va_arg(args, char32_t*));
+            std::u32string_view u32_s(va_arg(args->args, char32_t*));
             if (utf32_to_utf16(u32_s, r, &_len)) {
                 dig = r;
             } else {
                 dig = nullptr;
             }
         } else if (modifier == MOD_l) {
-            dig = va_arg(args, char16_t*);
+            dig = va_arg(args->args, char16_t*);
             _len = std::char_traits<char16_t>::length(dig);
         } else {
-            std::string_view u8_s(va_arg(args, char*));
+            std::string_view u8_s(va_arg(args->args, char*));
             int ret = utf8_to_utf16(u8_s, r, &_len);
             if (ret == UCR_FAILED) {
                 return UCR_FAILED;
@@ -502,16 +509,16 @@ namespace internal {
     }
 
     inline int extract_s(
-        va_list& args, char32_t* r, size_t* len,
-        int flags, int precision, int modifier, int width)
+        char32_t* r, size_t* len,
+        int flags, int precision, int modifier, int width, vlw* args)
     {
         char32_t* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
-            dig = va_arg(args, char32_t*);
+            dig = va_arg(args->args, char32_t*);
             _len = std::char_traits<char32_t>::length(dig);
         } else if (modifier == MOD_l) {
-            std::u16string_view u16_s(va_arg(args, char16_t*));
+            std::u16string_view u16_s(va_arg(args->args, char16_t*));
             int ret = utf16_to_utf32(u16_s, r, &_len);
             if (ret == UCR_FAILED) {
                 return UCR_FAILED;
@@ -522,7 +529,7 @@ namespace internal {
                 dig = nullptr;
             }
         } else {
-            std::string_view u8_s(va_arg(args, char*));
+            std::string_view u8_s(va_arg(args->args, char*));
             int ret = utf8_to_utf32(u8_s, r, &_len);
             if (ret == UCR_FAILED) {
                 return UCR_FAILED;
@@ -551,54 +558,54 @@ namespace internal {
 
     template <typename Cy>
     bool va_itos(
-        va_list& vars, int modifier, Cy* buf, size_t* len, bool* minus, bool* zero)
+        int modifier, Cy* buf, size_t* len, bool* minus, bool* zero, vlw* vars)
     {
         switch (modifier) {
         case MOD_hh:
         {
-            auto val = va_arg(vars, signed char);
+            auto val = va_arg(vars->args, int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_h:
         {
-            auto val = va_arg(vars, short);
+            auto val = va_arg(vars->args, int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_l:
         {
-            auto val = va_arg(vars, long);
+            auto val = va_arg(vars->args, long);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_ll:
         {
-            auto val = va_arg(vars, long long);
+            auto val = va_arg(vars->args, long long);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_j:
         {
-            auto val = va_arg(vars, intmax_t);
+            auto val = va_arg(vars->args, intmax_t);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_z:
         {
-            auto val = va_arg(vars, std::make_signed<size_t>::type);
+            auto val = va_arg(vars->args, std::make_signed<size_t>::type);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         case MOD_t:
         {
-            auto val = va_arg(vars, ptrdiff_t);
+            auto val = va_arg(vars->args, ptrdiff_t);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
         default:
         {
-            auto val = va_arg(vars, int);
+            auto val = va_arg(vars->args, int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len);
         }
@@ -607,55 +614,55 @@ namespace internal {
 
     template <typename Cy>
     bool va_uitos(
-        va_list& vars, int modifier, int radix, bool upper,
-        Cy* buf, size_t* len, bool* minus, bool* zero)
+        int modifier, int radix, bool upper,
+        Cy* buf, size_t* len, bool* minus, bool* zero, vlw* vars)
     {
         switch (modifier) {
         case MOD_hh:
         {
-            auto val = va_arg(vars, unsigned char);
+            auto val = va_arg(vars->args, unsigned int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_h:
         {
-            auto val = va_arg(vars, unsigned short);
+            auto val = va_arg(vars->args, unsigned int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_l:
         {
-            auto val = va_arg(vars, unsigned long);
+            auto val = va_arg(vars->args, unsigned long);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_ll:
         {
-            auto val = va_arg(vars, unsigned long long);
+            auto val = va_arg(vars->args, unsigned long long);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_j:
         {
-            auto val = va_arg(vars, uintmax_t);
+            auto val = va_arg(vars->args, uintmax_t);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_z:
         {
-            auto val = va_arg(vars, size_t);
+            auto val = va_arg(vars->args, size_t);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         case MOD_t:
         {
-            auto val = va_arg(vars, std::make_unsigned<ptrdiff_t>::type);
+            auto val = va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
         default:
         {
-            auto val = va_arg(vars, unsigned int);
+            auto val = va_arg(vars->args, unsigned int);
             *zero = val == 0; *minus = val < 0;
             return itos(val, buf, len, radix, upper);
         }
@@ -1147,8 +1154,8 @@ namespace internal {
 
     template <typename Cy>
     void extract_fFeEgG(
-        va_list& args, std::basic_string<Cy>* r,
-        int flags, int precision, int modifier, int width, int fmt)
+        std::basic_string<Cy>* r,
+        int flags, int precision, int modifier, int width, int fmt, vlw* args)
     {
         if (precision == -2) {
             precision = 6;
@@ -1160,9 +1167,9 @@ namespace internal {
 
         std::basic_string<Cy> _str;
         if (modifier == MOD_L) {
-            ftos(va_arg(args, long double), &_str, precision, fmt);
+            ftos(va_arg(args->args, long double), &_str, precision, fmt);
         } else {
-            ftos(va_arg(args, double), &_str, precision, fmt);
+            ftos(va_arg(args->args, double), &_str, precision, fmt);
         }
 
         // sign
@@ -1218,8 +1225,8 @@ namespace internal {
 
     template <typename Cy>
     bool extract_fFeEgG(
-        va_list& args, Cy* str, size_t* len,
-        int flags, int precision, int modifier, int width, int fmt)
+        Cy* str, size_t* len,
+        int flags, int precision, int modifier, int width, int fmt, vlw* args)
     {
         if (precision == -2) {
             precision = 6;
@@ -1232,13 +1239,13 @@ namespace internal {
         bool minus;
         size_t d_len = *len;
         if (modifier == MOD_L) {
-            auto val = va_arg(args, long double);
+            auto val = va_arg(args->args, long double);
             minus = std::signbit(val);
             if (!ftos(val, str, &d_len, precision, fmt)) {
                 str = nullptr;
             }
         } else {
-            auto val = va_arg(args, double);
+            auto val = va_arg(args->args, double);
             minus = std::signbit(val);
             if (!ftos(val, str, &d_len, precision, fmt)) {
                 str = nullptr;
@@ -1330,8 +1337,8 @@ namespace internal {
 
     template <typename Cy>
     void extract_aA(
-        va_list& args, std::basic_string<Cy>* r,
-        int flags, int precision, int modifier, int width, int fmt, Cy cp)
+        std::basic_string<Cy>* r,
+        int flags, int precision, int modifier, int width, int fmt, Cy cp, vlw* args)
     {
         size_t zero_count = 2;
         size_t pref_count = 2;
@@ -1346,9 +1353,9 @@ namespace internal {
 
         std::basic_string<Cy> _str;
         if (modifier == MOD_L) {
-            ftos(va_arg(args, long double), &_str, precision, fmt);
+            ftos(va_arg(args->args, long double), &_str, precision, fmt);
         } else {
-            ftos(va_arg(args, double), &_str, precision, fmt);
+            ftos(va_arg(args->args, double), &_str, precision, fmt);
         }
 
         // sign
@@ -1407,8 +1414,8 @@ namespace internal {
 
     template <typename Cy>
     bool extract_aA(
-        va_list& args, Cy* str, size_t* len,
-        int flags, int precision, int modifier, int width, int fmt, Cy cp)
+        Cy* str, size_t* len,
+        int flags, int precision, int modifier, int width, int fmt, Cy cp, vlw* args)
     {
         size_t zero_count = 2;
         size_t pref_count = 2;
@@ -1424,13 +1431,13 @@ namespace internal {
         bool minus;
         size_t d_len = *len;
         if (modifier == MOD_L) {
-            auto val = va_arg(args, long double);
+            auto val = va_arg(args->args, long double);
             minus = std::signbit(val);
             if (!ftos(val, str, &d_len, precision, fmt)) {
                 str = nullptr;
             }
         } else {
-            auto val = va_arg(args, double);
+            auto val = va_arg(args->args, double);
             minus = std::signbit(val);
             if (!ftos(val, str, &d_len, precision, fmt)) {
                 str = nullptr;
@@ -1639,7 +1646,7 @@ namespace internal {
     template <typename Cy>
     bool usprintf_base(
         const Cy* format, size_t len,
-        std::basic_string<Cy>* out, va_list vars) {
+        std::basic_string<Cy>* out, vlw* vars) {
         int flags;
         int width;
         int precision;
@@ -1674,7 +1681,7 @@ namespace internal {
                     continue;
                 }
                 if (width == -1) {
-                    width = va_arg(vars, int);
+                    width = va_arg(vars->args, int);
                     if (width < 0) {
                         flags |= FLAG_LEFT_JUST;
                         // 防止未定义行为
@@ -1695,7 +1702,7 @@ namespace internal {
                     continue;
                 }
                 if (precision == -1) {
-                    precision = va_arg(vars, int);
+                    precision = va_arg(vars->args, int);
                     if (precision < 0) {
                         precision = -2;
                     }
@@ -1715,13 +1722,13 @@ namespace internal {
                     break;
 
                 case Cy('c'):
-                    if (!extract_c(vars, result, flags, modifier, width)) {
+                    if (!extract_c(result, flags, modifier, width, vars)) {
                         return false;
                     }
                     break;
 
                 case Cy('s'):
-                    if (!extract_s(vars, result, flags, precision, modifier, width)) {
+                    if (!extract_s(result, flags, precision, modifier, width, vars)) {
                         return false;
                     }
                     break;
@@ -1731,14 +1738,14 @@ namespace internal {
                 {
                     std::basic_string<Cy> _str;
                     switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars, signed char), &_str); break;
-                    case MOD_h:  itos(va_arg(vars, short), &_str); break;
-                    case MOD_l:  itos(va_arg(vars, long), &_str); break;
-                    case MOD_ll: itos(va_arg(vars, long long), &_str); break;
-                    case MOD_j:  itos(va_arg(vars, intmax_t), &_str); break;
-                    case MOD_z:  itos(va_arg(vars, std::make_signed<size_t>::type), &_str); break;
-                    case MOD_t:  itos(va_arg(vars, ptrdiff_t), &_str); break;
-                    default:     itos(va_arg(vars, int), &_str); break;
+                    case MOD_hh: itos(va_arg(vars->args, int), &_str); break;
+                    case MOD_h:  itos(va_arg(vars->args, int), &_str); break;
+                    case MOD_l:  itos(va_arg(vars->args, long), &_str); break;
+                    case MOD_ll: itos(va_arg(vars->args, long long), &_str); break;
+                    case MOD_j:  itos(va_arg(vars->args, intmax_t), &_str); break;
+                    case MOD_z:  itos(va_arg(vars->args, std::make_signed<size_t>::type), &_str); break;
+                    case MOD_t:  itos(va_arg(vars->args, ptrdiff_t), &_str); break;
+                    default:     itos(va_arg(vars->args, int), &_str); break;
                     }
                     extract_diu(_str, false, flags, precision, width);
                     result.append(_str);
@@ -1749,14 +1756,14 @@ namespace internal {
                 {
                     std::basic_string<Cy> _str;
                     switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars, unsigned char), &_str, 8); break;
-                    case MOD_h:  itos(va_arg(vars, unsigned short), &_str, 8); break;
-                    case MOD_l:  itos(va_arg(vars, unsigned long), &_str, 8); break;
-                    case MOD_ll: itos(va_arg(vars, unsigned long long), &_str, 8); break;
-                    case MOD_j:  itos(va_arg(vars, uintmax_t), &_str, 8); break;
-                    case MOD_z:  itos(va_arg(vars, size_t), &_str, 8); break;
-                    case MOD_t:  itos(va_arg(vars, std::make_unsigned<ptrdiff_t>::type), &_str, 8); break;
-                    default:     itos(va_arg(vars, unsigned int), &_str, 8); break;
+                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 8); break;
+                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 8); break;
+                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 8); break;
+                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 8); break;
+                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 8); break;
+                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 8); break;
+                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 8); break;
+                    default:     itos(va_arg(vars->args, unsigned int), &_str, 8); break;
                     }
 
                     extract_o(_str, flags, precision, width);
@@ -1768,14 +1775,14 @@ namespace internal {
                 {
                     std::basic_string<Cy> _str;
                     switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars, unsigned char), &_str, 16); break;
-                    case MOD_h:  itos(va_arg(vars, unsigned short), &_str, 16); break;
-                    case MOD_l:  itos(va_arg(vars, unsigned long), &_str, 16); break;
-                    case MOD_ll: itos(va_arg(vars, unsigned long long), &_str, 16); break;
-                    case MOD_j:  itos(va_arg(vars, uintmax_t), &_str, 16); break;
-                    case MOD_z:  itos(va_arg(vars, size_t), &_str, 16); break;
-                    case MOD_t:  itos(va_arg(vars, std::make_unsigned<ptrdiff_t>::type), &_str, 16); break;
-                    default:     itos(va_arg(vars, unsigned int), &_str, 16); break;
+                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 16); break;
+                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 16); break;
+                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 16); break;
+                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 16); break;
+                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 16); break;
+                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 16); break;
+                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 16); break;
+                    default:     itos(va_arg(vars->args, unsigned int), &_str, 16); break;
                     }
 
                     extract_xX(_str, flags, precision, width, Cy('x'));
@@ -1787,14 +1794,14 @@ namespace internal {
                 {
                     std::basic_string<Cy> _str;
                     switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars, unsigned char), &_str, 16, true); break;
-                    case MOD_h:  itos(va_arg(vars, unsigned short), &_str, 16, true); break;
-                    case MOD_l:  itos(va_arg(vars, unsigned long), &_str, 16, true); break;
-                    case MOD_ll: itos(va_arg(vars, unsigned long long), &_str, 16, true); break;
-                    case MOD_j:  itos(va_arg(vars, uintmax_t), &_str, 16, true); break;
-                    case MOD_z:  itos(va_arg(vars, size_t), &_str, 16, true); break;
-                    case MOD_t:  itos(va_arg(vars, std::make_unsigned<ptrdiff_t>::type), &_str, 16, true); break;
-                    default:     itos(va_arg(vars, unsigned int), &_str, 16, true); break;
+                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
+                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
+                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 16, true); break;
+                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 16, true); break;
+                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 16, true); break;
+                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 16, true); break;
+                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 16, true); break;
+                    default:     itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
                     }
 
                     extract_xX(_str, flags, precision, width, Cy('X'));
@@ -1806,14 +1813,14 @@ namespace internal {
                 {
                     std::basic_string<Cy> _str;
                     switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars, unsigned char), &_str); break;
-                    case MOD_h:  itos(va_arg(vars, unsigned short), &_str); break;
-                    case MOD_l:  itos(va_arg(vars, unsigned long), &_str); break;
-                    case MOD_ll: itos(va_arg(vars, unsigned long long), &_str); break;
-                    case MOD_j:  itos(va_arg(vars, uintmax_t), &_str); break;
-                    case MOD_z:  itos(va_arg(vars, size_t), &_str); break;
-                    case MOD_t:  itos(va_arg(vars, std::make_unsigned<ptrdiff_t>::type), &_str); break;
-                    default:     itos(va_arg(vars, unsigned int), &_str); break;
+                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str); break;
+                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str); break;
+                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str); break;
+                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str); break;
+                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str); break;
+                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str); break;
+                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str); break;
+                    default:     itos(va_arg(vars->args, unsigned int), &_str); break;
                     }
 
                     extract_diu(_str, true, flags, precision, width);
@@ -1824,42 +1831,42 @@ namespace internal {
                 case Cy('f'):
                 {
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, 0);
+                        &result, flags, precision, modifier, width, 0, vars);
                     break;
                 }
 
                 case Cy('F'):
                 {
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, FF_UPP);
+                        &result, flags, precision, modifier, width, FF_UPP, vars);
                     break;
                 }
 
                 case Cy('e'):
                 {
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, FF_SCI);
+                        &result, flags, precision, modifier, width, FF_SCI, vars);
                     break;
                 }
 
                 case Cy('E'):
                 {
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, FF_SCI | FF_UPP);
+                        &result, flags, precision, modifier, width, FF_SCI | FF_UPP, vars);
                     break;
                 }
 
                 case Cy('a'):
                 {
                     extract_aA(
-                        vars, &result, flags, precision, modifier, width, 0, Cy('x'));
+                        &result, flags, precision, modifier, width, 0, Cy('x'), vars);
                     break;
                 }
 
                 case Cy('A'):
                 {
                     extract_aA(
-                        vars, &result, flags, precision, modifier, width, FF_UPP, Cy('X'));
+                        &result, flags, precision, modifier, width, FF_UPP, Cy('X'), vars);
                     break;
                 }
 
@@ -1871,7 +1878,7 @@ namespace internal {
                     }
 
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, fmt);
+                        &result, flags, precision, modifier, width, fmt, vars);
                     break;
                 }
                 case Cy('G'):
@@ -1882,14 +1889,14 @@ namespace internal {
                     }
 
                     extract_fFeEgG(
-                        vars, &result, flags, precision, modifier, width, fmt);
+                        &result, flags, precision, modifier, width, fmt, vars);
                     break;
                 }
                 case Cy('n'): return false;
                 case Cy('p'):
                 {
                     std::basic_string<Cy> _str;
-                    auto p = uintptr_t(va_arg(vars, void*));
+                    auto p = uintptr_t(va_arg(vars->args, void*));
                     itos(p, &_str, 16, true);
                     result.append(_str);
                     break;
@@ -1909,7 +1916,7 @@ namespace internal {
     template <typename Cy>
     int usprintf_base(
         const Cy* format, size_t len,
-        Cy* buf, size_t* buf_len, va_list vars)
+        Cy* buf, size_t* buf_len, vlw* vars)
     {
         int flags;
         int width;
@@ -1956,7 +1963,7 @@ namespace internal {
                     continue;
                 }
                 if (width == -1) {
-                    width = va_arg(vars, int);
+                    width = va_arg(vars->args, int);
                     if (width < 0) {
                         flags |= FLAG_LEFT_JUST;
                         // 防止未定义行为
@@ -1977,7 +1984,7 @@ namespace internal {
                     continue;
                 }
                 if (precision == -1) {
-                    precision = va_arg(vars, int);
+                    precision = va_arg(vars->args, int);
                     if (precision < 0) {
                         precision = -2;
                     }
@@ -2002,7 +2009,7 @@ namespace internal {
                 case Cy('c'):
                 {
                     size_t _len = rs ? rse - rs : 0u;
-                    int ret = extract_c(vars, rs, &_len, flags, modifier, width);
+                    int ret = extract_c(rs, &_len, flags, modifier, width, vars);
                     if (ret == UCR_FAILED) {
                         return ret;
                     }
@@ -2017,7 +2024,7 @@ namespace internal {
                 case Cy('s'):
                 {
                     size_t _len = rs ? rse - rs : 0u;
-                    int ret = extract_s(vars, rs, &_len, flags, precision, modifier, width);
+                    int ret = extract_s(rs, &_len, flags, precision, modifier, width, vars);
                     if (ret == UCR_FAILED) {
                         return ret;
                     }
@@ -2034,7 +2041,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_itos(vars, modifier, rs, &d_len, &minus, &zero)) {
+                    if (!va_itos(modifier, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
                     size_t _len = rs ? rse - rs : 0u;
@@ -2050,7 +2057,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_uitos(vars, modifier, 8, false, rs, &d_len, &minus, &zero)) {
+                    if (!va_uitos(modifier, 8, false, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
                     size_t _len = rs ? rse - rs : 0u;
@@ -2066,7 +2073,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_uitos(vars, modifier, 16, false, rs, &d_len, &minus, &zero)) {
+                    if (!va_uitos(modifier, 16, false, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
                     size_t _len = rs ? rse - rs : 0u;
@@ -2082,7 +2089,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_uitos(vars, modifier, 16, true, rs, &d_len, &minus, &zero)) {
+                    if (!va_uitos(modifier, 16, true, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
 
@@ -2099,7 +2106,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_uitos(vars, modifier, 10, false, rs, &d_len, &minus, &zero)) {
+                    if (!va_uitos(modifier, 10, false, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
 
@@ -2116,7 +2123,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, 0))
+                        rs, &_len, flags, precision, modifier, width, 0, vars))
                     {
                         rs = nullptr;
                     }
@@ -2129,7 +2136,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, FF_UPP))
+                        rs, &_len, flags, precision, modifier, width, FF_UPP, vars))
                     {
                         rs = nullptr;
                     }
@@ -2142,7 +2149,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, FF_SCI))
+                        rs, &_len, flags, precision, modifier, width, FF_SCI, vars))
                     {
                         rs = nullptr;
                     }
@@ -2155,7 +2162,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, FF_SCI | FF_UPP))
+                        rs, &_len, flags, precision, modifier, width, FF_SCI | FF_UPP, vars))
                     {
                         rs = nullptr;
                     }
@@ -2168,7 +2175,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_aA(
-                        vars, rs, &_len, flags, precision, modifier, width, 0, Cy('x')))
+                        rs, &_len, flags, precision, modifier, width, 0, Cy('x'), vars))
                     {
                         rs = nullptr;
                     }
@@ -2181,7 +2188,7 @@ namespace internal {
                 {
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_aA(
-                        vars, rs, &_len, flags, precision, modifier, width, FF_UPP, Cy('X')))
+                        rs, &_len, flags, precision, modifier, width, FF_UPP, Cy('X'), vars))
                     {
                         rs = nullptr;
                     }
@@ -2199,7 +2206,7 @@ namespace internal {
 
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, fmt))
+                        rs, &_len, flags, precision, modifier, width, fmt, vars))
                     {
                         rs = nullptr;
                     }
@@ -2216,7 +2223,7 @@ namespace internal {
 
                     size_t _len = rs ? rse - rs : 0u;
                     if (!extract_fFeEgG(
-                        vars, rs, &_len, flags, precision, modifier, width, fmt))
+                        rs, &_len, flags, precision, modifier, width, fmt, vars))
                     {
                         rs = nullptr;
                     }
@@ -2228,7 +2235,7 @@ namespace internal {
                 case Cy('p'):
                 {
                     size_t _len = rs ? rse - rs : 0u;
-                    auto p = uintptr_t(va_arg(vars, void*));
+                    auto p = uintptr_t(va_arg(vars->args, void*));
                     if (!itos(p, rs, &_len, 16, true)) {
                         rs = nullptr;
                     }

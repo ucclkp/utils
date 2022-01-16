@@ -17,27 +17,27 @@ namespace internal {
     constexpr uint16_t u16_clut[]
     {
         //0, 1, 2,  3,    4,
-        1, 10, 100, 1000, 1000'0
+        1u, 10u, 100u, 1000u, 1000'0u
     };
 
     constexpr uint32_t u32_clut[]
     {
-        //0, 1, 2,  3,    4,      5,       6,        7,
-        1, 10, 100, 1000, 1000'0, 1000'00, 1000'000, 1000'0000,
-        //8,         9,
-        1000'0000'0, 1000'0000'00
+        //0, 1,  2,    3,     4,       5,        6,         7,
+        1u, 10u, 100u, 1000u, 1000'0u, 1000'00u, 1000'000u, 1000'0000u,
+        //8,          9,
+        1000'0000'0u, 1000'0000'00u
     };
 
     constexpr uint64_t u64_clut[]
     {
-        //0, 1, 2,  3,    4,      5,       6,        7,
-        1, 10, 100, 1000, 1000'0, 1000'00, 1000'000, 1000'0000,
-        //8,         9,            10,            11,             12,
-        1000'0000'0, 1000'0000'00, 1000'0000'000, 1000'0000'0000, 1000'0000'0000'0,
-        //13,              14,                 15,                  16,
-        1000'0000'0000'00, 1000'0000'0000'000, 1000'0000'0000'0000, 1000'0000'0000'0000'0,
-        //17,                   18,                      19
-        1000'0000'0000'0000'00, 1000'0000'0000'0000'000, 1000'0000'0000'0000'0000,
+        //0, 1,  2,    3,     4,       5,        6,         7,
+        1u, 10u, 100u, 1000u, 1000'0u, 1000'00u, 1000'000u, 1000'0000u,
+        //8,          9,             10,             11,              12,
+        1000'0000'0u, 1000'0000'00u, 1000'0000'000u, 1000'0000'0000u, 1000'0000'0000'0u,
+        //13,               14,                  15,                   16,
+        1000'0000'0000'00u, 1000'0000'0000'000u, 1000'0000'0000'0000u, 1000'0000'0000'0000'0u,
+        //17,                    18,                       19
+        1000'0000'0000'0000'00u, 1000'0000'0000'0000'000u, 1000'0000'0000'0000'0000u,
     };
 
     constexpr uint8_t u64_dlut[]
@@ -63,6 +63,28 @@ namespace internal {
             std::numeric_limits<FTy>::digits - 1u;
         static constexpr size_t maxe =
             std::numeric_limits<FTy>::max_exponent;
+
+        static constexpr size_t bexp() {
+            size_t r = 0;
+            auto max_exp = maxe;
+            while (max_exp) {
+                max_exp /= 2;
+                ++r;
+            }
+            return r;
+        }
+
+        static constexpr size_t sexp() {
+            auto total = mant + bexp() + 1u;
+            if (total == 79u) {
+                return mant + 1u;
+            }
+            return mant;
+        }
+
+        static constexpr size_t ssign() {
+            return sexp() + bexp();
+        }
     };
 
 
@@ -212,14 +234,17 @@ namespace internal {
         static constexpr size_t dig = UCTraits::udig;
         static constexpr UTy uceil = UCTraits::uceil;
 
-        explicit BigFloat_bN(uint_fast8_t top) {
-            this->top = top;
-            std::memset(raw, 0, sizeof(UTy) * uic);
-        }
+        explicit BigFloat_bN(uint_fast8_t top)
+            : top(top),
+              effect(0) {}
 
         void add(const BigFloat_bN& rhs) {
             uint_fast8_t r = 0;
-            for (size_t i = uic; i-- > 0;) {
+            size_t i = rhs.effect;
+            for (; i-- > 0;) {
+                if (i >= effect) {
+                    raw[i] = 0;
+                }
                 auto tmp = raw[i] + rhs.raw[i] + r;
                 if (tmp >= uceil) {
                     r = 1;
@@ -230,11 +255,23 @@ namespace internal {
                 }
             }
             top = r;
+
+            if (rhs.effect > effect) {
+                effect = rhs.effect;
+            } else if (effect == rhs.effect) {
+                for (i = effect; i-- > 0;) {
+                    if (!raw[i]) {
+                        --effect;
+                    } else {
+                        break;
+                    }
+                }
+            }
         }
 
         void mul2() {
             uint_fast8_t r = 0;
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = effect; i-- > 0;) {
                 raw[i] *= 2;
                 if (r) {
                     raw[i] += r;
@@ -243,11 +280,15 @@ namespace internal {
                 raw[i] -= uceil * r;
             }
             top = r;
+
+            if (effect && !raw[effect - 1]) {
+                --effect;
+            }
         }
 
         void round(size_t d_pos, uint_fast8_t sign, int frm) {
             auto i = d_pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return;
 
             if (frm == FR_CEIL) {
@@ -307,12 +348,17 @@ namespace internal {
             uint_fast8_t r = top & 0x1;
             top /= 2;
 
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 if (r) {
                     raw[i] += uceil;
                 }
                 r = raw[i] & 0x1;
                 raw[i] /= 2;
+            }
+
+            if (r && effect < uic) {
+                raw[effect] = uceil / 2;
+                ++effect;
             }
         }
 
@@ -320,19 +366,26 @@ namespace internal {
             uint_fast8_t r = top % d;
             top /= d;
 
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 if (r) {
                     raw[i] += uceil * r;
                 }
                 r = raw[i] % d;
                 raw[i] /= d;
             }
+
+            if (r && effect < uic) {
+                raw[effect] = uceil * r;
+                r = raw[effect] % d;
+                raw[effect] /= d;
+                ++effect;
+            }
             assert(r == 0);
         }
 
         uint_fast8_t getDigit(size_t d_pos) const {
             auto i = d_pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return 0;
 
             auto d = raw[i] / UCTraits::bpow(dig - 1 - (d_pos % dig)) % bN;
@@ -340,7 +393,7 @@ namespace internal {
         }
 
         size_t getSignDigitPos() const {
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 auto u = raw[i];
                 if (u) {
                     for (uint_fast8_t j = dig; j-- > 0;) {
@@ -373,6 +426,7 @@ namespace internal {
                             if (_s != s) {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
+                                effect = i + 1;
                                 return UCR_OK;
                             }
                             return UCR_FAILED;
@@ -384,6 +438,7 @@ namespace internal {
                     }
                 }
                 raw[i] = result;
+                effect = i + 1;
             }
 
             assert(_s == _se);
@@ -402,7 +457,13 @@ namespace internal {
             auto _s = s;
             auto _se = s + len;
             auto j = d_pos % dig;
-            for (size_t i = d_pos / dig; i < uic; ++i) {
+
+            size_t i;
+            for (i = 0; i < d_pos / dig; ++i) {
+                raw[i] = 0;
+            }
+
+            for (; i < uic; ++i) {
                 if (_s >= _se) {
                     break;
                 }
@@ -421,6 +482,7 @@ namespace internal {
                             if (_s != s) {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
+                                effect = i + 1;
                                 return UCR_OK;
                             }
                             return UCR_FAILED;
@@ -434,6 +496,7 @@ namespace internal {
                 }
                 j = 0;
                 raw[i] = result;
+                effect = i + 1;
             }
 
             assert(_s == _se);
@@ -447,7 +510,7 @@ namespace internal {
         template <bool Upp, typename Cy>
         void toChars(Cy* s, size_t* len) const {
             size_t ep = 0;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 if (raw[i]) {
                     ep = i;
                 }
@@ -455,7 +518,7 @@ namespace internal {
 
             auto _s = s;
             size_t _len = 0;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 auto ss = _s + dig;
                 auto val = raw[i];
 
@@ -483,7 +546,7 @@ namespace internal {
         template <bool Upp, typename Cy>
         void toChars(Cy* s, size_t* len, size_t d_pos) const {
             size_t ep = 0;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 if (raw[i]) {
                     ep = i;
                 }
@@ -492,7 +555,7 @@ namespace internal {
             auto _s = s;
             size_t _len = 0;
             uint_fast8_t j = d_pos % dig;
-            for (size_t i = d_pos / dig; i < uic; ++i) {
+            for (size_t i = d_pos / dig; i < effect; ++i) {
                 auto ul = *len - _len;
                 size_t ude;
                 if (ul > dig - j) {
@@ -539,7 +602,7 @@ namespace internal {
 
         bool isZero() const {
             if (top) return false;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = 0; i < effect; ++i) {
                 if (raw[i]) {
                     return false;
                 }
@@ -549,7 +612,7 @@ namespace internal {
 
         bool isZeroAfter(size_t pos) const {
             auto i = pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return true;
 
             auto r = raw[i] % UCTraits::bpow(dig - 1 - (pos % dig));
@@ -558,7 +621,7 @@ namespace internal {
             }
 
             ++i;
-            for (; i < uic; ++i) {
+            for (; i < effect; ++i) {
                 if (raw[i]) {
                     return false;
                 }
@@ -568,6 +631,7 @@ namespace internal {
 
         uint_fast8_t top;
         UTy raw[uic];
+        size_t effect;
     };
 
     template <typename FTy, typename UTy, size_t bN, size_t Unit>
@@ -579,27 +643,18 @@ namespace internal {
         static constexpr size_t dig = UCTraits::udig;
         static constexpr UTy uceil = UCTraits::uceil;
 
-        explicit BigUInt_bN(uint_fast8_t bottom) {
-            this->bottom = bottom;
-            std::memset(raw, 0, sizeof(UTy) * uic);
-        }
+        explicit BigUInt_bN(uint_fast8_t bottom)
+            : bottom(bottom),
+              effect(0) {}
 
         void add(uint_fast8_t val) {
             if (val == 0) {
                 return;
             }
 
-            auto tmp = raw[uic - 1] + val;
-            if (tmp < uceil) {
-                raw[uic - 1] = tmp;
-                return;
-            }
-
-            uint_fast8_t r = 1;
-            raw[uic - 1] = tmp - uceil;
-
-            for (size_t i = uic - 1; i-- > 0;) {
-                tmp = raw[i] + r;
+            uint_fast8_t r = val;
+            for (size_t i = uic; i-- > uic - effect;) {
+                auto tmp = raw[i] + r;
                 if (tmp >= uceil) {
                     r = 1;
                     raw[i] = tmp - uceil;
@@ -608,12 +663,36 @@ namespace internal {
                     return;
                 }
             }
+
+            if (r && effect < uic) {
+                raw[uic - effect - 1] = r;
+                r = 0;
+                ++effect;
+            }
+
             assert(r == 0);
         }
 
         void add(const BigUInt_bN& rhs) {
             uint_fast8_t r = 0;
-            for (size_t i = uic; i-- > 0;) {
+
+            size_t max_u, min_u;
+            const UTy* max_raw;
+            if (effect >= rhs.effect) {
+                max_u = effect;
+                max_raw = raw;
+                min_u = rhs.effect;
+            } else {
+                max_u = rhs.effect;
+                max_raw = rhs.raw;
+                min_u = effect;
+                for (size_t i = min_u; i < max_u; ++i) {
+                    raw[uic - i - 1] = 0;
+                }
+            }
+
+            size_t i = uic;
+            for (; i-- > uic - min_u;) {
                 auto tmp = raw[i] + rhs.raw[i] + r;
                 if (tmp >= uceil) {
                     r = 1;
@@ -623,6 +702,27 @@ namespace internal {
                     raw[i] = tmp;
                 }
             }
+
+            for (++i; i-- > uic - max_u;) {
+                auto tmp = max_raw[i] + r;
+                if (tmp >= uceil) {
+                    r = 1;
+                    raw[i] = tmp - uceil;
+                } else {
+                    r = 0;
+                    raw[i] = tmp;
+                }
+            }
+
+            if (rhs.effect > effect) {
+                effect = rhs.effect;
+            }
+            if (r && effect < uic) {
+                raw[uic - effect - 1] = r;
+                r = 0;
+                ++effect;
+            }
+
             assert(r == 0);
         }
 
@@ -632,7 +732,7 @@ namespace internal {
             r = bottom / 10;
             bottom -= uint_fast8_t(10 * r);
 
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = uic; i-- > uic - effect;) {
                 raw[i] *= 2;
                 if (r) {
                     raw[i] += r;
@@ -640,6 +740,13 @@ namespace internal {
                 r = raw[i] / uceil;
                 raw[i] -= uceil * r;
             }
+
+            if (r && effect < uic) {
+                raw[uic - effect - 1] = r;
+                r = 0;
+                ++effect;
+            }
+
             assert(r == 0);
         }
 
@@ -649,7 +756,7 @@ namespace internal {
             r = bottom / 10;
             bottom -= uint_fast8_t(10 * r);
 
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = uic; i-- > uic - effect;) {
                 raw[i] = raw[i] * d;
                 if (r) {
                     raw[i] += r;
@@ -657,12 +764,19 @@ namespace internal {
                 r = raw[i] / uceil;
                 raw[i] -= uceil * r;
             }
+
+            if (r && effect < uic) {
+                raw[uic - effect - 1] = r;
+                r = 0;
+                ++effect;
+            }
+
             assert(r == 0);
         }
 
         void div2() {
             uint_fast8_t r = 0;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = uic - effect; i < uic; ++i) {
                 if (r) {
                     raw[i] += uceil;
                 }
@@ -670,6 +784,10 @@ namespace internal {
                 raw[i] /= 2;
             }
             bottom = r;
+
+            if (effect && !raw[uic - effect]) {
+                --effect;
+            }
         }
 
         void round(size_t d_pos, uint_fast8_t sign, bool f_zero, int frm) {
@@ -678,7 +796,7 @@ namespace internal {
             }
 
             auto i = d_pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return;
             i = uic - i - 1;
 
@@ -738,7 +856,7 @@ namespace internal {
         void moveUR() {
             size_t i;
             UTy mr = 0u;
-            for (i = uic; i-- > 0;) {
+            for (i = uic; i-- > uic - effect;) {
                 mr = raw[i];
                 if (mr) {
                     break;
@@ -755,11 +873,13 @@ namespace internal {
             }
 
             size_t j = uic;
-            for (; j-- > diff;) {
+            size_t target = uic - effect + diff;
+            for (; j-- > target;) {
                 raw[j] = raw[j - diff];
             }
-            for (++j; j-- > 0u;) {
-                raw[j] = 0u;
+            ++j;
+            if (j >= uic - effect) {
+                effect = j - uic - effect;
             }
         }
 
@@ -784,11 +904,16 @@ namespace internal {
 
             auto bo = UCTraits::bpow(uint_fast8_t(i));
             auto bo_1 = UCTraits::bpow(uint_fast8_t(dig - i));
-            for (size_t j = uic; j-- > 1;) {
+            for (size_t j = uic; j-- > 1 + uic - effect;) {
                 raw[j] /= bo;
                 raw[j] += (raw[j - 1] % bo) * bo_1;
             }
-            raw[0] /= bo;
+            if (effect) {
+                raw[uic - effect] /= bo;
+                if (!raw[uic - effect]) {
+                    --effect;
+                }
+            }
         }
 
         void movdr(size_t d_len) {
@@ -797,28 +922,35 @@ namespace internal {
 
             if (ul) {
                 size_t j = uic;
-                for (; j-- > ul;) {
+                size_t target = uic - effect + ul;
+                for (; j-- > target;) {
                     raw[j] = raw[j - ul];
                 }
-                for (++j; j-- > 0u;) {
-                    raw[j] = 0u;
+                ++j;
+                if (j >= uic - effect) {
+                    effect = j - uic - effect;
                 }
             }
 
             if (dl) {
                 auto bo = UCTraits::bpow(uint_fast8_t(dl));
                 auto bo_1 = UCTraits::bpow(uint_fast8_t(dig - dl));
-                for (size_t j = uic; j-- > 1;) {
+                for (size_t j = uic; j-- > 1 + uic - effect;) {
                     raw[j] /= bo;
                     raw[j] += (raw[j - 1] % bo) * bo_1;
                 }
-                raw[0] /= bo;
+                if (effect) {
+                    raw[uic - effect] /= bo;
+                    if (!raw[uic - effect]) {
+                        --effect;
+                    }
+                }
             }
         }
 
         uint_fast8_t getDigit(size_t d_pos) const {
             auto i = d_pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return 0;
             i = uic - i - 1;
 
@@ -827,7 +959,7 @@ namespace internal {
         }
 
         size_t getSignDigitPos() const {
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = uic - effect; i < uic; ++i) {
                 auto u = raw[i];
                 if (u) {
                     for (uint_fast8_t j = dig; j-- > 0;) {
@@ -854,6 +986,7 @@ namespace internal {
                 su = uic;
             }
 
+            effect = su;
             auto _s = s;
             auto _se = s + len;
             auto sd = dig - 1 - (len - 1) % dig;
@@ -914,7 +1047,15 @@ namespace internal {
             auto _s = s;
             auto _se = s + len;
             auto sd = (actual_len - 1) % dig + 1;
-            for (size_t i = uic - su; i < uic; ++i) {
+
+            size_t i;
+            // TODO:
+            for (i = uic; i-- > uic - su;) {
+                raw[i] = 0;
+            }
+
+            effect = su;
+            for (i = uic - su; i < uic; ++i) {
                 if (_s >= _se) {
                     break;
                 }
@@ -971,7 +1112,7 @@ namespace internal {
         template <bool Upp, typename Cy>
         void toChars(Cy* s, size_t* len) const {
             size_t ep = uic - 1;
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = uic; i-- > uic - effect;) {
                 if (raw[i]) {
                     ep = i;
                 }
@@ -979,7 +1120,7 @@ namespace internal {
 
             auto _s = s + (uic - ep) * dig;
             size_t _len = 0;
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = uic; i-- > uic - effect;) {
                 auto val = raw[i];
 
                 for (size_t j = 0; j < dig; ++j) {
@@ -1005,13 +1146,13 @@ namespace internal {
         template <bool Upp, typename Cy>
         void toChars(Cy* s, size_t* len, size_t d_pos) const {
             auto sud = d_pos / dig;
-            if (sud >= uic) {
+            if (sud >= effect) {
                 *len = 0;
                 return;
             }
 
             size_t ep = uic - 1;
-            for (size_t i = uic; i-- > 0;) {
+            for (size_t i = uic; i-- > uic - effect;) {
                 if (raw[i]) {
                     ep = i;
                 }
@@ -1025,7 +1166,7 @@ namespace internal {
             auto _s = s + tl;
             size_t _len = 0;
             uint_fast8_t j = d_pos % dig;
-            for (size_t i = uic - sud; i-- > 0;) {
+            for (size_t i = uic - sud; i-- > uic - effect;) {
                 auto val = raw[i];
                 val /= UCTraits::bpow(j);
 
@@ -1060,7 +1201,7 @@ namespace internal {
 
         bool isZero() const {
             if (bottom) return false;
-            for (size_t i = 0; i < uic; ++i) {
+            for (size_t i = uic - effect; i < uic; ++i) {
                 if (raw[i]) {
                     return false;
                 }
@@ -1074,7 +1215,7 @@ namespace internal {
             }
 
             auto i = pos / dig;
-            if (i >= uic)
+            if (i >= effect)
                 return true;
             i = uic - i - 1;
 
@@ -1087,7 +1228,7 @@ namespace internal {
                 return true;
             }
 
-            for (; i-- > uic;) {
+            for (; i < uic; ++i) {
                 if (raw[i]) {
                     return false;
                 }
@@ -1097,6 +1238,7 @@ namespace internal {
 
         UTy raw[uic];
         uint_fast8_t bottom;
+        size_t effect = uic;
     };
 
 }
