@@ -4,15 +4,14 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_USPRINTF_HPP_
-#define UTILS_USPRINTF_HPP_
+#include "usprintf.h"
 
 #include "utils/usprintf_internal.hpp"
 
 
 namespace utl {
 
-    inline int usprintf(char* buf, size_t* len, const char* format, ...) {
+    int usprintf(char* buf, size_t* len, const char* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t f_len = std::char_traits<char>::length(format);
@@ -21,7 +20,7 @@ namespace utl {
         return ret;
     }
 
-    inline std::string usprintf(const char* format, ...) {
+    std::string usprintf(const char* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t len = std::char_traits<char>::length(format);
@@ -32,7 +31,7 @@ namespace utl {
         return out;
     }
 
-    inline int usprintf(char16_t* buf, size_t* len, const char16_t* format, ...) {
+    int usprintf(char16_t* buf, size_t* len, const char16_t* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t f_len = std::char_traits<char16_t>::length(format);
@@ -41,7 +40,7 @@ namespace utl {
         return ret;
     }
 
-    inline std::u16string usprintf(const char16_t* format, ...) {
+    std::u16string usprintf(const char16_t* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t len = std::char_traits<char16_t>::length(format);
@@ -52,7 +51,7 @@ namespace utl {
         return out;
     }
 
-    inline int usprintf(char32_t* buf, size_t* len, const char32_t* format, ...) {
+    int usprintf(char32_t* buf, size_t* len, const char32_t* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t f_len = std::char_traits<char32_t>::length(format);
@@ -61,7 +60,7 @@ namespace utl {
         return ret;
     }
 
-    inline std::u32string usprintf(const char32_t* format, ...) {
+    std::u32string usprintf(const char32_t* format, ...) {
         internal::vlw args;
         va_start(args.args, format);
         size_t len = std::char_traits<char32_t>::length(format);
@@ -73,5 +72,3 @@ namespace utl {
     }
 
 }
-
-#endif  // UTILS_USPRINTF_HPP_

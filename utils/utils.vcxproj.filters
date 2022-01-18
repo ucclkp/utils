@@ -98,6 +98,8 @@
     <ClCompile Include="unit_test\test_collector.cpp">
       <Filter>unit_test</Filter>
     </ClCompile>
+    <ClCompile Include="usprintf.cpp" />
+    <ClCompile Include="float_conv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="convert.h" />
@@ -184,7 +186,7 @@
       <Filter>unit_test</Filter>
     </ClInclude>
     <ClInclude Include="define_utils.hpp" />
-    <ClInclude Include="float_conv.hpp" />
+    <ClInclude Include="float_conv.h" />
     <ClInclude Include="int_conv.hpp" />
     <ClInclude Include="assuming.hpp" />
     <ClInclude Include="endian_internal.hpp" />
@@ -195,7 +197,7 @@
     <ClInclude Include="float_conv_internal.hpp" />
     <ClInclude Include="float_conv_types.hpp" />
     <ClInclude Include="usprintf_internal.hpp" />
-    <ClInclude Include="usprintf.hpp" />
+    <ClInclude Include="usprintf.h" />
     <ClInclude Include="conv_types.hpp" />
     <ClInclude Include="uint_exp.hpp" />
   </ItemGroup>

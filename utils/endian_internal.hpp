@@ -414,45 +414,13 @@ namespace internal {
 
     template <typename Ty>
     Ty swap_f(Ty v) {
-        if constexpr (sizeof(Ty) == 2) {
-            Ty out;
-            auto src = reinterpret_cast<unsigned char*>(&v) + 1u;
-            auto dst = reinterpret_cast<unsigned char*>(&out);
+        Ty out;
+        auto src = reinterpret_cast<unsigned char*>(&v) + (sizeof(Ty) - 1);
+        auto dst = reinterpret_cast<unsigned char*>(&out);
+        for (size_t i = 0; i < sizeof(Ty); ++i) {
             *dst++ = *src--;
-            *dst = *src;
-            return out;
         }
-
-        if constexpr (sizeof(Ty) == 4) {
-            Ty out;
-            auto src = reinterpret_cast<unsigned char*>(&v) + 3u;
-            auto dst = reinterpret_cast<unsigned char*>(&out);
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst = *src;
-            return out;
-        }
-
-        if constexpr (sizeof(Ty) == 8) {
-            Ty out;
-            auto src = reinterpret_cast<unsigned char*>(&v) + 7u;
-            auto dst = reinterpret_cast<unsigned char*>(&out);
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst++ = *src--;
-            *dst = *src;
-            return out;
-        }
-
-        static_assert(
-            sizeof(Ty) == 2 || sizeof(Ty) == 4 || sizeof(Ty) == 8,
-            "unavailable type!");
-        return 0;
+        return out;
     }
 
 }

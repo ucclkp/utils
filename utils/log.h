@@ -32,7 +32,8 @@
     ::utl::Log(__WFILE__, __LINE__, level).stream()
 
 #define EARLY_BREAK_STREAM(level, condition) \
-    !(condition) ? (void) 0 : EARLY_BREAK(level), ::utl::LogVoidify() & (LOG_STREAM(level))
+    (condition) ? (void) 0 : EARLY_BREAK(level);  \
+    (condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(level))
 
 #ifndef NDEBUG
 #define IS_DEBUG_ON  true
@@ -42,12 +43,13 @@
 
 #define LOG(level)         EARLY_BREAK_STREAM(level, true)
 #define DLOG(level)        EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
-#define DBREAK(condition)  EARLY_BREAK_STREAM(::utl::Log::ERR, IS_DEBUG_ON && !(condition))
+#define DBREAK(condition)  EARLY_BREAK_STREAM(::utl::Log::ERR, IS_DEBUG_ON && (condition))
 
 #define THROW  \
     assert(false); LOG_STREAM(::utl::Log::FATAL)
 #define THROW_IF(condition)  \
-    !(condition) ? (void) 0 : assert(false), ::utl::LogVoidify() & (LOG_STREAM(::utl::Log::FATAL))
+    !(condition) ? (void) 0 : assert(false);  \
+    !(condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(::utl::Log::FATAL))
 
 
 namespace utl {

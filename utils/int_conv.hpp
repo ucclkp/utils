@@ -92,6 +92,9 @@ namespace internal {
 
     template <typename Ty, typename Cy>
     bool itos(Ty val, Cy* buf, size_t* len, int radix = 10, bool upper = false) {
+        static_assert(
+            std::is_integral<Ty>::value, "Ty must be a integral type!");
+
         typedef typename std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
@@ -144,6 +147,9 @@ namespace internal {
 
     template <typename Ty, typename Cy>
     void itos(Ty val, std::basic_string<Cy>* out, int radix = 10, bool upper = false) {
+        static_assert(
+            std::is_integral<Ty>::value, "Ty must be a integral type!");
+
         typedef typename std::make_unsigned<Ty>::type UTy;
         const auto bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
@@ -184,16 +190,34 @@ namespace internal {
         *out = std::move(result);
     }
 
-    template <typename Ty, typename Cy>
+    template <typename Cy, typename Ty>
     std::basic_string<Cy> itos(Ty val, int radix = 10, bool upper = false) {
         std::basic_string<Cy> result;
         itos(val, &result, radix, upper);
         return result;
     }
 
+    template <typename Ty>
+    std::string itos8(Ty val, int radix = 10, bool upper = false) {
+        return itos<char>(val, radix, upper);
+    }
+
+    template <typename Ty>
+    std::u16string itos16(Ty val, int radix = 10, bool upper = false) {
+        return itos<char16_t>(val, radix, upper);
+    }
+
+    template <typename Ty>
+    std::u32string itos32(Ty val, int radix = 10, bool upper = false) {
+        return itos<char32_t>(val, radix, upper);
+    }
+
 
     template <typename Ty, typename Cy>
     bool stoi(const Cy* buf, size_t len, Ty* out, int radix = 10, const Cy** p = nullptr) {
+        static_assert(
+            std::is_integral<Ty>::value, "Ty must be a integral type!");
+
         typedef typename std::make_unsigned<Ty>::type UTy;
         assert(radix >= 2 && radix <= 36);
 

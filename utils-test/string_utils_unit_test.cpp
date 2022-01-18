@@ -8,7 +8,8 @@
 
 #include "utils/string_utils.hpp"
 #include "utils/unit_test/test_collector.h"
-#include "utils/usprintf.hpp"
+#include "utils/usprintf.h"
+#include "utils/usprintf_internal.hpp"
 
 
 namespace {

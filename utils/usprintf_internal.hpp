@@ -7,9 +7,12 @@
 #ifndef UTILS_USPRINTF_INTERNAL_HPP_
 #define UTILS_USPRINTF_INTERNAL_HPP_
 
+#include <cassert>
+#include <cmath>
 #include <cstdarg>
 
-#include "utils/float_conv.hpp"
+#include "utils/int_conv.hpp"
+#include "utils/float_conv.h"
 #include "utils/type_utils.hpp"
 #include "utils/unicode_conv.h"
 

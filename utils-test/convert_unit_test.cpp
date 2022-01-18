@@ -6,7 +6,8 @@
 
 #include <cmath>
 
-#include "utils/float_conv.hpp"
+#include "utils/float_conv.h"
+#include "utils/float_conv_big_num.hpp"
 #include "utils/int_conv.hpp"
 #include "utils/uint_exp.hpp"
 #include "utils/unit_test/test_collector.h"
@@ -616,7 +617,7 @@ TEST_CASE(FloatingConv_Float_Dec) {
             float t = -0.65852354f;
             for (size_t i = 0; i < 10; ++i) {
                 size_t buf_size = i;
-                bool ret1 = utl::ftos<float, char16_t>(t, nullptr, &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
+                bool ret1 = utl::ftos(t, static_cast<char*>(nullptr), &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
                 TEST_E(buf_size, 10);
                 TEST_FALSE(ret1);
             }
@@ -683,7 +684,7 @@ TEST_CASE(FloatingConv_Double_Dec) {
             double t = -0.65852354;
             for (size_t i = 0; i < 10; ++i) {
                 size_t buf_size = i;
-                bool ret1 = utl::ftos<double, char16_t>(t, nullptr, &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
+                bool ret1 = utl::ftos(t, static_cast<char*>(nullptr), &buf_size, 3, utl::FF_SCI | utl::FF_UPP, utl::FR_FLOOR);
                 TEST_E(buf_size, 10);
                 TEST_FALSE(ret1);
             }

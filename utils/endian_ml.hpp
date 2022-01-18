@@ -27,38 +27,33 @@ namespace utl {
                 } else {
                     return internal::swap_i4b_b2l_ml2s(val);
                 }
-            }
-            if constexpr (N == 3) {
+            } else if constexpr (N == 3) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui4b_b2l_ml3u(val);
                 } else {
                     return internal::swap_i4b_b2l_ml3s(val);
                 }
             }
-        }
-        if constexpr (sizeof(Ty) == 8) {
+        } else if constexpr (sizeof(Ty) == 8) {
             if constexpr (N == 4) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_b2l_ml4u(val);
                 } else {
                     return internal::swap_i8b_b2l_ml4s(val);
                 }
-            }
-            if constexpr (N == 5) {
+            } else if constexpr (N == 5) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_b2l_ml5u(val);
                 } else {
                     return internal::swap_i8b_b2l_ml5s(val);
                 }
-            }
-            if constexpr (N == 6) {
+            } else if constexpr (N == 6) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_b2l_ml6u(val);
                 } else {
                     return internal::swap_i8b_b2l_ml6s(val);
                 }
-            }
-            if constexpr (N == 7) {
+            } else if constexpr (N == 7) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_b2l_ml7u(val);
                 } else {
@@ -83,38 +78,33 @@ namespace utl {
                 } else {
                     return internal::swap_i4b_l2b_ml2s(val);
                 }
-            }
-            if constexpr (N == 3) {
+            } else if constexpr (N == 3) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui4b_l2b_ml3u(val);
                 } else {
                     return internal::swap_i4b_l2b_ml3s(val);
                 }
             }
-        }
-        if constexpr (sizeof(Ty) == 8) {
+        } else if constexpr (sizeof(Ty) == 8) {
             if constexpr (N == 4) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_l2b_ml4u(val);
                 } else {
                     return internal::swap_i8b_l2b_ml4s(val);
                 }
-            }
-            if constexpr (N == 5) {
+            } else if constexpr (N == 5) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_l2b_ml5u(val);
                 } else {
                     return internal::swap_i8b_l2b_ml5s(val);
                 }
-            }
-            if constexpr (N == 6) {
+            } else if constexpr (N == 6) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_l2b_ml6u(val);
                 } else {
                     return internal::swap_i8b_l2b_ml6s(val);
                 }
-            }
-            if constexpr (N == 7) {
+            } else if constexpr (N == 7) {
                 if constexpr (std::is_unsigned<Ty>::value) {
                     return internal::swap_ui8b_l2b_ml7u(val);
                 } else {
