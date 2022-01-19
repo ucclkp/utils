@@ -10,5 +10,6 @@
     <ClCompile Include="unicode_unit_test.cpp" />
     <ClCompile Include="convert_unit_test.cpp" />
     <ClCompile Include="file_unit_test.cpp" />
+    <ClCompile Include="log_unit_test.cpp" />
   </ItemGroup>
 </Project>

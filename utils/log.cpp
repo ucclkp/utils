@@ -12,6 +12,7 @@
 
 #include "utils/convert.h"
 #include "utils/files/file_utils.h"
+#include "utils/string_utils.hpp"
 
 
 namespace utl {
@@ -58,8 +59,15 @@ namespace utl {
     Log::Log(const wchar_t* file_name, int line_number, Severity level)
         : level_(level),
           line_number_(line_number),
-          file_name_(WideToUTF16(file_name)) {
-    }
+          file_name_(WideToUTF16(file_name)),
+          is_str_(false) {}
+
+    Log::Log(const wchar_t* file_name, int line_number, Severity level, const std::string& msg)
+        : level_(level),
+          line_number_(line_number),
+          file_name_(WideToUTF16(file_name)),
+          is_str_(true),
+          str_(msg) {}
 
     Log::~Log() {
         if (log_params_.short_file_name) {
@@ -68,11 +76,11 @@ namespace utl {
 
         std::string msg;
         msg.append(UTF16ToUTF8(file_name_))
-            .append(u8"(")
+            .append(u8p("("))
             .append(std::to_string(line_number_))
-            .append(u8"): ")
-            .append(stream_.str())
-            .append(u8"\n");
+            .append(u8p("): "))
+            .append(is_str_ ? str_ : stream_.str())
+            .append(u8p("\n"));
 
         logMessage(level_, msg);
     }

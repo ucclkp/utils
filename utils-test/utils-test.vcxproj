@@ -176,6 +176,7 @@
     <ClCompile Include="endian_unit_test.cpp" />
     <ClCompile Include="file_unit_test.cpp" />
     <ClCompile Include="json_unit_test.cpp" />
+    <ClCompile Include="log_unit_test.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix_unit_test.cpp" />
     <ClCompile Include="string_utils_unit_test.cpp" />

@@ -121,7 +121,7 @@ namespace utl {
     void MessagePump::quitNow() {
         MessagePump* pump = getCurrent();
         if (!pump) {
-            THROW << "MessagePump::create() wasn't called on this thread!";
+            jour_e("MessagePump::create() wasn't called on this thread!\n");
             return;
         }
 

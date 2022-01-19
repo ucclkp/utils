@@ -14,6 +14,7 @@
 #include <signal.h>
 
 #include "utils/define_utils.hpp"
+#include "utils/usprintf.h"
 
 #ifdef _MSC_VER
 #define DEBUG_BREAK  __debugbreak()
@@ -31,9 +32,16 @@
 #define LOG_STREAM(level) \
     ::utl::Log(__WFILE__, __LINE__, level).stream()
 
+#define LOG_STRING(level, str) \
+    (void) ::utl::Log(__WFILE__, __LINE__, level, str);
+
 #define EARLY_BREAK_STREAM(level, condition) \
-    (condition) ? (void) 0 : EARLY_BREAK(level);  \
-    (condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(level))
+    !(condition) ? (void) 0 : EARLY_BREAK(level);  \
+    !(condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(level))
+
+#define EARLY_BREAK_STRING(level, condition, str) \
+    !(condition) ? (void) 0 : EARLY_BREAK(level);  \
+    !(condition) ? (void) 0 : LOG_STRING(level, str)
 
 #ifndef NDEBUG
 #define IS_DEBUG_ON  true
@@ -43,13 +51,21 @@
 
 #define LOG(level)         EARLY_BREAK_STREAM(level, true)
 #define DLOG(level)        EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
-#define DBREAK(condition)  EARLY_BREAK_STREAM(::utl::Log::ERR, IS_DEBUG_ON && (condition))
 
-#define THROW  \
-    assert(false); LOG_STREAM(::utl::Log::FATAL)
-#define THROW_IF(condition)  \
-    !(condition) ? (void) 0 : assert(false);  \
-    !(condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(::utl::Log::FATAL))
+#define jour_i(f, ...) EARLY_BREAK_STRING(Log::INFO,    true, utl::usprintf(f, __VA_ARGS__))
+#define jour_w(f, ...) EARLY_BREAK_STRING(Log::WARNING, true, utl::usprintf(f, __VA_ARGS__))
+#define jour_e(f, ...) EARLY_BREAK_STRING(Log::ERR,     true, utl::usprintf(f, __VA_ARGS__))
+#define jour_f(f, ...) EARLY_BREAK_STRING(Log::FATAL,   true, utl::usprintf(f, __VA_ARGS__))
+
+#define jour_di(f, ...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
+#define jour_dw(f, ...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
+#define jour_de(f, ...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
+#define jour_df(f, ...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
+
+#define dbreak(cond) !(IS_DEBUG_ON && !(cond)) ? (void) 0 : EARLY_BREAK(Log::ERR);
+
+#define panic(...)    EARLY_BREAK_STRING(Log::FATAL, true, utl::usprintf(__VA_ARGS__))
+#define panic_if(cond, ...) EARLY_BREAK_STRING(Log::FATAL, cond, utl::usprintf(__VA_ARGS__))
 
 
 namespace utl {
@@ -111,6 +127,7 @@ namespace utl {
         static void getDefaultLogPath(std::filesystem::path* path);
 
         Log(const wchar_t* file_name, int line_number, Severity level);
+        Log(const wchar_t* file_name, int line_number, Severity level,const std::string& msg);
         ~Log();
 
         std::ostringstream& stream();
@@ -126,6 +143,9 @@ namespace utl {
         Severity level_;
         int line_number_;
         std::u16string file_name_;
+
+        bool is_str_;
+        std::string str_;
         std::ostringstream stream_;
     };
 

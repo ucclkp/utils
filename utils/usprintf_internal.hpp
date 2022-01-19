@@ -16,6 +16,16 @@
 #include "utils/type_utils.hpp"
 #include "utils/unicode_conv.h"
 
+#define VA_ARG_ITOSB(type)  \
+    {auto val = va_arg(vars->args, type);  \
+    *zero = val == 0; *minus = val < 0;    \
+    return itos(val, buf, len, radix, upper);}
+
+#define VA_ARG_ITOSS(type)  \
+    {auto val = va_arg(vars->args, type);  \
+    *zero = val == 0; *minus = val < 0;    \
+    itos(val, str, radix, upper); return;}
+
 
 namespace utl {
 namespace internal {
@@ -38,6 +48,24 @@ namespace internal {
         MOD_z,
         MOD_t,
         MOD_L,
+    };
+
+    enum PRIType {
+        PRI_NONE,
+        PRI_8,
+        PRI_16,
+        PRI_32,
+        PRI_64,
+        PRI_L8,
+        PRI_L16,
+        PRI_L32,
+        PRI_L64,
+        PRI_F8,
+        PRI_F16,
+        PRI_F32,
+        PRI_F64,
+        PRI_MAX,
+        PRI_PTR,
     };
 
     struct vlw {
@@ -561,57 +589,35 @@ namespace internal {
 
     template <typename Cy>
     bool va_itos(
-        int modifier, Cy* buf, size_t* len, bool* minus, bool* zero, vlw* vars)
+        int modifier, int radix, bool upper,
+        Cy* buf, size_t* len, bool* minus, bool* zero, vlw* vars)
     {
         switch (modifier) {
-        case MOD_hh:
-        {
-            auto val = va_arg(vars->args, int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
+        case MOD_hh: VA_ARG_ITOSB(int);
+        case MOD_h:  VA_ARG_ITOSB(int);
+        case MOD_l:  VA_ARG_ITOSB(long);
+        case MOD_ll: VA_ARG_ITOSB(long long);
+        case MOD_j:  VA_ARG_ITOSB(intmax_t);
+        case MOD_z:  VA_ARG_ITOSB(std::make_signed<size_t>::type);
+        case MOD_t:  VA_ARG_ITOSB(ptrdiff_t);
+        default:     VA_ARG_ITOSB(int);
         }
-        case MOD_h:
-        {
-            auto val = va_arg(vars->args, int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        case MOD_l:
-        {
-            auto val = va_arg(vars->args, long);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        case MOD_ll:
-        {
-            auto val = va_arg(vars->args, long long);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        case MOD_j:
-        {
-            auto val = va_arg(vars->args, intmax_t);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        case MOD_z:
-        {
-            auto val = va_arg(vars->args, std::make_signed<size_t>::type);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        case MOD_t:
-        {
-            auto val = va_arg(vars->args, ptrdiff_t);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
-        default:
-        {
-            auto val = va_arg(vars->args, int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len);
-        }
+    }
+
+    template <typename Cy>
+    void va_itos(
+        int modifier, int radix, bool upper,
+        std::basic_string<Cy>* str, bool* minus, bool* zero, vlw* vars)
+    {
+        switch (modifier) {
+        case MOD_hh: VA_ARG_ITOSS(int);
+        case MOD_h:  VA_ARG_ITOSS(int);
+        case MOD_l:  VA_ARG_ITOSS(long);
+        case MOD_ll: VA_ARG_ITOSS(long long);
+        case MOD_j:  VA_ARG_ITOSS(intmax_t);
+        case MOD_z:  VA_ARG_ITOSS(std::make_signed<size_t>::type);
+        case MOD_t:  VA_ARG_ITOSS(ptrdiff_t);
+        default:     VA_ARG_ITOSS(int);
         }
     }
 
@@ -621,62 +627,40 @@ namespace internal {
         Cy* buf, size_t* len, bool* minus, bool* zero, vlw* vars)
     {
         switch (modifier) {
-        case MOD_hh:
-        {
-            auto val = va_arg(vars->args, unsigned int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
+        case MOD_hh: VA_ARG_ITOSB(unsigned int);
+        case MOD_h:  VA_ARG_ITOSB(unsigned int);
+        case MOD_l:  VA_ARG_ITOSB(unsigned long);
+        case MOD_ll: VA_ARG_ITOSB(unsigned long long);
+        case MOD_j:  VA_ARG_ITOSB(uintmax_t);
+        case MOD_z:  VA_ARG_ITOSB(size_t);
+        case MOD_t:  VA_ARG_ITOSB(std::make_unsigned<ptrdiff_t>::type);
+        default:     VA_ARG_ITOSB(unsigned int);
         }
-        case MOD_h:
-        {
-            auto val = va_arg(vars->args, unsigned int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        case MOD_l:
-        {
-            auto val = va_arg(vars->args, unsigned long);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        case MOD_ll:
-        {
-            auto val = va_arg(vars->args, unsigned long long);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        case MOD_j:
-        {
-            auto val = va_arg(vars->args, uintmax_t);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        case MOD_z:
-        {
-            auto val = va_arg(vars->args, size_t);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        case MOD_t:
-        {
-            auto val = va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
-        default:
-        {
-            auto val = va_arg(vars->args, unsigned int);
-            *zero = val == 0; *minus = val < 0;
-            return itos(val, buf, len, radix, upper);
-        }
+    }
+
+    template <typename Cy>
+    void va_uitos(
+        int modifier, int radix, bool upper,
+        std::basic_string<Cy>* str, bool* minus, bool* zero, vlw* vars)
+    {
+        switch (modifier) {
+        case MOD_hh: VA_ARG_ITOSS(unsigned int);
+        case MOD_h:  VA_ARG_ITOSS(unsigned int);
+        case MOD_l:  VA_ARG_ITOSS(unsigned long);
+        case MOD_ll: VA_ARG_ITOSS(unsigned long long);
+        case MOD_j:  VA_ARG_ITOSS(uintmax_t);
+        case MOD_z:  VA_ARG_ITOSS(size_t);
+        case MOD_t:  VA_ARG_ITOSS(std::make_unsigned<ptrdiff_t>::type);
+        default:     VA_ARG_ITOSS(unsigned int);
         }
     }
 
     template <typename Cy>
     void extract_diu(
-        std::basic_string<Cy>& str, bool us, int flags, int precision, int width)
+        std::basic_string<Cy>& str,
+        bool us, bool minus, bool zero, int flags, int precision, int width)
     {
-        if (str.size() == 1 && str[0] == Cy('0') && precision == 0) {
+        if (zero && precision == 0) {
             str.clear();
             return;
         }
@@ -686,7 +670,7 @@ namespace internal {
         size_t sign_len = 0;
         std::basic_string_view<Cy> sv = str;
         if (!us) {
-            if (sv[0] != Cy('-')) {
+            if (!minus) {
                 if (flags & FLAG_SIGN) {
                     sign = Cy('+');
                     sign_len = 1;
@@ -843,9 +827,10 @@ namespace internal {
 
     template <typename Cy>
     void extract_o(
-        std::basic_string<Cy>& str, int flags, int precision, int width)
+        std::basic_string<Cy>& str,
+        bool zero, int flags, int precision, int width)
     {
-        if (str.size() == 1 && str[0] == Cy('0') && precision == 0) {
+        if (zero && precision == 0) {
             if (!(flags & FLAG_ALTER)) {
                 str.clear();
             }
@@ -857,7 +842,7 @@ namespace internal {
         size_t sign_len = 0;
 
         size_t zero_count = 0;
-        if ((flags & FLAG_ALTER) && str[0] != Cy('0')) {
+        if ((flags & FLAG_ALTER) && !zero) {
             zero_count += 1;
         }
 
@@ -994,9 +979,10 @@ namespace internal {
 
     template <typename Cy>
     void extract_xX(
-        std::basic_string<Cy>& str, int flags, int precision, int width, Cy cp)
+        std::basic_string<Cy>& str,
+        bool zero, int flags, int precision, int width, Cy cp)
     {
-        if (str.size() == 1 && str[0] == Cy('0') && precision == 0) {
+        if (zero && precision == 0) {
             str.clear();
             return;
         }
@@ -1647,6 +1633,128 @@ namespace internal {
     }
 
     template <typename Cy>
+    void parsePRI(
+        const Cy** format, size_t len, PRIType* pri)
+    {
+        auto s = *format;
+        auto se = s + len;
+        if (*s != Cy('P')) {
+            *pri = PRI_NONE;
+            return;
+        }
+        ++s;
+
+        Cy prefix = 0;
+        for (; s < se;) {
+            switch (*s) {
+            case Cy('L'):
+                prefix = Cy('L');
+                break;
+
+            case Cy('F'):
+                prefix = Cy('F');
+                break;
+
+            case Cy('M'):
+                *pri = PRI_MAX;
+                *format = ++s;
+                return;
+
+            case Cy('P'):
+                *pri = PRI_PTR;
+                *format = ++s;
+                return;
+
+            case Cy('8'):
+                switch (prefix) {
+                case Cy('L'):
+                    *pri = PRI_L8;
+                    *format = ++s;
+                    break;
+                case Cy('F'):
+                    *pri = PRI_F8;
+                    *format = ++s;
+                    break;
+                default:
+                    *pri = PRI_8;
+                    *format = ++s;
+                    break;
+                }
+                return;
+
+            case Cy('1'):
+                if (++s >= se || *s != Cy('6')) {
+                    *pri = PRI_NONE;
+                    return;
+                }
+                switch (prefix) {
+                case Cy('L'):
+                    *pri = PRI_L16;
+                    *format = ++s;
+                    break;
+                case Cy('F'):
+                    *pri = PRI_F16;
+                    *format = ++s;
+                    break;
+                default:
+                    *pri = PRI_16;
+                    *format = ++s;
+                    break;
+                }
+                return;
+
+            case Cy('3'):
+                if (++s >= se || *s != Cy('2')) {
+                    *pri = PRI_NONE;
+                    return;
+                }
+                switch (prefix) {
+                case Cy('L'):
+                    *pri = PRI_L32;
+                    *format = ++s;
+                    break;
+                case Cy('F'):
+                    *pri = PRI_F32;
+                    *format = ++s;
+                    break;
+                default:
+                    *pri = PRI_32;
+                    *format = ++s;
+                    break;
+                }
+                return;
+
+            case Cy('6'):
+                if (++s >= se || *s != Cy('4')) {
+                    *pri = PRI_NONE;
+                    return;
+                }
+                switch (prefix) {
+                case Cy('L'):
+                    *pri = PRI_L64;
+                    *format = ++s;
+                    break;
+                case Cy('F'):
+                    *pri = PRI_F64;
+                    *format = ++s;
+                    break;
+                default:
+                    *pri = PRI_64;
+                    *format = ++s;
+                    break;
+                }
+                return;
+
+            default:
+                *pri = PRI_NONE;
+                return;
+            }
+        }
+
+        *pri = PRI_NONE;
+    }
+
+    template <typename Cy>
     bool usprintf_base(
         const Cy* format, size_t len,
         std::basic_string<Cy>* out, vlw* vars) {
@@ -1654,6 +1762,7 @@ namespace internal {
         int width;
         int precision;
         int modifier;
+        //PRIType pri;
         std::basic_string<Cy> result;
 
         auto s = format;
@@ -1718,6 +1827,13 @@ namespace internal {
                     continue;
                 }
 
+                /*auto pri_s = s;
+                parsePRI(&pri_s, se - s, &pri);
+                if (s >= se) {
+                    prev_pos = s;
+                    continue;
+                }*/
+
                 // specifier
                 switch (*s) {
                 case Cy('%'):
@@ -1739,94 +1855,50 @@ namespace internal {
                 case Cy('d'):
                 case Cy('i'):
                 {
+                    bool zero, minus;
                     std::basic_string<Cy> _str;
-                    switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars->args, int), &_str); break;
-                    case MOD_h:  itos(va_arg(vars->args, int), &_str); break;
-                    case MOD_l:  itos(va_arg(vars->args, long), &_str); break;
-                    case MOD_ll: itos(va_arg(vars->args, long long), &_str); break;
-                    case MOD_j:  itos(va_arg(vars->args, intmax_t), &_str); break;
-                    case MOD_z:  itos(va_arg(vars->args, std::make_signed<size_t>::type), &_str); break;
-                    case MOD_t:  itos(va_arg(vars->args, ptrdiff_t), &_str); break;
-                    default:     itos(va_arg(vars->args, int), &_str); break;
-                    }
-                    extract_diu(_str, false, flags, precision, width);
+                    va_itos(modifier, 10, false, &_str, &minus, &zero, vars);
+                    extract_diu(_str, false, minus, zero, flags, precision, width);
                     result.append(_str);
                     break;
                 }
 
                 case Cy('o'):
                 {
+                    bool zero, minus;
                     std::basic_string<Cy> _str;
-                    switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 8); break;
-                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 8); break;
-                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 8); break;
-                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 8); break;
-                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 8); break;
-                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 8); break;
-                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 8); break;
-                    default:     itos(va_arg(vars->args, unsigned int), &_str, 8); break;
-                    }
-
-                    extract_o(_str, flags, precision, width);
+                    va_uitos(modifier, 8, false, &_str, &minus, &zero, vars);
+                    extract_o(_str, zero, flags, precision, width);
                     result.append(_str);
                     break;
                 }
 
                 case Cy('x'):
                 {
+                    bool zero, minus;
                     std::basic_string<Cy> _str;
-                    switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 16); break;
-                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 16); break;
-                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 16); break;
-                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 16); break;
-                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 16); break;
-                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 16); break;
-                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 16); break;
-                    default:     itos(va_arg(vars->args, unsigned int), &_str, 16); break;
-                    }
-
-                    extract_xX(_str, flags, precision, width, Cy('x'));
+                    va_uitos(modifier, 16, false, &_str, &minus, &zero, vars);
+                    extract_xX(_str, zero, flags, precision, width, Cy('x'));
                     result.append(_str);
                     break;
                 }
 
                 case Cy('X'):
                 {
+                    bool zero, minus;
                     std::basic_string<Cy> _str;
-                    switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
-                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
-                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str, 16, true); break;
-                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str, 16, true); break;
-                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str, 16, true); break;
-                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str, 16, true); break;
-                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str, 16, true); break;
-                    default:     itos(va_arg(vars->args, unsigned int), &_str, 16, true); break;
-                    }
-
-                    extract_xX(_str, flags, precision, width, Cy('X'));
+                    va_uitos(modifier, 16, true, &_str, &minus, &zero, vars);
+                    extract_xX(_str, zero, flags, precision, width, Cy('X'));
                     result.append(_str);
                     break;
                 }
 
                 case Cy('u'):
                 {
+                    bool zero, minus;
                     std::basic_string<Cy> _str;
-                    switch (modifier) {
-                    case MOD_hh: itos(va_arg(vars->args, unsigned int), &_str); break;
-                    case MOD_h:  itos(va_arg(vars->args, unsigned int), &_str); break;
-                    case MOD_l:  itos(va_arg(vars->args, unsigned long), &_str); break;
-                    case MOD_ll: itos(va_arg(vars->args, unsigned long long), &_str); break;
-                    case MOD_j:  itos(va_arg(vars->args, uintmax_t), &_str); break;
-                    case MOD_z:  itos(va_arg(vars->args, size_t), &_str); break;
-                    case MOD_t:  itos(va_arg(vars->args, std::make_unsigned<ptrdiff_t>::type), &_str); break;
-                    default:     itos(va_arg(vars->args, unsigned int), &_str); break;
-                    }
-
-                    extract_diu(_str, true, flags, precision, width);
+                    va_uitos(modifier, 10, false, &_str, &minus, &zero, vars);
+                    extract_diu(_str, true, minus, zero, flags, precision, width);
                     result.append(_str);
                     break;
                 }
@@ -2044,7 +2116,7 @@ namespace internal {
                 {
                     bool zero, minus;
                     size_t d_len = rs ? rse - rs : 0u;
-                    if (!va_itos(modifier, rs, &d_len, &minus, &zero, vars)) {
+                    if (!va_itos(modifier, 10, false, rs, &d_len, &minus, &zero, vars)) {
                         rs = nullptr;
                     }
                     size_t _len = rs ? rse - rs : 0u;

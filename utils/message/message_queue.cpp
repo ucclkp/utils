@@ -104,7 +104,7 @@ namespace utl {
             ++ptr;
         }
 
-        THROW_IF(ptr == message_.end()) << "Cannot find barrier!";
+        panic_if(ptr == message_.end(), "Cannot find barrier!\n");
 
         // over the barrier
         auto prev = ptr;

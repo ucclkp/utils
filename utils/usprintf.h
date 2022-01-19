@@ -12,13 +12,12 @@
 
 namespace utl {
 
-    int usprintf(char* buf, size_t* len, const char* format, ...);
+    int usprintfb(char* buf, size_t* len, const char* format, ...);
+    int usprintfb(char16_t* buf, size_t* len, const char16_t* format, ...);
+    int usprintfb(char32_t* buf, size_t* len, const char32_t* format, ...);
+
     std::string usprintf(const char* format, ...);
-
-    int usprintf(char16_t* buf, size_t* len, const char16_t* format, ...);
     std::u16string usprintf(const char16_t* format, ...);
-
-    int usprintf(char32_t* buf, size_t* len, const char32_t* format, ...);
     std::u32string usprintf(const char32_t* format, ...);
 
 }
