@@ -254,7 +254,7 @@ namespace utl {
 
         if (is_frac) {
             double result;
-            int ret = utl::stof(str, &result, FF_SCI);
+            int ret = utl::stof(str, &result, UFF_SCI);
             if (ret != UCR_OK) {
                 return false;
             }

@@ -30,6 +30,24 @@ namespace utl {
             Ty>::type>::type>::type;
     };
 
+    template <typename Ty>
+    class raw_pointer {
+        using _r_cvref_type = typename std::remove_reference<
+            typename std::remove_cv<Ty>::type>::type;
+        using _r_ptr_type = typename std::remove_pointer<_r_cvref_type>::type;
+        using _raw_type = typename std::remove_reference<
+            typename std::remove_cv<_r_ptr_type>::type>::type;
+    public:
+        using type = typename std::add_pointer<_raw_type>::type;
+    };
+
+    template <typename Ty1, typename Ty2>
+    struct is_same_pointer {
+        static constexpr auto value = std::is_same<
+            typename raw_pointer<Ty1>::type, typename raw_pointer<Ty2>::type>::value;
+    };
+
+
 }
 
 #endif  // UTILS_TYPE_UTILS_HPP_

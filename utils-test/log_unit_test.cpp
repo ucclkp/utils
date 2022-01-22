@@ -11,13 +11,14 @@
 TEST_CASE(LogUnitTest) {
 
     TEST_DEF("log") {
-        DBREAK(true);
-        THROW_IF(false);
+        ubassert(true);
+        uthrow_if(false, "");
         LOG(Log::INFO) << "info";
         LOG(Log::WARNING) << "warning";
 
+        jour_i("123: %d");
         jour_i("123: %d", 123);
-        dbreak(true);
+        ubassert(true);
 
         //jour_e("ERROR: %d not found!\n", 233);
 

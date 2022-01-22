@@ -293,6 +293,45 @@ namespace internal {
             return *this != 0;
         }
 
+        bool isZeroAfter(size_t pos) const {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (u >= N) {
+                return *this == 0;
+            }
+
+            if (d[N - u - 1] & ((uint_fast64_t(1u) << b) - 1u)) {
+                return false;
+            }
+
+            for (; u-- > 0;) {
+                if (d[N - u - 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        UIntExp& incAt(size_t pos) {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (u >= N) {
+                return *this;
+            }
+
+            auto r = uint_fast64_t(1u) << b;
+            for (size_t i = N - u; i-- > 0;) {
+                if (UIntExp_base::umax - d[i] < r) {
+                    d[i] += r;
+                    r = 1;
+                } else {
+                    d[i] += r;
+                    break;
+                }
+            }
+            return *this;
+        }
+
         UIntExp& zero() {
             for (size_t i = 0; i < N; ++i) {
                 d[i] = 0;
@@ -305,6 +344,15 @@ namespace internal {
             auto b = pos % ubits;
             if (u < N) {
                 d[N - u - 1] |= (uint_fast64_t(1u) << b);
+            }
+            return *this;
+        }
+
+        UIntExp& clearBit(size_t pos) {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (u < N) {
+                d[N - u - 1] &= ~(uint_fast64_t(1u) << b);
             }
             return *this;
         }
@@ -544,6 +592,30 @@ namespace internal {
             return *this != 0;
         }
 
+        bool isZeroAfter(size_t pos) const {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (u >= 1) {
+                return *this == 0;
+            }
+
+            if (d & ((uint_fast64_t(1u) << b) - 1u)) {
+                return false;
+            }
+            return true;
+        }
+
+        UIntExp& incAt(size_t pos) {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (u >= 1) {
+                return *this;
+            }
+
+            d += uint_fast64_t(1u) << b;
+            return *this;
+        }
+
         UIntExp& zero() {
             d = 0;
             return *this;
@@ -554,6 +626,15 @@ namespace internal {
             auto b = pos % ubits;
             if (!u) {
                 d |= (uint_fast64_t(1u) << b);
+            }
+            return *this;
+        }
+
+        UIntExp& clearBit(size_t pos) {
+            auto u = pos / ubits;
+            auto b = pos % ubits;
+            if (!u) {
+                d &= ~(uint_fast64_t(1u) << b);
             }
             return *this;
         }

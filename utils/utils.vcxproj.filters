@@ -100,6 +100,7 @@
     </ClCompile>
     <ClCompile Include="usprintf.cpp" />
     <ClCompile Include="float_conv.cpp" />
+    <ClCompile Include="usformat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="convert.h" />
@@ -200,6 +201,10 @@
     <ClInclude Include="usprintf.h" />
     <ClInclude Include="conv_types.hpp" />
     <ClInclude Include="uint_exp.hpp" />
+    <ClInclude Include="usformat.h" />
+    <ClInclude Include="ustring_print_internal.hpp" />
+    <ClInclude Include="usformat_internal.hpp" />
+    <ClInclude Include="usformat_any_internal.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

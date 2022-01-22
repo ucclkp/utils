@@ -14,6 +14,7 @@
 #include <signal.h>
 
 #include "utils/define_utils.hpp"
+#include "utils/usformat.h"
 #include "utils/usprintf.h"
 
 #ifdef _MSC_VER
@@ -49,23 +50,23 @@
 #define IS_DEBUG_ON  false
 #endif
 
-#define LOG(level)         EARLY_BREAK_STREAM(level, true)
-#define DLOG(level)        EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
+#define LOG(level)      EARLY_BREAK_STREAM(level, true)
+#define DLOG(level)     EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
 
-#define jour_i(f, ...) EARLY_BREAK_STRING(Log::INFO,    true, utl::usprintf(f, __VA_ARGS__))
-#define jour_w(f, ...) EARLY_BREAK_STRING(Log::WARNING, true, utl::usprintf(f, __VA_ARGS__))
-#define jour_e(f, ...) EARLY_BREAK_STRING(Log::ERR,     true, utl::usprintf(f, __VA_ARGS__))
-#define jour_f(f, ...) EARLY_BREAK_STRING(Log::FATAL,   true, utl::usprintf(f, __VA_ARGS__))
+#define jour_i(...)  EARLY_BREAK_STRING(Log::INFO,    true, utl::usformat(__VA_ARGS__))
+#define jour_w(...)  EARLY_BREAK_STRING(Log::WARNING, true, utl::usformat(__VA_ARGS__))
+#define jour_e(...)  EARLY_BREAK_STRING(Log::ERR,     true, utl::usformat(__VA_ARGS__))
+#define jour_f(...)  EARLY_BREAK_STRING(Log::FATAL,   true, utl::usformat(__VA_ARGS__))
 
-#define jour_di(f, ...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
-#define jour_dw(f, ...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
-#define jour_de(f, ...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
-#define jour_df(f, ...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usprintf(f, __VA_ARGS__))
+#define jour_di(...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
+#define jour_dw(...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
+#define jour_de(...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
+#define jour_df(...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
 
-#define dbreak(cond) !(IS_DEBUG_ON && !(cond)) ? (void) 0 : EARLY_BREAK(Log::ERR);
+#define ubassert(cond)    !(IS_DEBUG_ON && !(cond)) ? (void) 0 : EARLY_BREAK(Log::ERR);
 
-#define panic(...)    EARLY_BREAK_STRING(Log::FATAL, true, utl::usprintf(__VA_ARGS__))
-#define panic_if(cond, ...) EARLY_BREAK_STRING(Log::FATAL, cond, utl::usprintf(__VA_ARGS__))
+#define uthrow(...)          EARLY_BREAK_STRING(Log::FATAL, true, utl::usformat(__VA_ARGS__))
+#define uthrow_if(cond, ...) EARLY_BREAK_STRING(Log::FATAL, cond, utl::usformat(__VA_ARGS__))
 
 
 namespace utl {

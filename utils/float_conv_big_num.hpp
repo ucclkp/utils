@@ -63,6 +63,19 @@ namespace internal {
             std::numeric_limits<FTy>::digits - 1u;
         static constexpr size_t maxe =
             std::numeric_limits<FTy>::max_exponent;
+        static constexpr int mine =
+            std::numeric_limits<FTy>::min_exponent - 1;
+        static constexpr bool has_denorm = !FORCE_NO_DENORM &&
+            std::numeric_limits<FTy>::has_denorm == std::denorm_present;
+
+        static constexpr bool hb_present() {
+            auto total = mant + bexp() + 1u;
+            return total == 79u;
+        }
+
+        static constexpr size_t mine_c() {
+            return mant + maxe - 2u;
+        }
 
         static constexpr size_t bexp() {
             size_t r = 0;
@@ -75,8 +88,7 @@ namespace internal {
         }
 
         static constexpr size_t sexp() {
-            auto total = mant + bexp() + 1u;
-            if (total == 79u) {
+            if (hb_present()) {
                 return mant + 1u;
             }
             return mant;
@@ -99,7 +111,15 @@ namespace internal {
             std::numeric_limits<FTy>::max_exponent10 + 1u;
         static constexpr size_t mant = Base::mant;
         static constexpr size_t maxe = Base::maxe;
-        static constexpr size_t mine_b = (mant + maxe - 2u) * 10u / 33u;
+
+        static constexpr size_t mine_adc() {
+            if constexpr (Base::has_denorm) {
+                return (mant + maxe - 2u) * 10u / 33u;
+            } else {
+                return (maxe - 1u) * 10u / 33u;
+            }
+        }
+
     };
 
     template <typename FTy>
@@ -110,7 +130,15 @@ namespace internal {
             std::numeric_limits<FTy>::max_exponent / 4u;
         static constexpr size_t mant = Base::mant;
         static constexpr size_t maxe = Base::maxe;
-        static constexpr size_t mine_b = (mant + maxe + 3u) / 4u;
+
+        static constexpr size_t mine_adc() {
+            if constexpr (Base::has_denorm) {
+                return (mant + maxe + 3u) / 4u;
+            } else {
+                return (maxe + 3u) / 4u;
+            }
+        }
+
     };
 
 
@@ -291,21 +319,21 @@ namespace internal {
             if (i >= effect)
                 return;
 
-            if (frm == FR_CEIL) {
+            if (frm == UFR_CEIL) {
                 if (sign) {
                     return;
                 }
                 if (isZeroAfter(d_pos)) {
                     return;
                 }
-            } else if (frm == FR_FLOOR) {
+            } else if (frm == UFR_FLOOR) {
                 if (!sign) {
                     return;
                 }
                 if (isZeroAfter(d_pos)) {
                     return;
                 }
-            } else if (frm == FR_ZERO) {
+            } else if (frm == UFR_ZERO) {
                 return;
             } else {
                 auto d_1 = getDigit(d_pos + 1);
@@ -800,21 +828,21 @@ namespace internal {
                 return;
             i = uic - i - 1;
 
-            if (frm == FR_CEIL) {
+            if (frm == UFR_CEIL) {
                 if (sign) {
                     return;
                 }
                 if (isZeroBefore(d_pos)) {
                     return;
                 }
-            } else if (frm == FR_FLOOR) {
+            } else if (frm == UFR_FLOOR) {
                 if (!sign) {
                     return;
                 }
                 if (isZeroBefore(d_pos)) {
                     return;
                 }
-            } else if (frm == FR_ZERO) {
+            } else if (frm == UFR_ZERO) {
                 return;
             } else {
                 auto d_1 = getDigit(d_pos - 1);
@@ -840,7 +868,8 @@ namespace internal {
             uint_fast8_t r = 1;
             raw[i] = tmp - uceil;
 
-            for (; i-- > 0;) {
+            auto tar = uic - effect;
+            for (; i-- > tar;) {
                 tmp = raw[i] + r;
                 if (tmp >= uceil) {
                     r = 1;
@@ -850,7 +879,16 @@ namespace internal {
                     return;
                 }
             }
-            assert(r == 0);
+
+            if (r == 0) {
+                return;
+            }
+
+            assert(tar != 0);
+            if (tar > 0) {
+                raw[i] = r;
+                ++effect;
+            }
         }
 
         void moveUR() {
@@ -1049,8 +1087,8 @@ namespace internal {
             auto sd = (actual_len - 1) % dig + 1;
 
             size_t i;
-            // TODO:
-            for (i = uic; i-- > uic - su;) {
+            size_t skip_u = (d_pos + dig - 1) / dig;
+            for (i = uic; i-- > uic - skip_u;) {
                 raw[i] = 0;
             }
 
@@ -1238,7 +1276,7 @@ namespace internal {
 
         UTy raw[uic];
         uint_fast8_t bottom;
-        size_t effect = uic;
+        size_t effect;
     };
 
 }

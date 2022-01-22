@@ -9,26 +9,28 @@
 
 #include "utils/conv_types.hpp"
 
+#define FORCE_NO_DENORM  false
+
 
 namespace utl {
 
-    enum FFormat : unsigned int {
-        FF_NOR  = 1u << 0u,
-        FF_SCI  = 1u << 1u,
-        FF_HEX  = 1u << 2u,
-        FF_HEX2 = 1u << 3u,
-        FF_UPP  = 1u << 4u,
-        FF_DIG  = 1u << 5u,
-        FF_EXA  = 1u << 6u,
-        FF_NTZ  = 1u << 7u,
-        FF_ENZ  = 1u << 8u,
+    enum UFFormat : unsigned int {
+        UFF_FIX  = 1u << 0u,
+        UFF_SCI  = 1u << 1u,
+        UFF_HEX  = 1u << 2u,
+        UFF_HEX2 = 1u << 3u,
+        UFF_UPP  = 1u << 4u,
+        UFF_DIG  = 1u << 5u,
+        UFF_EXA  = 1u << 6u,
+        UFF_NTZ  = 1u << 7u,
+        UFF_ENZ  = 1u << 8u,
     };
 
-    enum FRound {
-        FR_NEAR = 0,
-        FR_CEIL,
-        FR_FLOOR,
-        FR_ZERO,
+    enum UFRound {
+        UFR_NEAR = 0,
+        UFR_CEIL,
+        UFR_FLOOR,
+        UFR_ZERO,
     };
 
 }

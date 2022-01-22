@@ -46,6 +46,17 @@
 #define TEST_NUM_E(a, b)   if (!utl::is_num_equal(a, b)) return false;
 #define TEST_NUM_NE(a, b)  if (utl::is_num_equal(a, b))  return false;
 
+#define TEST_TRUE_BRK(a)   if (!(a)) {ubassert(false); return false;}
+#define TEST_FALSE_BRK(a)  if ((a))  {ubassert(false); return false;}
+#define TEST_E_BRK(a, b)   if ((a) != (b)) {ubassert(false); return false;}
+#define TEST_G_BRK(a, b)   if ((a) <= (b)) {ubassert(false); return false;}
+#define TEST_L_BRK(a, b)   if ((a) >= (b)) {ubassert(false); return false;}
+#define TEST_GE_BRK(a, b)  if ((a) < (b))  {ubassert(false); return false;}
+#define TEST_LE_BRK(a, b)  if ((a) > (b))  {ubassert(false); return false;}
+#define TEST_NE_BRK(a, b)  if ((a) == (b)) {ubassert(false); return false;}
+#define TEST_NUM_E_BRK(a, b)   if (!utl::is_num_equal(a, b)) {ubassert(false); return false;}
+#define TEST_NUM_NE_BRK(a, b)  if (utl::is_num_equal(a, b))  {ubassert(false); return false;}
+
 
 namespace utl {
 namespace test {

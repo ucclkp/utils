@@ -18,13 +18,15 @@ namespace internal {
     template <typename FTy, typename Cy>
     bool ftos(
         FTy val, Cy* buf, size_t* len,
-        int precision, int fmt = FF_NOR, int round = FR_NEAR)
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR)
     {
-        if (fmt & FF_HEX2) {
-            fmt |= FF_SCI;
-        }
+        static_assert(
+            std::is_floating_point<FTy>::value, "FTy must be a floating type!");
 
-        if ((fmt & FF_HEX) || (fmt & FF_HEX2)) {
+        if (fmt & UFF_HEX2) {
+            fmt |= UFF_SCI;
+            return ftos_hex2_base(val, fmt, round, precision, buf, len);
+        } else if (fmt & UFF_HEX) {
             return ftos_base<FTy, uint_fast64_t, Cy, 16>(val, fmt, round, precision, buf, len);
         } else {
             return ftos_base<FTy, uint_fast64_t, Cy, 10>(val, fmt, round, precision, buf, len);
@@ -34,7 +36,7 @@ namespace internal {
     template <typename FTy, typename Cy>
     void ftos(
         FTy val, std::basic_string<Cy>* out,
-        int precision, int fmt = FF_NOR, int round = FR_NEAR)
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR)
     {
         static_assert(
             std::is_floating_point<FTy>::value, "FTy must be a floating type!");
@@ -43,12 +45,11 @@ namespace internal {
             precision = 0;
         }
 
-        if (fmt & FF_HEX2) {
-            fmt |= FF_SCI;
-        }
-
         std::basic_string<Cy> result;
-        if ((fmt & FF_HEX) || (fmt & FF_HEX2)) {
+        if (fmt & UFF_HEX2) {
+            fmt |= UFF_SCI;
+            ftos_hex2_base(val, fmt, round, precision, &result);
+        } else if (fmt & UFF_HEX) {
             ftos_base<FTy, uint_fast64_t, Cy, 16>(val, fmt, round, precision, &result);
         } else {
             ftos_base<FTy, uint_fast64_t, Cy, 10>(val, fmt, round, precision, &result);
@@ -60,20 +61,22 @@ namespace internal {
     template <typename FTy, typename Cy>
     int stof(
         const Cy* str, size_t len, FTy* out,
-        int fmt = FF_NOR, int round = FR_NEAR, const Cy** n = nullptr)
+        int fmt = UFF_FIX, int round = UFR_NEAR, const Cy** n = nullptr)
     {
+        static_assert(
+            std::is_floating_point<FTy>::value, "FTy must be a floating type!");
+
         if (!len || !str) {
             if (n) *n = str;
             return UCR_FAILED;
         }
 
-        if (fmt & FF_HEX2) {
-            fmt |= FF_SCI;
-        }
-
         int ret;
         const Cy* _p;
-        if ((fmt & FF_HEX) || (fmt & FF_HEX2)) {
+        if (fmt & UFF_HEX2) {
+            fmt |= UFF_SCI;
+            ret = stof_hex2_base(str, len, fmt, round, out, &_p);
+        } else if (fmt & UFF_HEX) {
             ret = stof_base<FTy, uint_fast64_t, Cy, 16>(str, len, fmt, round, out, &_p);
         } else {
             ret = stof_base<FTy, uint_fast64_t, Cy, 10>(str, len, fmt, round, out, &_p);
@@ -217,6 +220,78 @@ namespace internal {
         int precision, int fmt, int round)
     {
         internal::ftos(val, out, precision, fmt, round);
+    }
+
+    std::string ftos8(
+        float val, int precision, int fmt, int round)
+    {
+        std::string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::string ftos8(
+        double val, int precision, int fmt, int round)
+    {
+        std::string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::string ftos8(
+        long double val, int precision, int fmt, int round)
+    {
+        std::string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u16string ftos16(
+        float val, int precision, int fmt, int round)
+    {
+        std::u16string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u16string ftos16(
+        double val, int precision, int fmt, int round)
+    {
+        std::u16string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u16string ftos16(
+        long double val, int precision, int fmt, int round)
+    {
+        std::u16string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u32string ftos32(
+        float val, int precision, int fmt, int round)
+    {
+        std::u32string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u32string ftos32(
+        double val, int precision, int fmt, int round)
+    {
+        std::u32string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::u32string ftos32(
+        long double val, int precision, int fmt, int round)
+    {
+        std::u32string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
     }
 
     int stof(

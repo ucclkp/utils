@@ -63,7 +63,6 @@ namespace utl {
             assert(
                 val >= Ty(R(val)) ? val - Ty(R(val)) <= 1 : Ty(R(val)) - val <= 1);
         } else {
-            // ???
             assert(
                 std::numeric_limits<R>::max() >= val &&
                 std::numeric_limits<R>::min() <= val);
@@ -117,7 +116,6 @@ namespace utl {
                 std::numeric_limits<R>::min() <= val &&
                 (val >= Ty(R(val)) ? val - Ty(R(val)) <= 1 : Ty(R(val)) - val <= 1));
         } else {
-            // ???
             return (
                 std::numeric_limits<R>::max() >= val &&
                 std::numeric_limits<R>::min() <= val);

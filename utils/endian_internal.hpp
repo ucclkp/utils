@@ -18,6 +18,7 @@
 #define UTILS_ENDIAN_INTERNAL_HPP_
 
 #include <climits>
+#include <cstddef>
 
 #define ff_at(bpos) (Ty(static_cast<unsigned char>(~0u)) << CHAR_BIT * (bpos))
 

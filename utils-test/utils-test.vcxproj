@@ -171,7 +171,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="convert_unit_test.cpp" />
+    <ClCompile Include="number_conv_unit_test.cpp" />
     <ClCompile Include="dynamic_matrix_unit_test.cpp" />
     <ClCompile Include="endian_unit_test.cpp" />
     <ClCompile Include="file_unit_test.cpp" />

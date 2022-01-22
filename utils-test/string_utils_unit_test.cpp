@@ -5,11 +5,14 @@
 // found in the LICENSE file.
 
 #include <charconv>
+#include <variant>
+#include <filesystem>
 
 #include "utils/string_utils.hpp"
 #include "utils/unit_test/test_collector.h"
 #include "utils/usprintf.h"
 #include "utils/usprintf_internal.hpp"
+#include "utils/usformat.h"
 
 
 namespace {
@@ -106,16 +109,33 @@ TEST_CASE(StringUtilsUnitTest) {
         return true;
     };
 
-    TEST_DEF("stringPrintf -> string test.") {
+    TEST_DEF("usprintf -> string test.") {
         int* p = reinterpret_cast<int*>(0x12345678);
 
-        auto test = stringPrintf("%##++9%d,%d, f=%f, e=%e", 233, 10 / 11.0, 10 / 11.0);
+        auto test0 = stringPrintf("%##++9%d,%d, f=%f, e=%e", 233, 10 / 11.0, 10 / 11.0);
+        auto test1 = stringPrintf("%+u", 233);
+        auto test2 = stringPrintf("%a", 1.0);
 
-        TEST_E(usprintf(u"%d", 233), u"233");
+        TEST_E(usprintf(u"", 233), u"");
+
+        TEST_E(usprintf(u"%d", 233),  u"233");
+        TEST_E(usprintf(u"%+d", 233), u"+233");
+        TEST_E(usprintf(u"%1d", 233), u"233");
+        TEST_E(usprintf(u"%5d", 233), u"  233");
+        TEST_E(usprintf(u"%+5d", 233), u" +233");
+        TEST_E(usprintf(u"%-+5d", 233), u"+233 ");
         TEST_E(usprintf(u"%i", -233), u"-233");
+
         TEST_E(usprintf(u"%o", 857), u"1531");
+        TEST_E(usprintf(u"%+5o", 857), u" 1531");
+        TEST_E(usprintf(u"%-+5o", 857), u"1531 ");
+
         TEST_E(usprintf(u"%x", 1234), u"4d2");
         TEST_E(usprintf(u"%X", 5678), u"162E");
+        TEST_E(usprintf(u"%+X", 5678), u"162E");
+        TEST_E(usprintf(u"%+5X", 5678), u" 162E");
+        TEST_E(usprintf(u"%+-5X", 5678), u"162E ");
+
         TEST_E(usprintf(u"%f", 86.395), u"86.395000");
         TEST_E(usprintf(u"%F", 15234.0), u"15234.000000");
         TEST_E(usprintf(u"%e", 609.0), u"6.090000e+02");
@@ -142,7 +162,7 @@ TEST_CASE(StringUtilsUnitTest) {
         return true;
     };
 
-    TEST_DEF("stringPrintf -> buf    test.") {
+    TEST_DEF("usprintf -> buf    test.") {
         auto _TEST_FUNC = [](const std::string& r, const char* format, ...) -> bool {
             internal::vlw vars;
             va_start(vars.args, format);
@@ -183,6 +203,67 @@ TEST_CASE(StringUtilsUnitTest) {
             u8p("😍💖😜👀顬🚲🛴🏍⛅🧼🌁💒👱‍♂️4567👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄7🤩😞☹☹"),
             u8p("😍💖😜👀%s🚲🛴🏍⛅🧼🌁💒👱‍♂️%d👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄%c🤩😞☹☹"),
             u8p("顬"), 4567, '7'));
+
+        return true;
+    };
+
+    TEST_DEF("usformat tests.") {
+        const char16_t* buf = u"sdfdsf";
+        std::filesystem::path fp = u"test";
+
+        TEST_E(usformat(u"", 233), u"");
+
+        TEST_E(usformat(u"%d", 233), u"233");
+        TEST_E(usformat(u"%+d", 233), u"+233");
+        TEST_E(usformat(u"%1d", 233), u"233");
+        TEST_E(usformat(u"%5d", 233), u"  233");
+        TEST_E(usformat(u"%+5d", 233), u" +233");
+        TEST_E(usformat(u"%-+5d", 233), u"+233 ");
+        TEST_E(usformat(u"%i", -233), u"-233");
+
+        TEST_E(usformat(u"%o", 857), u"1531");
+        TEST_E(usformat(u"%+5o", 857), u"+1531");
+        TEST_E(usformat(u"%-+5o", 857), u"+1531");
+
+        TEST_E(usformat(u"%x", 1234), u"4d2");
+        TEST_E(usformat(u"%X", 5678), u"162E");
+        TEST_E(usformat(u"%+X", 5678), u"+162E");
+        TEST_E(usformat(u"%+5X", 5678), u"+162E");
+        TEST_E(usformat(u"%+-5X", 5678), u"+162E");
+
+        TEST_E(usformat(u"%f", 86.395), u"86.395000");
+        TEST_E(usformat(u"%F", 15234.0), u"15234.000000");
+        TEST_E(usformat(u"%e", 609.0), u"6.090000e+02");
+        TEST_E(usformat(u"%E", 9607.387), u"9.607387E+03");
+        TEST_E(usformat(u"%g", 574.26), u"574.26");
+        TEST_E(usformat(u"%G", 879.09), u"879.09");
+        TEST_E(usformat(u"%a", 85767.9576), u"0x1.4f07f525460aap+16");
+        TEST_E(usformat(u"%A", 756.3), u"0X1.7A26666666666P+9");
+        TEST_E(usformat(u"%c", u']'), u"]");
+        TEST_E(usformat(u"%ls", u"abcd"), u"abcd");
+        //TEST_E(usformat(u"%p", p), u"12345678");
+        TEST_E(usformat(u"%%"), u"%");
+        TEST_E(usformat("%- 5d", 233), " 233 ");
+        TEST_E(usformat("%010.3f", -0.1), "-00000.100");
+        TEST_E(
+            usformat(u"%##++9%d,%d, s=%s, c=%c, f=%f, e=%e", 233, u8p("顬"), '8', 10 / 11.0, 10 / 11.0),
+            u"%d,233, s=顬, c=8, f=0.909091, e=9.090909e-01");
+        TEST_E(
+            usformat(U"This %s, is a %s, and %.1f: %s\n", buf, std::string("123"), 0.1, fp),
+            U"This sdfdsf, is a 123, and 0.1: test\n");
+        TEST_E(
+            usformat(
+                u"😍💖😜👀%s🚲🛴🏍⛅🧼🌁💒👱‍♂️%d👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄%c🤩😞☹☹",
+                u8p("顬"), 4567, '7'),
+            u"😍💖😜👀顬🚲🛴🏍⛅🧼🌁💒👱‍♂️4567👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄7🤩😞☹☹");
+
+        TEST_E(usformat("%d", 453468.5678569), "453468");
+        TEST_E(usformat("%f", 453468), "453468.000000");
+        TEST_E(usformat("%5", 453468), "");
+
+        char16_t _buf[32];
+        size_t _buf_len = 18;
+        int ret = usformatb(_buf, &_buf_len, u"This is a %d, %s", 233, fp);
 
         return true;
     };

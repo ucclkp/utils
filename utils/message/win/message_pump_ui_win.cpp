@@ -162,7 +162,7 @@ namespace utl {
             //
         }
         ::ResetEvent(event_);
-        dbreak(result != WAIT_FAILED);
+        ubassert(result != WAIT_FAILED);
     }
 
     bool MessagePumpUIWin::platformWork() {
