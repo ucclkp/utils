@@ -57,6 +57,10 @@ namespace utl {
         std::u16string out;
         auto ret = internal::usprintf_base(format, len, &out, &args);
         va_end(args.args);
+
+        if (!ret) {
+            out.clear();
+        }
         return out;
     }
 
@@ -68,6 +72,10 @@ namespace utl {
         std::u32string out;
         auto ret = internal::usprintf_base(format, len, &out, &args);
         va_end(args.args);
+
+        if (!ret) {
+            out.clear();
+        }
         return out;
     }
 

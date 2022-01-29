@@ -92,39 +92,51 @@ namespace internal {
 
     template <typename... Args>
     std::string usformat(const std::string_view& fmt, Args&&... args) {
+        bool ret;
         std::string out;
         constexpr auto count = sizeof...(args);
         if constexpr (count == 0) {
-            internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
         } else {
             internal::usformat_any vars[count]{ args... };
-            internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+        }
+        if (!ret) {
+            out.clear();
         }
         return out;
     }
 
     template <typename... Args>
     std::u16string usformat(const std::u16string_view& fmt, Args&&... args) {
+        bool ret;
         std::u16string out;
         constexpr auto count = sizeof...(args);
         if constexpr (count == 0) {
-            internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
         } else {
             internal::usformat_any vars[count]{ args... };
-            internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+        }
+        if (!ret) {
+            out.clear();
         }
         return out;
     }
 
     template <typename... Args>
     std::u32string usformat(const std::u32string_view& fmt, Args&&... args) {
+        bool ret;
         std::u32string out;
         constexpr auto count = sizeof...(args);
         if constexpr (count == 0) {
-            internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, nullptr, count);
         } else {
             internal::usformat_any vars[count]{ args... };
-            internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+            ret = internal::usformat_0(fmt.data(), fmt.size(), &out, vars, count);
+        }
+        if (!ret) {
+            out.clear();
         }
         return out;
     }

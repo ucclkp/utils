@@ -200,7 +200,6 @@ namespace internal {
         using BigUInt = BigUInt_bN<FTy, UTy, bN, UUnit>;
         using BigFloat = BigFloat_bN<FTy, UTy, bN, FUnit>;
         using FT = FloatTraits_base<FTy>;
-        constexpr auto maxe_1 = FT::maxe - 1u;
 
         if (exp_shf != 0) {
             if (fmt & UFF_SCI) {
@@ -1514,10 +1513,6 @@ namespace internal {
     void ftos_base(FTy val, int fmt, int round, int precision, std::basic_string<Cy>* out) {
         using FT = FloatTraits_base<FTy>;
         using uint_e = uint_e<FTy>;
-        constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = FT::bexp();
-        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
-        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
         uint_e fra;
         uint_fast32_t exp_shift;
@@ -1551,10 +1546,6 @@ namespace internal {
     {
         using FT = FloatTraits_base<FTy>;
         using uint_e = uint_e<FTy>;
-        constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = FT::bexp();
-        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
-        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
         uint_e fra;
         uint_fast32_t exp_shift;
@@ -1692,9 +1683,6 @@ namespace internal {
         using FT = FloatTraits_base<FTy>;
         using uint_e = uint_e<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = FT::bexp();
-        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
-        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
         constexpr size_t bN = 16;
         constexpr size_t bbit = 4;
 
@@ -1770,9 +1758,6 @@ namespace internal {
         using FT = FloatTraits_base<FTy>;
         using uint_e = uint_e<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
-        constexpr auto bexp = FT::bexp();
-        // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
-        const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
         constexpr size_t bN = 16;
         constexpr size_t bbit = 4;
 

@@ -15,7 +15,6 @@
 #define u8c(c) reinterpret_cast<char>(u8##c)
 #define u8p(s) reinterpret_cast<const char*>(u8##s)
 #define u8r(r) reinterpret_cast<const char&>(u8##r)
-#define u8path_c(p) reinterpret_cast<const char*>((p).u8string().c_str())
 
 
 namespace utl {

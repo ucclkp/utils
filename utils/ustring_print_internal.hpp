@@ -265,7 +265,6 @@ namespace internal {
         }
 
         auto s = str;
-        auto se = s ? s + *len : nullptr;
 
         // sign
         Cy sign = 0;
@@ -305,10 +304,11 @@ namespace internal {
         }
 
         auto total = zero_count + space_count + sign_len + d_len;
-        *len = total;
         if (!s || total > *len) {
+            *len = total;
             return false;
         }
+        *len = total;
 
         if (flags & FLAG_LEFT_JUST) {
             auto diff = zero_count + (minus ? 0 : sign_len);
@@ -445,7 +445,6 @@ namespace internal {
         }
 
         auto s = str;
-        auto se = s ? s + *len : nullptr;
 
         // sign
         Cy sign = 0;
@@ -489,10 +488,11 @@ namespace internal {
         }
 
         auto total = zero_count + space_count + sign_len + d_len;
-        *len = total;
         if (!s || total > *len) {
+            *len = total;
             return false;
         }
+        *len = total;
 
         if (flags & FLAG_LEFT_JUST) {
             auto diff = zero_count + (minus ? 0 : sign_len);
@@ -633,7 +633,6 @@ namespace internal {
         }
 
         auto s = str;
-        auto se = s ? s + *len : nullptr;
 
         // sign
         Cy sign = 0;
@@ -679,10 +678,11 @@ namespace internal {
         }
 
         auto total = zero_count + space_count + sign_len + d_len;
-        *len = total;
         if (!s || total > *len) {
+            *len = total;
             return false;
         }
+        *len = total;
 
         if (flags & FLAG_LEFT_JUST) {
             auto diff = zero_count + (minus ? 0 : sign_len);
@@ -799,7 +799,6 @@ namespace internal {
         int flags, int width, bool minus, size_t d_len)
     {
         auto s = str;
-        auto se = s ? s + *len : nullptr;
 
         // sign
         Cy sign = 0;
@@ -831,10 +830,11 @@ namespace internal {
         }
 
         auto total = zero_count + space_count + sign_len + d_len;
-        *len = total;
         if (!s || total > *len) {
+            *len = total;
             return false;
         }
+        *len = total;
 
         if (flags & FLAG_LEFT_JUST) {
             auto diff = zero_count + (minus ? 0 : sign_len);
@@ -952,7 +952,6 @@ namespace internal {
         size_t pref_count = 2;
 
         auto s = str;
-        auto se = s ? s + *len : nullptr;
 
         // sign
         Cy sign = 0;
@@ -983,10 +982,11 @@ namespace internal {
         }
 
         auto total = zero_count + space_count + sign_len + d_len;
-        *len = total;
         if (!s || total > *len) {
+            *len = total;
             return false;
         }
+        *len = total;
 
         if (flags & FLAG_LEFT_JUST) {
             auto diff = zero_count + (minus ? 0 : sign_len);

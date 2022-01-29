@@ -146,7 +146,7 @@ TEST_CASE(StringUtilsUnitTest) {
         TEST_E(usprintf(u"%A", 756.3), u"0X1.7A26666666666P+9");
         TEST_E(usprintf(u"%c", u']'), u"]");
         TEST_E(usprintf(u"%ls", u"abcd"), u"abcd");
-        //TEST_E(usprintf(u"%p", p), u"12345678");
+        TEST_E(usprintf(u"%p", p), u"12345678");
         TEST_E(usprintf(u"%%"), u"%");
         TEST_E(usprintf("%- 5d", 233), " 233 ");
         TEST_E(usprintf("%010.3f", -0.1), "-00000.100");
@@ -197,7 +197,7 @@ TEST_CASE(StringUtilsUnitTest) {
         TEST_TRUE(_TEST_FUNC("0X1.7A26666666666P+9", "%A", 756.3));
         TEST_TRUE(_TEST_FUNC("]", "%c", ']'));
         TEST_TRUE(_TEST_FUNC("abcd", "%ls", u"abcd"));
-        //TEST_E(usprintf(u"%p", p), u"12345678");
+        TEST_E(usprintf(u"%p", p), u"12345678");
         TEST_TRUE(_TEST_FUNC("%", "%%"));
         TEST_TRUE(_TEST_FUNC(
             u8p("😍💖😜👀顬🚲🛴🏍⛅🧼🌁💒👱‍♂️4567👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄7🤩😞☹☹"),
@@ -210,6 +210,7 @@ TEST_CASE(StringUtilsUnitTest) {
     TEST_DEF("usformat tests.") {
         const char16_t* buf = u"sdfdsf";
         std::filesystem::path fp = u"test";
+        int* p = reinterpret_cast<int*>(0x12345678);
 
         TEST_E(usformat(u"", 233), u"");
 
@@ -241,7 +242,7 @@ TEST_CASE(StringUtilsUnitTest) {
         TEST_E(usformat(u"%A", 756.3), u"0X1.7A26666666666P+9");
         TEST_E(usformat(u"%c", u']'), u"]");
         TEST_E(usformat(u"%ls", u"abcd"), u"abcd");
-        //TEST_E(usformat(u"%p", p), u"12345678");
+        TEST_E(usformat(u"%p", p), u"12345678");
         TEST_E(usformat(u"%%"), u"%");
         TEST_E(usformat("%- 5d", 233), " 233 ");
         TEST_E(usformat("%010.3f", -0.1), "-00000.100");
@@ -262,8 +263,12 @@ TEST_CASE(StringUtilsUnitTest) {
         TEST_E(usformat("%5", 453468), "");
 
         char16_t _buf[32];
-        size_t _buf_len = 18;
-        int ret = usformatb(_buf, &_buf_len, u"This is a %d, %s", 233, fp);
+        for (size_t i = 0; i < 19; ++i) {
+            size_t _buf_len = i;
+            int ret = usformatb(_buf, &_buf_len, u"This is a %d, %s", 233, fp);
+            TEST_E(ret, UCR_BUFFER);
+            TEST_E(_buf_len, 19);
+        }
 
         return true;
     };
