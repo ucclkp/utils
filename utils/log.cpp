@@ -56,17 +56,22 @@ namespace utl {
         }
     }
 
-    Log::Log(const wchar_t* file_name, int line_number, Severity level)
+    Log::Log(
+        const wchar_t* file_name, int line_number, Severity level)
         : level_(level),
           line_number_(line_number),
           file_name_(WideToUTF16(file_name)),
-          is_str_(false) {}
+          is_str_(false),
+          need_new_line_(true) {}
 
-    Log::Log(const wchar_t* file_name, int line_number, Severity level, const std::string& msg)
+    Log::Log(
+        const wchar_t* file_name, int line_number, Severity level,
+        const std::string& msg, bool new_line)
         : level_(level),
           line_number_(line_number),
           file_name_(WideToUTF16(file_name)),
           is_str_(true),
+          need_new_line_(new_line),
           str_(msg) {}
 
     Log::~Log() {
@@ -79,9 +84,10 @@ namespace utl {
             .append(u8p("("))
             .append(std::to_string(line_number_))
             .append(u8p("): "))
-            .append(is_str_ ? str_ : stream_.str())
-            .append(u8p("\n"));
-
+            .append(is_str_ ? str_ : stream_.str());
+        if (need_new_line_) {
+            msg.append(u8p("\n"));
+        }
         logMessage(level_, msg);
     }
 

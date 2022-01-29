@@ -33,16 +33,16 @@
 #define LOG_STREAM(level) \
     ::utl::Log(__WFILE__, __LINE__, level).stream()
 
-#define LOG_STRING(level, str) \
-    (void) ::utl::Log(__WFILE__, __LINE__, level, str);
+#define LOG_STRING(level, str, new_line) \
+    (void) ::utl::Log(__WFILE__, __LINE__, level, str, new_line);
 
 #define EARLY_BREAK_STREAM(level, condition) \
     !(condition) ? (void) 0 : EARLY_BREAK(level);  \
     !(condition) ? (void) 0 : ::utl::LogVoidify() & (LOG_STREAM(level))
 
-#define EARLY_BREAK_STRING(level, condition, str) \
+#define EARLY_BREAK_STRING(level, condition, str, new_line) \
     !(condition) ? (void) 0 : EARLY_BREAK(level);  \
-    !(condition) ? (void) 0 : LOG_STRING(level, str)
+    !(condition) ? (void) 0 : LOG_STRING(level, str, new_line)
 
 #ifndef NDEBUG
 #define IS_DEBUG_ON  true
@@ -53,20 +53,30 @@
 #define LOG(level)      EARLY_BREAK_STREAM(level, true)
 #define DLOG(level)     EARLY_BREAK_STREAM(level, IS_DEBUG_ON)
 
-#define jour_i(...)  EARLY_BREAK_STRING(Log::INFO,    true, utl::usformat(__VA_ARGS__))
-#define jour_w(...)  EARLY_BREAK_STRING(Log::WARNING, true, utl::usformat(__VA_ARGS__))
-#define jour_e(...)  EARLY_BREAK_STRING(Log::ERR,     true, utl::usformat(__VA_ARGS__))
-#define jour_f(...)  EARLY_BREAK_STRING(Log::FATAL,   true, utl::usformat(__VA_ARGS__))
+#define jour_i(...)  EARLY_BREAK_STRING(Log::INFO,    true, utl::usformat(__VA_ARGS__), true)
+#define jour_w(...)  EARLY_BREAK_STRING(Log::WARNING, true, utl::usformat(__VA_ARGS__), true)
+#define jour_e(...)  EARLY_BREAK_STRING(Log::ERR,     true, utl::usformat(__VA_ARGS__), true)
+#define jour_f(...)  EARLY_BREAK_STRING(Log::FATAL,   true, utl::usformat(__VA_ARGS__), true)
 
-#define jour_di(...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
-#define jour_dw(...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
-#define jour_de(...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
-#define jour_df(...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usformat(__VA_ARGS__))
+#define jour_di(...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usformat(__VA_ARGS__), true)
+#define jour_dw(...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usformat(__VA_ARGS__), true)
+#define jour_de(...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usformat(__VA_ARGS__), true)
+#define jour_df(...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usformat(__VA_ARGS__), true)
+
+#define jour_oi(...)  EARLY_BREAK_STRING(Log::INFO,    true, utl::usformat(__VA_ARGS__), false)
+#define jour_ow(...)  EARLY_BREAK_STRING(Log::WARNING, true, utl::usformat(__VA_ARGS__), false)
+#define jour_oe(...)  EARLY_BREAK_STRING(Log::ERR,     true, utl::usformat(__VA_ARGS__), false)
+#define jour_of(...)  EARLY_BREAK_STRING(Log::FATAL,   true, utl::usformat(__VA_ARGS__), false)
+
+#define jour_odi(...) EARLY_BREAK_STRING(Log::INFO,    IS_DEBUG_ON, utl::usformat(__VA_ARGS__), false)
+#define jour_odw(...) EARLY_BREAK_STRING(Log::WARNING, IS_DEBUG_ON, utl::usformat(__VA_ARGS__), false)
+#define jour_ode(...) EARLY_BREAK_STRING(Log::ERR,     IS_DEBUG_ON, utl::usformat(__VA_ARGS__), false)
+#define jour_odf(...) EARLY_BREAK_STRING(Log::FATAL,   IS_DEBUG_ON, utl::usformat(__VA_ARGS__), false)
 
 #define ubassert(cond)    !(IS_DEBUG_ON && !(cond)) ? (void) 0 : EARLY_BREAK(Log::ERR);
 
-#define uthrow(...)          EARLY_BREAK_STRING(Log::FATAL, true, utl::usformat(__VA_ARGS__))
-#define uthrow_if(cond, ...) EARLY_BREAK_STRING(Log::FATAL, cond, utl::usformat(__VA_ARGS__))
+#define uthrow(...)          EARLY_BREAK_STRING(Log::FATAL, true, utl::usformat(__VA_ARGS__), true)
+#define uthrow_if(cond, ...) EARLY_BREAK_STRING(Log::FATAL, cond, utl::usformat(__VA_ARGS__), true)
 
 
 namespace utl {
@@ -127,8 +137,11 @@ namespace utl {
         static void setVTEnabled(bool enabled);
         static void getDefaultLogPath(std::filesystem::path* path);
 
-        Log(const wchar_t* file_name, int line_number, Severity level);
-        Log(const wchar_t* file_name, int line_number, Severity level,const std::string& msg);
+        Log(
+            const wchar_t* file_name, int line_number, Severity level);
+        Log(
+            const wchar_t* file_name, int line_number, Severity level,
+            const std::string& msg, bool new_line);
         ~Log();
 
         std::ostringstream& stream();
@@ -146,6 +159,7 @@ namespace utl {
         std::u16string file_name_;
 
         bool is_str_;
+        bool need_new_line_;
         std::string str_;
         std::ostringstream stream_;
     };
