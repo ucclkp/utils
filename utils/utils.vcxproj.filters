@@ -37,6 +37,15 @@
     <Filter Include="memory">
       <UniqueIdentifier>{e47e8862-14ed-48bf-a059-af63caadbf49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sync">
+      <UniqueIdentifier>{f2f934de-ae48-4325-9a40-eea19aabee2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory\win">
+      <UniqueIdentifier>{fa23bc24-6a35-4aa2-93ac-2c4e8b04b1ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sync\win">
+      <UniqueIdentifier>{8c28877e-0ea9-4f31-a035-1045259908ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="log.cpp" />
@@ -254,6 +263,15 @@
     </ClInclude>
     <ClInclude Include="strings\uint_exp.hpp">
       <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\win\com_pptr.hpp">
+      <Filter>memory\win</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\win\com_ptr.hpp">
+      <Filter>memory\win</Filter>
+    </ClInclude>
+    <ClInclude Include="sync\win\critical_section.hpp">
+      <Filter>sync\win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -217,6 +217,8 @@
     <ClInclude Include="executable.h" />
     <ClInclude Include="files\file_utils.h" />
     <ClInclude Include="memory\aligments.hpp" />
+    <ClInclude Include="memory\win\com_pptr.hpp" />
+    <ClInclude Include="memory\win\com_ptr.hpp" />
     <ClInclude Include="strings\conv_ret_code.hpp" />
     <ClInclude Include="strings\float_conv.h" />
     <ClInclude Include="strings\float_conv_big_num.hpp" />
@@ -265,6 +267,7 @@
     <ClInclude Include="scope_utils.hpp" />
     <ClInclude Include="stl_utils.h" />
     <ClInclude Include="stream_utils.h" />
+    <ClInclude Include="sync\win\critical_section.hpp" />
     <ClInclude Include="time_utils.h" />
     <ClInclude Include="type_utils.hpp" />
     <ClInclude Include="unit_test\test_case.h" />
