@@ -4,18 +4,18 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_USPRINTF_INTERNAL_HPP_
-#define UTILS_USPRINTF_INTERNAL_HPP_
+#ifndef UTILS_STRINGS_USPRINTF_INTERNAL_HPP_
+#define UTILS_STRINGS_USPRINTF_INTERNAL_HPP_
 
 #include <cassert>
 #include <cmath>
 #include <cstdarg>
 
-#include "utils/int_conv.hpp"
-#include "utils/float_conv.h"
+#include "utils/strings/int_conv.hpp"
+#include "utils/strings/float_conv.h"
+#include "utils/strings/unicode_conv.h"
+#include "utils/strings/ustring_print_internal.hpp"
 #include "utils/type_utils.hpp"
-#include "utils/unicode_conv.h"
-#include "utils/ustring_print_internal.hpp"
 
 #define VA_ARG_ITOSB(type)  \
     {auto val = va_arg(vars->args, type);  \
@@ -1270,4 +1270,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_USPRINTF_INTERNAL_HPP_
+#endif  // UTILS_STRINGS_USPRINTF_INTERNAL_HPP_

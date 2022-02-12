@@ -4,11 +4,10 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#include "utils/unicode_conv.h"
+#include "unicode_conv.h"
 
 #include <cassert>
 
-#include "utils/conv_types.hpp"
 
 #define IN_RANGE(var, min, max)  \
     (var) >= (min) && (var) <= (max)

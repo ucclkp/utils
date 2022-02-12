@@ -4,10 +4,10 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_FLOAT_CONV_TYPES_H_
-#define UTILS_FLOAT_CONV_TYPES_H_
+#ifndef UTILS_STRINGS_FLOAT_CONV_TYPES_H_
+#define UTILS_STRINGS_FLOAT_CONV_TYPES_H_
 
-#include "utils/conv_types.hpp"
+#include "utils/strings/conv_ret_code.hpp"
 
 #define FORCE_NO_DENORM  false
 
@@ -35,4 +35,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_FLOAT_CONV_TYPES_H_
+#endif  // UTILS_STRINGS_FLOAT_CONV_TYPES_H_

@@ -4,11 +4,11 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_FLOAT_CONV_BIG_NUM_HPP_
-#define UTILS_FLOAT_CONV_BIG_NUM_HPP_
+#ifndef UTILS_STRINGS_FLOAT_CONV_BIG_NUM_HPP_
+#define UTILS_STRINGS_FLOAT_CONV_BIG_NUM_HPP_
 
-#include "utils/int_conv.hpp"
-#include "utils/float_conv_types.hpp"
+#include "utils/strings/int_conv.hpp"
+#include "utils/strings/float_conv_types.hpp"
 
 
 namespace utl {
@@ -1282,4 +1282,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_FLOAT_CONV_BIG_NUM_HPP_
+#endif  // UTILS_STRINGS_FLOAT_CONV_BIG_NUM_HPP_

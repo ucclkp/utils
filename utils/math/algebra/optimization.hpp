@@ -12,6 +12,7 @@
 #include "utils/math/algebra/matrix.hpp"
 
 
+namespace utl {
 namespace math {
 
     class Optimization {
@@ -126,6 +127,7 @@ namespace math {
         }
     };
 
+}
 }
 
 #endif  // MATH_ALGEBRA_OPTIMIZATION_HPP_

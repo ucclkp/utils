@@ -4,9 +4,10 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#include "utils/string_utils.hpp"
-#include "utils/unicode_conv.h"
+#include "utils/strings/string_utils.hpp"
+#include "utils/strings/unicode_conv.h"
 #include "utils/unit_test/test_collector.h"
+
 
 using namespace utl;
 

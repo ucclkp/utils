@@ -4,14 +4,14 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_STRING_UTILS_HPP_
-#define UTILS_STRING_UTILS_HPP_
+#ifndef UTILS_STRINGS_STRING_UTILS_HPP_
+#define UTILS_STRINGS_STRING_UTILS_HPP_
 
 #include <string>
 #include <vector>
 
-#include "utils/string_utils_internal.hpp"
-#include "utils/unicode_conv.h"
+#include "utils/strings/string_utils_internal.hpp"
+#include "utils/strings/unicode_conv.h"
 
 
 namespace utl {
@@ -373,4 +373,4 @@ namespace utl {
 }
 
 
-#endif  // UTILS_STRING_UTILS_HPP_
+#endif  // UTILS_STRINGS_STRING_UTILS_HPP_

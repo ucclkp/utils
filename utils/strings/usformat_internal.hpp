@@ -4,17 +4,18 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_USFORMAT_INTERNAL_HPP_
-#define UTILS_USFORMAT_INTERNAL_HPP_
+#ifndef UTILS_STRINGS_USFORMAT_INTERNAL_HPP_
+#define UTILS_STRINGS_USFORMAT_INTERNAL_HPP_
 
 #include <cmath>
 #include <string>
 
-#include "utils/float_conv.h"
-#include "utils/number.hpp"
-#include "utils/unicode_conv.h"
-#include "utils/usformat_any_internal.hpp"
-#include "utils/ustring_print_internal.hpp"
+#include "utils/numbers.hpp"
+#include "utils/strings/int_conv.hpp"
+#include "utils/strings/float_conv.h"
+#include "utils/strings/unicode_conv.h"
+#include "utils/strings/usformat_any_internal.hpp"
+#include "utils/strings/ustring_print_internal.hpp"
 
 #define USFA_ITOSB(type)  \
     {auto val = std::get<type>(arg);  \
@@ -1965,4 +1966,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_USFORMAT_INTERNAL_HPP_
+#endif  // UTILS_STRINGS_USFORMAT_INTERNAL_HPP_

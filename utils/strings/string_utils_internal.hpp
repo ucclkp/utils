@@ -4,13 +4,13 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_STRING_UTILS_INTERNAL_HPP_
-#define UTILS_STRING_UTILS_INTERNAL_HPP_
+#ifndef UTILS_STRINGS_STRING_UTILS_INTERNAL_HPP_
+#define UTILS_STRINGS_STRING_UTILS_INTERNAL_HPP_
 
 #include <string>
 #include <vector>
 
-#include "utils/string_utils_types.hpp"
+#include "utils/strings/string_utils_types.hpp"
 
 
 namespace utl {
@@ -294,4 +294,4 @@ namespace internal {
 }
 
 
-#endif  // UTILS_STRING_UTILS_INTERNAL_HPP_
+#endif  // UTILS_STRINGS_STRING_UTILS_INTERNAL_HPP_

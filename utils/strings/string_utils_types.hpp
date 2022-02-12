@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_STRING_UTILS_TYPES_HPP_
-#define UTILS_STRING_UTILS_TYPES_HPP_
+#ifndef UTILS_STRINGS_STRING_UTILS_TYPES_HPP_
+#define UTILS_STRINGS_STRING_UTILS_TYPES_HPP_
 
 #define u8c(c) reinterpret_cast<char>(u8##c)
 #define u8p(s) reinterpret_cast<const char*>(u8##s)
@@ -24,4 +24,4 @@ namespace utl {
 }
 
 
-#endif  // UTILS_STRING_UTILS_TYPES_HPP_
+#endif  // UTILS_STRINGS_STRING_UTILS_TYPES_HPP_

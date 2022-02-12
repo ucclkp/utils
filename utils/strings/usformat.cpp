@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "utils/usformat_internal.hpp"
+#include "utils/strings/usformat_internal.hpp"
 
 
 namespace utl {

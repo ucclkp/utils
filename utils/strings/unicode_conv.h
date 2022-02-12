@@ -4,10 +4,12 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_UNICODE_CONV_H_
-#define UTILS_UNICODE_CONV_H_
+#ifndef UTILS_STRINGS_UNICODE_CONV_H_
+#define UTILS_STRINGS_UNICODE_CONV_H_
 
 #include <string>
+
+#include "utils/strings/conv_ret_code.hpp"
 
 #define IS_HIGH_SURROGATES(c16)  ((c16) >= 0xD800 && (c16) <= 0xDBFF)
 #define IS_LOW_SURROGATES(c16)   ((c16) >= 0xDC00 && (c16) <= 0xDFFF)
@@ -84,4 +86,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_UNICODE_CONV_H_
+#endif  // UTILS_STRINGS_UNICODE_CONV_H_

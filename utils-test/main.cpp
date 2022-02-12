@@ -6,7 +6,6 @@
 
 #include "utils/assuming.hpp"
 #include "utils/command_line.h"
-#include "utils/convert.h"
 #include "utils/log.h"
 
 #include "utils/unit_test/test_collector.h"

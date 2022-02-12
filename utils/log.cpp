@@ -11,7 +11,7 @@
 #include <iostream>
 
 #include "utils/files/file_utils.h"
-#include "utils/string_utils.hpp"
+#include "utils/strings/string_utils.hpp"
 
 
 namespace utl {

@@ -4,10 +4,11 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_INT_EXP_H_
-#define UTILS_INT_EXP_H_
+#ifndef UTILS_STRINGS_UINT_EXP_HPP_
+#define UTILS_STRINGS_UINT_EXP_HPP_
 
 #include <cstdint>
+#include <string>
 
 #include "utils/platform_utils.h"
 
@@ -700,4 +701,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_INT_EXP_H_
+#endif  // UTILS_STRINGS_UINT_EXP_HPP_

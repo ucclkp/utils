@@ -10,6 +10,7 @@
 #include "utils/math/algebra/dynamic_matrix.hpp"
 
 
+namespace utl {
 namespace math {
 
     class DOptimization {
@@ -139,6 +140,7 @@ namespace math {
         }
     };
 
+}
 }
 
 #endif  // MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_

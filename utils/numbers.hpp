@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_NUMBER_HPP_
-#define UTILS_NUMBER_HPP_
+#ifndef UTILS_NUMBERS_HPP_
+#define UTILS_NUMBERS_HPP_
 
 #include <assert.h>
 #include <cmath>
@@ -157,4 +157,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_NUMBER_HPP_
+#endif  // UTILS_NUMBERS_HPP_

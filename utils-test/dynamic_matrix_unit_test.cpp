@@ -6,11 +6,11 @@
 
 #include "utils/math/algebra/matrix.hpp"
 #include "utils/math/algebra/dynamic_matrix.hpp"
-#include "utils/number.hpp"
+#include "utils/numbers.hpp"
 #include "utils/unit_test/test_collector.h"
 
 
-using namespace math;
+using namespace utl::math;
 
 TEST_CASE(DMatrixUnitTest) {
 
@@ -187,7 +187,7 @@ TEST_CASE(DMatrixUnitTest) {
             DMatrixT<double> e_m(1, 2);
             m.rref(&e_m);
 
-            TEST_E(e_m, math::DMatrixT<double>(1, 2, {1, 0.5}));
+            TEST_E(e_m, DMatrixT<double>(1, 2, {1, 0.5}));
         }
 
         {
@@ -198,7 +198,7 @@ TEST_CASE(DMatrixUnitTest) {
             DMatrixT<double> e_m(2, 2);
             m.rref(&e_m);
 
-            TEST_E(e_m, math::DMatrixT<double>(2, 2, {
+            TEST_E(e_m, DMatrixT<double>(2, 2, {
                 1, 0,
                 0, 1
             }));
@@ -212,7 +212,7 @@ TEST_CASE(DMatrixUnitTest) {
             DMatrixT<double> e_m(2, 2);
             m.rref(&e_m);
 
-            TEST_E(e_m, math::DMatrixT<double>(2, 2, {
+            TEST_E(e_m, DMatrixT<double>(2, 2, {
                 1, 0,
                 0, 1
             }));
@@ -226,7 +226,7 @@ TEST_CASE(DMatrixUnitTest) {
             DMatrixT<double> e_m(2, 3);
             m.rref(&e_m);
 
-            TEST_E(e_m, math::DMatrixT<double>(2, 3, {
+            TEST_E(e_m, DMatrixT<double>(2, 3, {
                 1, 0, -0.5,
                 0, 1,    7,
             }));
@@ -241,7 +241,7 @@ TEST_CASE(DMatrixUnitTest) {
             DMatrixT<double> e_m(3, 3);
             m.rref(&e_m);
 
-            TEST_E(e_m, math::DMatrixT<double>(3, 3, {
+            TEST_E(e_m, DMatrixT<double>(3, 3, {
                 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1,

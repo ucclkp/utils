@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "utils/string_utils.hpp"
+#include "utils/strings/string_utils.hpp"
 
 
 namespace {

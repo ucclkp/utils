@@ -7,11 +7,11 @@
 #include <cmath>
 #include <random>
 
-#include "utils/float_conv.h"
-#include "utils/float_conv_big_num.hpp"
-#include "utils/int_conv.hpp"
 #include "utils/log.h"
-#include "utils/uint_exp.hpp"
+#include "utils/strings/float_conv.h"
+#include "utils/strings/float_conv_big_num.hpp"
+#include "utils/strings/int_conv.hpp"
+#include "utils/strings/uint_exp.hpp"
 #include "utils/unit_test/test_collector.h"
 
 //#define USING_CHARCONV

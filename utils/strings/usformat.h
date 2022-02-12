@@ -4,12 +4,12 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_USFORMAT_HPP_
-#define UTILS_USFORMAT_HPP_
+#ifndef UTILS_STRINGS_USFORMAT_HPP_
+#define UTILS_STRINGS_USFORMAT_HPP_
 
 #include <string>
 
-#include "utils/usformat_any_internal.hpp"
+#include "utils/strings/usformat_any_internal.hpp"
 
 
 namespace utl {
@@ -143,4 +143,4 @@ namespace internal {
 
 }
 
-#endif  // UTILS_USFORMAT_HPP_
+#endif  // UTILS_STRINGS_USFORMAT_HPP_

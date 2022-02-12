@@ -5,11 +5,11 @@
 // found in the LICENSE file.
 
 #include "utils/math/algebra/matrix.hpp"
-#include "utils/number.hpp"
+#include "utils/numbers.hpp"
 #include "utils/unit_test/test_collector.h"
 
 
-using namespace math;
+using namespace utl::math;
 
 TEST_CASE(MatrixUnitTest) {
 
@@ -186,7 +186,7 @@ TEST_CASE(MatrixUnitTest) {
             MatrixT<double, 1, 2> e_m;
             m.rref(&e_m);
 
-            TEST_TRUE((e_m == math::MatrixT<double, 1, 2>{1, 0.5}));
+            TEST_TRUE((e_m == MatrixT<double, 1, 2>{1, 0.5}));
         }
 
         {
@@ -197,7 +197,7 @@ TEST_CASE(MatrixUnitTest) {
             MatrixT<double, 2, 2> e_m;
             m.rref(&e_m);
 
-            TEST_TRUE((e_m == math::MatrixT<double, 2, 2>{
+            TEST_TRUE((e_m == MatrixT<double, 2, 2>{
                 1, 0,
                 0, 1
             }));
@@ -211,7 +211,7 @@ TEST_CASE(MatrixUnitTest) {
             MatrixT<double, 2, 2> e_m;
             m.rref(&e_m);
 
-            TEST_TRUE((e_m == math::MatrixT<double, 2, 2>{
+            TEST_TRUE((e_m == MatrixT<double, 2, 2>{
                 1, 0,
                 0, 1
             }));
@@ -225,7 +225,7 @@ TEST_CASE(MatrixUnitTest) {
             MatrixT<double, 2, 3> e_m;
             m.rref(&e_m);
 
-            TEST_TRUE((e_m == math::MatrixT<double, 2, 3>{
+            TEST_TRUE((e_m == MatrixT<double, 2, 3>{
                 1, 0, -0.5,
                 0, 1,    7,
             }));
@@ -240,7 +240,7 @@ TEST_CASE(MatrixUnitTest) {
             MatrixT<double, 3, 3> e_m;
             m.rref(&e_m);
 
-            TEST_TRUE((e_m == math::MatrixT<double, 3, 3>{
+            TEST_TRUE((e_m == MatrixT<double, 3, 3>{
                 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1,

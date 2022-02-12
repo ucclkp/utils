@@ -4,13 +4,11 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_USTRING_PRINT_INTERNAL_HPP_
-#define UTILS_USTRING_PRINT_INTERNAL_HPP_
+#ifndef UTILS_STRINGS_USTRING_PRINT_INTERNAL_HPP_
+#define UTILS_STRINGS_USTRING_PRINT_INTERNAL_HPP_
 
 #include <cassert>
 #include <string>
-
-#include "utils/int_conv.hpp"
 
 
 namespace utl {
@@ -1275,4 +1273,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_USTRING_PRINT_INTERNAL_HPP_
+#endif  // UTILS_STRINGS_USTRING_PRINT_INTERNAL_HPP_

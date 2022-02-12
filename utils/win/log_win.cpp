@@ -10,8 +10,8 @@
 #include <Windows.h>
 
 #include "utils/files/file_utils.h"
-#include "utils/number.hpp"
-#include "utils/string_utils.hpp"
+#include "utils/numbers.hpp"
+#include "utils/strings/string_utils.hpp"
 
 
 namespace {

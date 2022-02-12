@@ -12,10 +12,11 @@
 #include <cstring>
 #include <type_traits>
 
-#include "utils/number.hpp"
+#include "utils/numbers.hpp"
 #include "utils/type_utils.hpp"
 
 
+namespace utl {
 namespace math {
 
     template <typename Ty, size_t Row, size_t Col>
@@ -862,6 +863,7 @@ namespace internal {
         }
     }
 
+}
 }
 }
 

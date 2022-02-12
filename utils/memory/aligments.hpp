@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_ALIGNMENT_HPP_
-#define UTILS_ALIGNMENT_HPP_
+#ifndef UTILS_MEMORY_ALIGNMENTS_HPP_
+#define UTILS_MEMORY_ALIGNMENTS_HPP_
 
 #include <type_traits>
 
@@ -47,4 +47,4 @@ namespace utl {
 
 }
 
-#endif  // UTILS_ALIGNMENT_HPP_
+#endif  // UTILS_MEMORY_ALIGNMENTS_HPP_

@@ -11,9 +11,10 @@
 #include <stdexcept>
 #include <string>
 
-#include "utils/number.hpp"
+#include "utils/numbers.hpp"
 
 
+namespace utl {
 namespace math {
 
     template <typename Ty>
@@ -659,6 +660,7 @@ namespace internal {
         }
     }
 
+}
 }
 }
 

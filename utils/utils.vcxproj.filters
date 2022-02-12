@@ -31,12 +31,17 @@
     <Filter Include="unit_test">
       <UniqueIdentifier>{0584489f-c14f-4843-80d8-f14bb8847e4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="strings">
+      <UniqueIdentifier>{d57eaf8e-59dd-428e-bb9e-c1ec2c483aca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{e47e8862-14ed-48bf-a059-af63caadbf49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="log.cpp" />
     <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
-    <ClCompile Include="unicode_conv.cpp" />
     <ClCompile Include="json\json_parser.cpp">
       <Filter>json</Filter>
     </ClCompile>
@@ -97,9 +102,18 @@
     <ClCompile Include="unit_test\test_collector.cpp">
       <Filter>unit_test</Filter>
     </ClCompile>
-    <ClCompile Include="usprintf.cpp" />
-    <ClCompile Include="float_conv.cpp" />
-    <ClCompile Include="usformat.cpp" />
+    <ClCompile Include="strings\unicode_conv.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\usformat.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\usprintf.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
+    <ClCompile Include="strings\float_conv.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="event_handler.hpp" />
@@ -107,8 +121,6 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="platform_utils.h" />
     <ClInclude Include="stl_utils.h" />
-    <ClInclude Include="string_utils.hpp" />
-    <ClInclude Include="unicode_conv.h" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />
     <ClInclude Include="json\json_parser.h">
@@ -163,7 +175,7 @@
     <ClInclude Include="message\message_pump.h">
       <Filter>message</Filter>
     </ClInclude>
-    <ClInclude Include="number.hpp" />
+    <ClInclude Include="numbers.hpp" />
     <ClInclude Include="scope_utils.hpp" />
     <ClInclude Include="message\win\message_pump_ui_win.h">
       <Filter>message\win</Filter>
@@ -173,7 +185,6 @@
     </ClInclude>
     <ClInclude Include="multi_callbacks.hpp" />
     <ClInclude Include="time_utils.h" />
-    <ClInclude Include="aligment.hpp" />
     <ClInclude Include="type_utils.hpp" />
     <ClInclude Include="unit_test\test_case.h">
       <Filter>unit_test</Filter>
@@ -185,26 +196,65 @@
       <Filter>unit_test</Filter>
     </ClInclude>
     <ClInclude Include="define_utils.hpp" />
-    <ClInclude Include="float_conv.h" />
-    <ClInclude Include="int_conv.hpp" />
     <ClInclude Include="assuming.hpp" />
     <ClInclude Include="endian_internal.hpp" />
     <ClInclude Include="unit_test\test_log.hpp">
       <Filter>unit_test</Filter>
     </ClInclude>
-    <ClInclude Include="float_conv_big_num.hpp" />
-    <ClInclude Include="float_conv_internal.hpp" />
-    <ClInclude Include="float_conv_types.hpp" />
-    <ClInclude Include="usprintf_internal.hpp" />
-    <ClInclude Include="usprintf.h" />
-    <ClInclude Include="conv_types.hpp" />
-    <ClInclude Include="uint_exp.hpp" />
-    <ClInclude Include="usformat.h" />
-    <ClInclude Include="ustring_print_internal.hpp" />
-    <ClInclude Include="usformat_internal.hpp" />
-    <ClInclude Include="usformat_any_internal.hpp" />
-    <ClInclude Include="string_utils_internal.hpp" />
-    <ClInclude Include="string_utils_types.hpp" />
+    <ClInclude Include="strings\string_utils.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\string_utils_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\string_utils_types.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\unicode_conv.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\usformat.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\usformat_any_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\usformat_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\usprintf.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\usprintf_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\ustring_print_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\aligments.hpp">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\conv_ret_code.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\float_conv.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\float_conv_big_num.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\float_conv_internal.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\float_conv_types.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\int_conv.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\uint_exp.hpp">
+      <Filter>strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

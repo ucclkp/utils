@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "utils/define_utils.hpp"
-#include "utils/number.hpp"
+#include "utils/numbers.hpp"
 
 #define TEST_CASE_CLASS_START(class_name)  \
     class class_name : public utl::test::TestCase

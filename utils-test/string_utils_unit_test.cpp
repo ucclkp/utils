@@ -8,11 +8,11 @@
 #include <variant>
 #include <filesystem>
 
-#include "utils/string_utils.hpp"
+#include "utils/strings/string_utils.hpp"
+#include "utils/strings/usprintf.h"
+#include "utils/strings/usprintf_internal.hpp"
+#include "utils/strings/usformat.h"
 #include "utils/unit_test/test_collector.h"
-#include "utils/usprintf.h"
-#include "utils/usprintf_internal.hpp"
-#include "utils/usformat.h"
 
 
 namespace {
@@ -97,6 +97,21 @@ TEST_CASE(StringUtilsUnitTest) {
         TEST_FALSE(endWith("12", "123"));
         TEST_FALSE(endWith("abc", "C", true));
         TEST_TRUE(endWith("abc", "C", false));
+
+        return true;
+    };
+
+    TEST_DEF("IsLitEqual test.") {
+        TEST_TRUE(isLitEqual("", ""));
+        TEST_FALSE(isLitEqual("", "1"));
+        TEST_TRUE(isLitEqual("12345678", "12345678"));
+        TEST_FALSE(isLitEqual("12345678", "12345679"));
+        TEST_FALSE(isLitEqual("22345678", "12345678"));
+
+        TEST_TRUE(isLitEqual("abcd", "abcd"));
+        TEST_TRUE(isLitEqual("abcd", "ABCD"));
+        TEST_FALSE(isLitEqual("abcd", "ABCD", true));
+        TEST_TRUE(isLitEqual("ABCD", "ABCD", true));
 
         return true;
     };

@@ -8,10 +8,10 @@
 
 #include <cmath>
 
-#include "utils/int_conv.hpp"
-#include "utils/float_conv.h"
 #include "utils/stream_utils.h"
-#include "utils/unicode_conv.h"
+#include "utils/strings/int_conv.hpp"
+#include "utils/strings/float_conv.h"
+#include "utils/strings/unicode_conv.h"
 
 
 namespace utl {

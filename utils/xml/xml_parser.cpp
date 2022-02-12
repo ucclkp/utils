@@ -10,7 +10,7 @@
 
 #include "utils/log.h"
 #include "utils/stream_utils.h"
-#include "utils/string_utils.hpp"
+#include "utils/strings/string_utils.hpp"
 
 #define ADV_PEDO(adv)  \
     pedometer_.step(adv);

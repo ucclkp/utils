@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_INT_CONV_H_
-#define UTILS_INT_CONV_H_
+#ifndef UTILS_STRINGS_INT_CONV_HPP_
+#define UTILS_STRINGS_INT_CONV_HPP_
 
 #include <cassert>
 #include <string>
@@ -324,4 +324,4 @@ namespace internal {
 
 }
 
-#endif  // UTILS_INT_CONV_H_
+#endif  // UTILS_STRINGS_INT_CONV_HPP_

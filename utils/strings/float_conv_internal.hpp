@@ -4,11 +4,11 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_FLOAT_CONV_INTERNAL_HPP_
-#define UTILS_FLOAT_CONV_INTERNAL_HPP_
+#ifndef UTILS_STRINGS_FLOAT_CONV_INTERNAL_HPP_
+#define UTILS_STRINGS_FLOAT_CONV_INTERNAL_HPP_
 
-#include "utils/float_conv_big_num.hpp"
-#include "utils/uint_exp.hpp"
+#include "utils/strings/float_conv_big_num.hpp"
+#include "utils/strings/uint_exp.hpp"
 
 #define SELECT_IF(u, f)  \
     if (uuc <= u && fuc <= f)
@@ -2035,4 +2035,4 @@ namespace internal {
 }
 }
 
-#endif  // UTILS_FLOAT_CONV_INTERNAL_HPP_
+#endif  // UTILS_STRINGS_FLOAT_CONV_INTERNAL_HPP_
