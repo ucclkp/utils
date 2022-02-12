@@ -60,7 +60,7 @@ namespace utl {
 #ifdef OS_WINDOWS
         pump.reset(new win::MessagePumpWin());
 #elif defined OS_MAC
-        pump.reset(new MessagePumpMac());
+        pump.reset(new mac::MessagePumpMac());
 #endif
         cur_pump_ = pump;
     }
@@ -78,7 +78,7 @@ namespace utl {
 #ifdef OS_WINDOWS
         pump.reset(new win::MessagePumpUIWin());
 #elif defined OS_MAC
-        pump.reset(new MessagePumpUIMac());
+        pump.reset(new mac::MessagePumpUIMac());
 #endif
         cur_pump_ = pump;
 

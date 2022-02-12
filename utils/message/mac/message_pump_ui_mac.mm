@@ -15,6 +15,7 @@
 
 
 namespace utl {
+namespace mac {
 
     MessagePumpUIMac::MessagePumpUIMac() {
         auto ns_loop = [NSRunLoop currentRunLoop];
@@ -61,14 +62,14 @@ namespace utl {
     }
 
     void MessagePumpUIMac::onSourcePerform(void* info) {
-        auto ptr = static_cast<utl::MessagePumpUIMac*>(info);
+        auto ptr = static_cast<MessagePumpUIMac*>(info);
         if (!ptr->doWork()) {
             [NSApp stop:nil];
         }
     }
 
     void MessagePumpUIMac::onTimerPerform(CFRunLoopTimerRef timer, void* info) {
-        auto ptr = static_cast<utl::MessagePumpUIMac*>(info);
+        auto ptr = static_cast<MessagePumpUIMac*>(info);
         if (ptr->source_) {
             CFRunLoopSourceSignal(ptr->source_);
         }
@@ -144,4 +145,5 @@ namespace utl {
         [NSApp run];
     }
 
+}
 }

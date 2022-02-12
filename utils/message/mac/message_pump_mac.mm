@@ -13,6 +13,7 @@
 
 
 namespace utl {
+namespace mac {
 
     MessagePumpMac::MessagePumpMac() {
         int ret = pthread_cond_init(&cv_, nullptr);
@@ -108,4 +109,5 @@ namespace utl {
         }
     }
 
+}
 }

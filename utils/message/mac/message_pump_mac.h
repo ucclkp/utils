@@ -13,6 +13,7 @@
 
 
 namespace utl {
+namespace mac {
 
     class MessagePumpMac : public MessagePump {
     public:
@@ -35,6 +36,7 @@ namespace utl {
         bool is_initialized_ = false;
     };
 
+}
 }
 
 #endif  // UTILS_MESSAGE_MAC_MESSAGE_PUMP_MAC_H_

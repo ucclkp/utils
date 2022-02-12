@@ -8,8 +8,6 @@
 
 #include "utils/log.h"
 
-#include "utils/convert.h"
-
 #include <signal.h>
 #include <sys/sysctl.h>
 #include <unistd.h>

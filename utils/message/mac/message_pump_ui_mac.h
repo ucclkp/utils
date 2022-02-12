@@ -13,6 +13,7 @@
 
 
 namespace utl {
+namespace mac {
 
     class MessagePumpUIMac : public MessagePump {
     public:
@@ -40,6 +41,7 @@ namespace utl {
         CFRunLoopObserverRef observer_;
     };
 
+}
 }
 
 #endif  // UTILS_MESSAGE_MAC_MESSAGE_PUMP_UI_MAC_H_
