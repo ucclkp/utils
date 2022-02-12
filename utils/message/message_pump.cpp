@@ -58,7 +58,7 @@ namespace utl {
         std::shared_ptr<MessagePump> pump;
 
 #ifdef OS_WINDOWS
-        pump.reset(new MessagePumpWin());
+        pump.reset(new win::MessagePumpWin());
 #elif defined OS_MAC
         pump.reset(new MessagePumpMac());
 #endif
@@ -76,7 +76,7 @@ namespace utl {
         std::shared_ptr<MessagePump> pump;
 
 #ifdef OS_WINDOWS
-        pump.reset(new MessagePumpUIWin());
+        pump.reset(new win::MessagePumpUIWin());
 #elif defined OS_MAC
         pump.reset(new MessagePumpUIMac());
 #endif

@@ -16,6 +16,7 @@
 
 
 namespace utl {
+namespace win {
 
     MessagePumpUIWin::MessagePumpUIWin() {
         event_ = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
@@ -315,4 +316,5 @@ namespace utl {
         return 0;
     }
 
+}
 }

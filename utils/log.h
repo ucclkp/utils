@@ -15,7 +15,6 @@
 
 #include "utils/define_utils.hpp"
 #include "utils/usformat.h"
-#include "utils/usprintf.h"
 
 #ifdef _MSC_VER
 #define DEBUG_BREAK  __debugbreak()

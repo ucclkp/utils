@@ -17,6 +17,7 @@
 
 
 namespace utl {
+namespace win {
 
     class WinMessageIntercepter {
     public:
@@ -82,6 +83,7 @@ namespace utl {
         std::vector<WinMessageIntercepter*> intercepters_;
     };
 
+}
 }
 
 #endif  // UTILS_MESSAGE_WIN_MESSAGE_PUMP_UI_WIN_H_

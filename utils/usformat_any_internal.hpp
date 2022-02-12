@@ -7,7 +7,6 @@
 #ifndef UTILS_USFORMAT_ANY_INTERNAL_HPP_
 #define UTILS_USFORMAT_ANY_INTERNAL_HPP_
 
-#include <string>
 #include <variant>
 #include <filesystem>
 
@@ -42,10 +41,12 @@ namespace internal {
         const char*,
         const char16_t*,
         const char32_t*,
+        const wchar_t*,
         void*,
         std::string_view,
         std::u16string_view,
         std::u32string_view,
+        std::wstring_view,
         _std_fspath_wrapper>;
 
     enum USFAnyTypes {
@@ -63,10 +64,12 @@ namespace internal {
         USFA_CHARP,
         USFA_CHAR16P,
         USFA_CHAR32P,
+        USFA_WCHARP,
         USFA_VOIDP,
         USFA_SV,
         USFA_SV16,
         USFA_SV32,
+        USFA_WSV,
         USFA_FSPATH,
     };
 

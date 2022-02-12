@@ -44,6 +44,16 @@ namespace utl {
         long double val, char32_t* buf, size_t* len,
         int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
 
+    bool ftos(
+        float val, wchar_t* buf, size_t* len,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    bool ftos(
+        double val, wchar_t* buf, size_t* len,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    bool ftos(
+        long double val, wchar_t* buf, size_t* len,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+
     void ftos(
         float val, std::string* out,
         int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
@@ -74,6 +84,16 @@ namespace utl {
         long double val, std::u32string* out,
         int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
 
+    void ftos(
+        float val, std::wstring* out,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    void ftos(
+        double val, std::wstring* out,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    void ftos(
+        long double val, std::wstring* out,
+        int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+
     std::string ftos8(
         float val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
     std::string ftos8(
@@ -93,6 +113,13 @@ namespace utl {
     std::u32string ftos32(
         double val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
     std::u32string ftos32(
+        long double val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+
+    std::wstring ftosw(
+        float val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    std::wstring ftosw(
+        double val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
+    std::wstring ftosw(
         long double val, int precision, int fmt = UFF_FIX, int round = UFR_NEAR);
 
     int stof(
@@ -126,6 +153,16 @@ namespace utl {
         int fmt = UFF_FIX, int round = UFR_NEAR, const char32_t** n = nullptr);
 
     int stof(
+        const wchar_t* str, size_t len, float* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR, const wchar_t** n = nullptr);
+    int stof(
+        const wchar_t* str, size_t len, double* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR, const wchar_t** n = nullptr);
+    int stof(
+        const wchar_t* str, size_t len, long double* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR, const wchar_t** n = nullptr);
+
+    int stof(
         const std::string_view& str, float* out,
         int fmt = UFF_FIX, int round = UFR_NEAR);
     int stof(
@@ -153,6 +190,16 @@ namespace utl {
         int fmt = UFF_FIX, int round = UFR_NEAR);
     int stof(
         const std::u32string_view& str, long double* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR);
+
+    int stof(
+        const std::wstring_view& str, float* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR);
+    int stof(
+        const std::wstring_view& str, double* out,
+        int fmt = UFF_FIX, int round = UFR_NEAR);
+    int stof(
+        const std::wstring_view& str, long double* out,
         int fmt = UFF_FIX, int round = UFR_NEAR);
 
 }

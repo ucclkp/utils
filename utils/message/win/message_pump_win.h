@@ -14,6 +14,7 @@
 
 
 namespace utl {
+namespace win {
 
     class MessagePumpWin : public MessagePump {
     public:
@@ -31,6 +32,7 @@ namespace utl {
         HANDLE event_;
     };
 
+}
 }
 
 #endif  // UTILS_MESSAGE_WIN_MESSAGE_PUMP_WIN_H_

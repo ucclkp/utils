@@ -159,6 +159,27 @@ namespace internal {
         return internal::ftos(val, buf, len, precision, fmt, round);
     }
 
+    bool ftos(
+        float val, wchar_t* buf, size_t* len,
+        int precision, int fmt, int round)
+    {
+        return internal::ftos(val, buf, len, precision, fmt, round);
+    }
+
+    bool ftos(
+        double val, wchar_t* buf, size_t* len,
+        int precision, int fmt, int round)
+    {
+        return internal::ftos(val, buf, len, precision, fmt, round);
+    }
+
+    bool ftos(
+        long double val, wchar_t* buf, size_t* len,
+        int precision, int fmt, int round)
+    {
+        return internal::ftos(val, buf, len, precision, fmt, round);
+    }
+
     void ftos(
         float val, std::string* out,
         int precision, int fmt, int round)
@@ -222,6 +243,27 @@ namespace internal {
         internal::ftos(val, out, precision, fmt, round);
     }
 
+    void ftos(
+        float val, std::wstring* out,
+        int precision, int fmt, int round)
+    {
+        internal::ftos(val, out, precision, fmt, round);
+    }
+
+    void ftos(
+        double val, std::wstring* out,
+        int precision, int fmt, int round)
+    {
+        internal::ftos(val, out, precision, fmt, round);
+    }
+
+    void ftos(
+        long double val, std::wstring* out,
+        int precision, int fmt, int round)
+    {
+        internal::ftos(val, out, precision, fmt, round);
+    }
+
     std::string ftos8(
         float val, int precision, int fmt, int round)
     {
@@ -290,6 +332,30 @@ namespace internal {
         long double val, int precision, int fmt, int round)
     {
         std::u32string out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::wstring ftosw(
+        float val, int precision, int fmt, int round)
+    {
+        std::wstring out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::wstring ftosw(
+        double val, int precision, int fmt, int round)
+    {
+        std::wstring out;
+        internal::ftos(val, &out, precision, fmt, round);
+        return out;
+    }
+
+    std::wstring ftosw(
+        long double val, int precision, int fmt, int round)
+    {
+        std::wstring out;
         internal::ftos(val, &out, precision, fmt, round);
         return out;
     }
@@ -358,6 +424,27 @@ namespace internal {
     }
 
     int stof(
+        const wchar_t* str, size_t len, float* out,
+        int fmt, int round, const wchar_t** n)
+    {
+        return internal::stof(str, len, out, fmt, round, n);
+    }
+
+    int stof(
+        const wchar_t* str, size_t len, double* out,
+        int fmt, int round, const wchar_t** n)
+    {
+        return internal::stof(str, len, out, fmt, round, n);
+    }
+
+    int stof(
+        const wchar_t* str, size_t len, long double* out,
+        int fmt, int round, const wchar_t** n)
+    {
+        return internal::stof(str, len, out, fmt, round, n);
+    }
+
+    int stof(
         const std::string_view& str, float* out,
         int fmt, int round)
     {
@@ -415,6 +502,27 @@ namespace internal {
 
     int stof(
         const std::u32string_view& str, long double* out,
+        int fmt, int round)
+    {
+        return internal::stof(str.data(), str.size(), out, fmt, round);
+    }
+
+    int stof(
+        const std::wstring_view& str, float* out,
+        int fmt, int round)
+    {
+        return internal::stof(str.data(), str.size(), out, fmt, round);
+    }
+
+    int stof(
+        const std::wstring_view& str, double* out,
+        int fmt, int round)
+    {
+        return internal::stof(str.data(), str.size(), out, fmt, round);
+    }
+
+    int stof(
+        const std::wstring_view& str, long double* out,
         int fmt, int round)
     {
         return internal::stof(str.data(), str.size(), out, fmt, round);

@@ -212,6 +212,11 @@ namespace internal {
         return itos<char32_t>(val, radix, upper);
     }
 
+    template <typename Ty>
+    std::wstring itosw(Ty val, int radix = 10, bool upper = false) {
+        return itos<wchar_t>(val, radix, upper);
+    }
+
 
     template <typename Ty, typename Cy>
     bool stoi(const Cy* buf, size_t len, Ty* out, int radix = 10, const Cy** p = nullptr) {

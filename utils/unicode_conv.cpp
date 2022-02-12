@@ -8,6 +8,8 @@
 
 #include <cassert>
 
+#include "utils/conv_types.hpp"
+
 #define IN_RANGE(var, min, max)  \
     (var) >= (min) && (var) <= (max)
 

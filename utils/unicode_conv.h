@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include "utils/conv_types.hpp"
-
 #define IS_HIGH_SURROGATES(c16)  ((c16) >= 0xD800 && (c16) <= 0xDBFF)
 #define IS_LOW_SURROGATES(c16)   ((c16) >= 0xDC00 && (c16) <= 0xDFFF)
 #define IS_SURROGATES(c16)       (IS_HIGH_SURROGATES(c16) || IS_LOW_SURROGATES(c16))

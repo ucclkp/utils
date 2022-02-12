@@ -9,9 +9,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "utils/convert.h"
 #include "utils/files/file_utils.h"
 #include "utils/number.hpp"
+#include "utils/string_utils.hpp"
 
 
 namespace {

@@ -13,6 +13,7 @@
 
 
 namespace utl {
+namespace win {
 
     MessagePumpWin::MessagePumpWin() {
         event_ = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
@@ -69,4 +70,5 @@ namespace utl {
         return false;
     }
 
+}
 }

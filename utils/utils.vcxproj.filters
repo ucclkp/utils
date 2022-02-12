@@ -33,7 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="convert.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
@@ -103,7 +102,6 @@
     <ClCompile Include="usformat.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="convert.h" />
     <ClInclude Include="event_handler.hpp" />
     <ClInclude Include="executable.h" />
     <ClInclude Include="log.h" />
@@ -205,6 +203,8 @@
     <ClInclude Include="ustring_print_internal.hpp" />
     <ClInclude Include="usformat_internal.hpp" />
     <ClInclude Include="usformat_any_internal.hpp" />
+    <ClInclude Include="string_utils_internal.hpp" />
+    <ClInclude Include="string_utils_types.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

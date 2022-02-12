@@ -520,6 +520,24 @@ namespace internal {
             break;
         }
 
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            int ret = wchar_to_utf8(w_s, r, &_len);
+            if (ret == UCR_FAILED) {
+                return UCR_FAILED;
+            }
+            if (ret == UCR_OK) {
+                dig = r;
+            } else {
+                dig = nullptr;
+            }
+            break;
+        }
+
         case USFA_FSPATH:
         {
             auto fsp = std::get<USFA_FSPATH>(arg);
@@ -587,6 +605,24 @@ namespace internal {
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
             int ret = utf8_to_utf16(u8_s, r, &_len);
+            if (ret == UCR_FAILED) {
+                return UCR_FAILED;
+            }
+            if (ret == UCR_OK) {
+                dig = r;
+            } else {
+                dig = nullptr;
+            }
+            break;
+        }
+
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            int ret = wchar_to_utf16(w_s, r, &_len);
             if (ret == UCR_FAILED) {
                 return UCR_FAILED;
             }
@@ -680,6 +716,24 @@ namespace internal {
             break;
         }
 
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            int ret = wchar_to_utf32(w_s, r, &_len);
+            if (ret == UCR_FAILED) {
+                return UCR_FAILED;
+            }
+            if (ret == UCR_OK) {
+                dig = r;
+            } else {
+                dig = nullptr;
+            }
+            break;
+        }
+
         case USFA_FSPATH:
         {
             auto fsp = std::get<USFA_FSPATH>(arg);
@@ -746,6 +800,19 @@ namespace internal {
             break;
         }
 
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            if (!wchar_to_utf8(w_s, &u8_str)) {
+                return false;
+            }
+            sv = u8_str;
+            break;
+        }
+
         case USFA_FSPATH:
         {
             auto fsp = std::get<USFA_FSPATH>(arg);
@@ -800,6 +867,19 @@ namespace internal {
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
             if (!utf8_to_utf16(u8_s, &u16_str)) {
+                return false;
+            }
+            sv = u16_str;
+            break;
+        }
+
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            if (!wchar_to_utf16(w_s, &u16_str)) {
                 return false;
             }
             sv = u16_str;
@@ -862,6 +942,19 @@ namespace internal {
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
             if (!utf8_to_utf32(u8_s, &u32_str)) {
+                return false;
+            }
+            sv = u32_str;
+            break;
+        }
+
+        case USFA_WSV:
+        case USFA_WCHARP:
+        {
+            std::wstring_view w_s(
+                arg.index() == USFA_WCHARP ?
+                std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
+            if (!wchar_to_utf32(w_s, &u32_str)) {
                 return false;
             }
             sv = u32_str;

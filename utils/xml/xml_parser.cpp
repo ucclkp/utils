@@ -8,9 +8,9 @@
 
 #include <cassert>
 
-#include "utils/convert.h"
 #include "utils/log.h"
 #include "utils/stream_utils.h"
+#include "utils/string_utils.hpp"
 
 #define ADV_PEDO(adv)  \
     pedometer_.step(adv);
@@ -666,7 +666,7 @@ namespace utl {
     }
 
     bool XMLParser::checkTagName(const std::string& str) const {
-        return tolatl(str) != "xml";
+        return !isLitEqual(str, "xml");
     }
 
 }

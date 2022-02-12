@@ -44,8 +44,12 @@ namespace utl {
         size_t len = std::char_traits<char>::length(format);
 
         std::string out;
-        internal::usprintf_base(format, len, &out, &args);
+        auto ret = internal::usprintf_base(format, len, &out, &args);
         va_end(args.args);
+
+        if (!ret) {
+            out.clear();
+        }
         return out;
     }
 
