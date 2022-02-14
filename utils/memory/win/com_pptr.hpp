@@ -51,18 +51,6 @@ namespace win {
             return *this;
         }
 
-        ComPPtr& operator=(Ty** real, size_t count) {
-            if (real == pptr_) {
-                return *this;
-            }
-
-            Release();
-
-            pptr_ = real;
-            count_ = count;
-            return *this;
-        }
-
         Ty*** operator&() {
             assert(!pptr_ && count_ == 0);
             return &pptr_;
@@ -112,6 +100,10 @@ namespace win {
 
         size_t size() const {
             return count_;
+        }
+
+        void setSize(size_t s) {
+            count_ = s;
         }
 
         Ty** detach() {

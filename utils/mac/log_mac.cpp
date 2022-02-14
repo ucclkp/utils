@@ -70,7 +70,7 @@ namespace utl {
     }
 
     // static
-    bool Log::writeConsole(const std::string& msg) {
+    bool Log::writeConsole(const std::string_view& msg) {
         return false;
     }
 
@@ -95,7 +95,7 @@ namespace utl {
     }
 
     // static
-    void Log::outputDebugString(const std::string& msg) {
+    void Log::outputDebugString(const std::string_view& msg) {
         std::cout << msg;
     }
 

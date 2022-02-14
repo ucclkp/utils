@@ -88,7 +88,7 @@ namespace utl {
     }
 
     // static
-    bool Log::writeConsole(const std::string& msg) {
+    bool Log::writeConsole(const std::string_view& msg) {
         if (console_output_handle_ == INVALID_HANDLE_VALUE) {
             return false;
         }
@@ -120,7 +120,7 @@ namespace utl {
     }
 
     // static
-    void Log::outputDebugString(const std::string& msg) {
+    void Log::outputDebugString(const std::string_view& msg) {
         auto u16_msg = UTF8ToUTF16(msg);
         std::wstring w_msg(u16_msg.begin(), u16_msg.end());
         ::OutputDebugStringW(w_msg.c_str());

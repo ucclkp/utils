@@ -60,7 +60,7 @@ namespace utl {
         cmds_.clear();
     }
 
-    bool CommandLine::hasName(const std::string& name) {
+    bool CommandLine::hasName(const std::string_view& name) {
         auto it = cmds_.find(name);
         if (it == cmds_.end()) {
             return false;
@@ -72,7 +72,7 @@ namespace utl {
         return cmds_;
     }
 
-    const std::u16string& CommandLine::getValue(const std::string& name) {
+    const std::u16string& CommandLine::getValue(const std::string_view& name) {
         // 因为返回值为引用，所以需要在查找不到元素时
         // 返回一个有效的空值
         static std::u16string empty;

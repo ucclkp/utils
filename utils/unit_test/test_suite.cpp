@@ -10,11 +10,11 @@
 namespace utl {
 namespace test {
 
-    TestSuite::TestSuite(const std::string& name)
+    TestSuite::TestSuite(const std::string_view& name)
         : TestCase(name) {}
 
     TestSuite::TestSuite(
-        const std::string& name,
+        const std::string_view& name,
         TestCollector* collector)
         : TestCase(name, collector)
     {}
@@ -88,7 +88,7 @@ namespace test {
         }
     }
 
-    TestCase* TestSuite::removeCase(const std::string& name, bool del) {
+    TestCase* TestSuite::removeCase(const std::string_view& name, bool del) {
         auto it = children_.find(name);
         if (it == children_.end()) {
             return nullptr;

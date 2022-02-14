@@ -14,12 +14,12 @@
 namespace utl {
 namespace test {
 
-    TestCase::TestCase(const std::string& name)
+    TestCase::TestCase(const std::string_view& name)
         : name_(name)
     {}
 
     TestCase::TestCase(
-        const std::string& name, TestCollector* collector)
+        const std::string_view& name, TestCollector* collector)
         : name_(name)
     {
         collector->add(this);

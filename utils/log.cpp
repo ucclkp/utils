@@ -65,7 +65,7 @@ namespace utl {
 
     Log::Log(
         const wchar_t* file_name, int line_number, Severity level,
-        const std::string& msg, bool new_line)
+        const std::string_view& msg, bool new_line)
         : level_(level),
           line_number_(line_number),
           file_name_(WideToUTF16(file_name)),
@@ -95,7 +95,7 @@ namespace utl {
     }
 
     // static
-    void Log::logMessage(Severity level, const std::string& msg) {
+    void Log::logMessage(Severity level, const std::string_view& msg) {
         if (log_params_.target & DEBUGGER) {
             outputDebugString(msg);
         }
@@ -119,7 +119,7 @@ namespace utl {
         case ERR:
             break;
         case FATAL:
-            throw std::runtime_error(msg);
+            throw std::runtime_error(std::string(msg));
         }
     }
 

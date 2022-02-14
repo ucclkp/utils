@@ -16,7 +16,7 @@ namespace json {
     DoubleValue::DoubleValue(double val)
         : val_(val) {}
 
-    StringValue::StringValue(const std::string& val)
+    StringValue::StringValue(const std::string_view& val)
         : val_(val) {}
 
     BoolValue::BoolValue(bool val)
@@ -46,7 +46,7 @@ namespace json {
         values_.push_back(new DoubleValue(val));
     }
 
-    void ArrayValue::put(const std::string& val) {
+    void ArrayValue::put(const std::string_view& val) {
         values_.push_back(new StringValue(val));
     }
 
@@ -179,12 +179,12 @@ namespace json {
         return def_val;
     }
 
-    std::string ArrayValue::getString(size_t index, const std::string& def_val) const {
+    std::string ArrayValue::getString(size_t index, const std::string_view& def_val) const {
         std::string out;
         if (getString(index, &out)) {
             return out;
         }
-        return def_val;
+        return std::string(def_val);
     }
 
     bool ArrayValue::getBoolean(size_t index, bool def_val) const {

@@ -98,7 +98,7 @@ namespace json {
 
     class StringValue : public Value {
     public:
-        explicit StringValue(const std::string& val);
+        explicit StringValue(const std::string_view& val);
 
         Type getType() const override { return JT_STRING; }
 
@@ -142,7 +142,7 @@ namespace json {
         void put(Value* v);
         void put(int64_t val);
         void put(double val);
-        void put(const std::string& val);
+        void put(const std::string_view& val);
         void put(bool val);
         void put(ArrayValue* val);
         void put(ObjectValue* val);
@@ -158,7 +158,7 @@ namespace json {
         Value* get(size_t index) const;
         int64_t getInteger(size_t index, int64_t def_val = 0) const;
         double getDouble(size_t index, double def_val = 0.0) const;
-        std::string getString(size_t index, const std::string& def_val = {}) const;
+        std::string getString(size_t index, const std::string_view& def_val = {}) const;
         bool getBoolean(size_t index, bool def_val = false) const;
         ArrayValue* getArray(size_t index) const;
         ObjectValue* getObject(size_t index) const;

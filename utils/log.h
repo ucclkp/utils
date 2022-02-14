@@ -131,7 +131,7 @@ namespace utl {
 
         static bool openConsole();
         static bool closeConsole();
-        static bool writeConsole(const std::string& msg);
+        static bool writeConsole(const std::string_view& msg);
         static void modifyTarget(unsigned int* target);
         static void setVTEnabled(bool enabled);
         static void getDefaultLogPath(std::filesystem::path* path);
@@ -140,16 +140,16 @@ namespace utl {
             const wchar_t* file_name, int line_number, Severity level);
         Log(
             const wchar_t* file_name, int line_number, Severity level,
-            const std::string& msg, bool new_line);
+            const std::string_view& msg, bool new_line);
         ~Log();
 
         std::ostringstream& stream();
 
-        static void logMessage(Severity level, const std::string& msg);
+        static void logMessage(Severity level, const std::string_view& msg);
         static const char* vt_format(VTFormat f);
 
     private:
-        static void outputDebugString(const std::string& msg);
+        static void outputDebugString(const std::string_view& msg);
 
         static bool is_vt_enabled_;
 

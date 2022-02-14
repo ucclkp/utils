@@ -65,9 +65,9 @@ namespace test {
 
     class TestCase {
     public:
-        explicit TestCase(const std::string& name);
+        explicit TestCase(const std::string_view& name);
         TestCase(
-            const std::string& name,
+            const std::string_view& name,
             TestCollector* collector);
         virtual ~TestCase();
 
@@ -81,8 +81,8 @@ namespace test {
 
     protected:
         struct TestFunction {
-            explicit TestFunction(std::string desc) {
-                this->desc = std::move(desc);
+            explicit TestFunction(const std::string_view& desc) {
+                this->desc = desc;
             }
 
             template <typename F>

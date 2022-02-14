@@ -15,16 +15,16 @@ namespace utl {
 
     class CommandLine {
     public:
-        using Map = std::map<std::string, std::u16string>;
+        using Map = std::map<std::string, std::u16string, std::less<>>;
 
         static void initialize();
         static void initialize(int argc, char16_t* argv[]);
         static void clear();
 
-        static bool hasName(const std::string& name);
+        static bool hasName(const std::string_view& name);
 
         static const Map& getMap();
-        static const std::u16string& getValue(const std::string& name);
+        static const std::u16string& getValue(const std::string_view& name);
 
     private:
         static Map cmds_;

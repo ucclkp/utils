@@ -17,9 +17,9 @@ namespace test {
 
     class TestSuite : public TestCase {
     public:
-        explicit TestSuite(const std::string& name);
+        explicit TestSuite(const std::string_view& name);
         TestSuite(
-            const std::string& name,
+            const std::string_view& name,
             TestCollector* collector);
         ~TestSuite();
 
@@ -30,13 +30,13 @@ namespace test {
 
         void addCase(TestCase* c);
         void removeCase(TestCase* c, bool del = true);
-        TestCase* removeCase(const std::string& name, bool del = true);
+        TestCase* removeCase(const std::string_view& name, bool del = true);
         void clearCase(bool del = true);
 
         size_t getCaseCount() const;
 
     private:
-        std::map<std::string, TestCase*> children_;
+        std::map<std::string, TestCase*, std::less<>> children_;
     };
 
 }
