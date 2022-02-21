@@ -18,6 +18,8 @@ namespace utl {
         using Map = std::map<std::string, std::u16string, std::less<>>;
 
         static void initialize();
+        static void initialize(int argc, char* argv[]);
+        static void initialize(int argc, wchar_t* argv[]);
         static void initialize(int argc, char16_t* argv[]);
         static void clear();
 
