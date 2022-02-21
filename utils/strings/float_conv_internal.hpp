@@ -1706,7 +1706,7 @@ namespace internal {
         size_t bit_count = FT::mant;
 
         if (fmt & UFF_EXA) {
-            precision = std::numeric_limits<int>::max();
+            precision = (std::numeric_limits<int>::max)();
         }
 
         size_t fbuf_len = 0;
@@ -1782,7 +1782,7 @@ namespace internal {
         size_t bit_count = FT::mant;
 
         if (fmt & UFF_EXA) {
-            precision = std::numeric_limits<int>::max();
+            precision = (std::numeric_limits<int>::max)();
         }
 
         size_t fbuf_len = 0;

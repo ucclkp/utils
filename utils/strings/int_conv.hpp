@@ -108,8 +108,8 @@ namespace internal {
         if constexpr (std::is_signed<Ty>::value) {
             if (val < 0) {
                 // 防止溢出
-                if (val == std::numeric_limits<Ty>::min()) {
-                    value = UTy(std::numeric_limits<Ty>::max()) + 1u;
+                if (val == (std::numeric_limits<Ty>::min)()) {
+                    value = UTy((std::numeric_limits<Ty>::max)()) + 1u;
                 } else {
                     value = -val;
                 }
@@ -164,8 +164,8 @@ namespace internal {
         if constexpr (std::is_signed<Ty>::value) {
             if (val < 0) {
                 // 防止溢出
-                if (val == std::numeric_limits<Ty>::min()) {
-                    value = UTy(std::numeric_limits<Ty>::max()) + 1;
+                if (val == (std::numeric_limits<Ty>::min)()) {
+                    value = UTy((std::numeric_limits<Ty>::max)()) + 1;
                 } else {
                     value = -val;
                 }
@@ -246,9 +246,9 @@ namespace internal {
 
         UTy M;
         if constexpr (std::is_unsigned<Ty>::value) {
-            M = std::numeric_limits<Ty>::max();
+            M = (std::numeric_limits<Ty>::max)();
         } else {
-            M = UTy(std::numeric_limits<Ty>::max()) + (sign ? 0 : 1);
+            M = UTy((std::numeric_limits<Ty>::max)()) + (sign ? 0 : 1);
         }
 
         auto M_sub = M / radix;
@@ -301,7 +301,7 @@ namespace internal {
                  * https://en.cppreference.com/w/cpp/language/implicit_conversion
                  */
                 if (result == M) {
-                    *out = std::numeric_limits<Ty>::min();
+                    *out = (std::numeric_limits<Ty>::min)();
                 } else {
                     *out = Ty(result) * (-1);
                 }

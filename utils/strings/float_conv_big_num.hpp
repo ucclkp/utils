@@ -1099,7 +1099,7 @@ namespace internal {
                 }
 
                 UTy result = 0;
-                auto tdig = std::min<size_t>(_se - _s, sd);
+                auto tdig = (std::min<size_t>)(_se - _s, sd);
                 for (size_t j = 0; j < tdig;) {
                     if (_s < _se) {
                         if (has_dp && *_s == Cy('.')) {

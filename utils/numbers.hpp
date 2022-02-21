@@ -29,16 +29,16 @@ namespace utl {
                 // int/uint -> uint
                 assert(
                     val >= 0 &&
-                    std::numeric_limits<R>::max() >= typename std::make_unsigned<Ty>::type(val));
+                    (std::numeric_limits<R>::max)() >= typename std::make_unsigned<Ty>::type(val));
             } else {
                 if constexpr (std::numeric_limits<Ty>::is_signed) {
                     // int -> int
                     assert(
-                        std::numeric_limits<R>::max() >= val &&
-                        std::numeric_limits<R>::min() <= val);
+                        (std::numeric_limits<R>::max)() >= val &&
+                        (std::numeric_limits<R>::min)() <= val);
                 } else {
                     // uint -> int
-                    assert(typename std::make_unsigned<R>::type(std::numeric_limits<R>::max()) >= val);
+                    assert(typename std::make_unsigned<R>::type((std::numeric_limits<R>::max)()) >= val);
                 }
             }
         } else if constexpr (
@@ -47,8 +47,8 @@ namespace utl {
         {
             // float -> int/uint
             assert(
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val);
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val);
 
             assert(std::abs(val - R(val)) <= 1);
         } else if constexpr (
@@ -57,15 +57,15 @@ namespace utl {
         {
             // int/uint -> float
             assert(
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val);
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val);
 
             assert(
                 val >= Ty(R(val)) ? val - Ty(R(val)) <= 1 : Ty(R(val)) - val <= 1);
         } else {
             assert(
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val);
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val);
         }
 
         return R(val);
@@ -85,16 +85,16 @@ namespace utl {
                 // int/uint -> uint
                 return (
                     val >= 0 &&
-                    std::numeric_limits<R>::max() >= std::make_unsigned<Ty>::type(val));
+                    (std::numeric_limits<R>::max)() >= std::make_unsigned<Ty>::type(val));
             } else {
                 if constexpr (std::numeric_limits<Ty>::is_signed) {
                     // int -> int
                     return (
-                        std::numeric_limits<R>::max() >= val &&
-                        std::numeric_limits<R>::min() <= val);
+                        (std::numeric_limits<R>::max)() >= val &&
+                        (std::numeric_limits<R>::min)() <= val);
                 } else {
                     // uint -> int
-                    return (std::make_unsigned<R>::type(std::numeric_limits<R>::max()) >= val);
+                    return (std::make_unsigned<R>::type((std::numeric_limits<R>::max)()) >= val);
                 }
             }
         } else if constexpr (
@@ -103,8 +103,8 @@ namespace utl {
         {
             // float -> int/uint
             return (
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val &&
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val &&
                 std::abs(val - R(val)) <= 1);
         } else if constexpr (
             !std::numeric_limits<R>::is_integer &&
@@ -112,13 +112,13 @@ namespace utl {
         {
             // int/uint -> float
             return (
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val &&
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val &&
                 (val >= Ty(R(val)) ? val - Ty(R(val)) <= 1 : Ty(R(val)) - val <= 1));
         } else {
             return (
-                std::numeric_limits<R>::max() >= val &&
-                std::numeric_limits<R>::min() <= val);
+                (std::numeric_limits<R>::max)() >= val &&
+                (std::numeric_limits<R>::min)() <= val);
         }
     }
 
@@ -129,7 +129,7 @@ namespace utl {
             return v1 == v2;
         } else {
             return std::fabs(v1 - v2) <= std::numeric_limits<Ty>::epsilon() * std::fabs(v1 + v2)
-                || std::fabs(v1 - v2) < std::numeric_limits<Ty>::min();
+                || std::fabs(v1 - v2) < (std::numeric_limits<Ty>::min)();
         }
     }
 

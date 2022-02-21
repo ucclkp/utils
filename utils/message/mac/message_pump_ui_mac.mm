@@ -41,7 +41,8 @@ namespace mac {
         CFRunLoopTimerContext timer_context = {0, this, nullptr, nullptr, nullptr};
         timer_ = CFRunLoopTimerCreate(
                                       kCFAllocatorDefault,
-                                      std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
+                                      (std::numeric_limits<double>::max)(),
+                                      (std::numeric_limits<double>::max)(),
                                       0, 0,
                                       &onTimerPerform, &timer_context);
         if (timer_) {
