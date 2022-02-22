@@ -12,5 +12,7 @@
     <ClCompile Include="file_unit_test.cpp" />
     <ClCompile Include="log_unit_test.cpp" />
     <ClCompile Include="cmd_line_unit_test.cpp" />
+    <ClCompile Include="memory_unit_test.cpp" />
+    <ClCompile Include="message_unit_test.cpp" />
   </ItemGroup>
 </Project>

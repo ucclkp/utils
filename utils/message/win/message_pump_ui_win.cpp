@@ -235,7 +235,8 @@ namespace win {
          * 在调整窗口位置或大小时，嵌套消息循环每获得特定的消息，就跑一下我们自己的消息队列。
          * 仅对特定的消息做处理，以防止卡顿。
          */
-        auto This = static_cast<MessagePumpUIWin*>(getCurrent());
+        auto mp_ptr = getCurrent();
+        auto This = static_cast<MessagePumpUIWin*>(mp_ptr.get());
         if (code == HC_ACTION) {
             if (This->is_in_sml_ || This->is_in_mml_) {
                 UINT remove_flag = UINT(wParam);
@@ -271,7 +272,8 @@ namespace win {
          * 在嵌套消息循环处理完消息，进入等待状态时，跑一下我们自己的消息队列。
          * 对于我们自己的消息队列中的延时消息，使用工作线程等待，超时后通知嵌套消息循环。
          */
-        auto This = static_cast<MessagePumpUIWin*>(getCurrent());
+        auto mp_ptr = getCurrent();
+        auto This = static_cast<MessagePumpUIWin*>(mp_ptr.get());
         if (code == HC_ACTION) {
             if (This->is_in_sml_ || This->is_in_mml_ || This->is_in_dml_) {
                 int64_t delay_ns;

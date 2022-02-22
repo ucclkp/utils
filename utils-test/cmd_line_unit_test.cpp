@@ -22,7 +22,7 @@ TEST_CASE(CmdlineUnitTest) {
             // *.exe tst.//\p
             char buf[] = "tst.//\\p";
             char* pbuf[]{ path, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -31,7 +31,7 @@ TEST_CASE(CmdlineUnitTest) {
             char sw[] = "-s123";
             char buf[] = "tst.//\\p";
             char* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -40,7 +40,7 @@ TEST_CASE(CmdlineUnitTest) {
             char sw[] = "--s123";
             char buf[] = "tst.//\\p";
             char* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s123"), u"tst.//\\p");
         }
@@ -50,7 +50,7 @@ TEST_CASE(CmdlineUnitTest) {
             char sw[] = "-s";
             char buf[] = "tst.//\\p";
             char* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"tst.//\\p");
         }
@@ -61,7 +61,7 @@ TEST_CASE(CmdlineUnitTest) {
             char buf[] = "test";
             char sw2[] = "-e";
             char* pbuf[]{ path, sw1, buf, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -75,7 +75,7 @@ TEST_CASE(CmdlineUnitTest) {
             char buf2[] = "test2";
             char sw2[] = "-e";
             char* pbuf[]{ path, sw1, buf, buf2, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -90,7 +90,7 @@ TEST_CASE(CmdlineUnitTest) {
             char sw2[] = "-e";
             char sw3[] = "-f";
             char* pbuf[]{ path, sw1, buf, buf2, sw2, sw3 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -114,7 +114,7 @@ TEST_CASE(CmdlineUnitTest) {
             // *.exe tst.//\p
             char16_t buf[] = u"tst.//\\p";
             char16_t* pbuf[]{ path, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -123,7 +123,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t sw[] = u"-s123";
             char16_t buf[] = u"tst.//\\p";
             char16_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -132,7 +132,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t sw[] = u"--s123";
             char16_t buf[] = u"tst.//\\p";
             char16_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s123"), u"tst.//\\p");
         }
@@ -142,7 +142,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t sw[] = u"-s";
             char16_t buf[] = u"tst.//\\p";
             char16_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"tst.//\\p");
         }
@@ -153,7 +153,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t buf[] = u"test";
             char16_t sw2[] = u"-e";
             char16_t* pbuf[]{ path, sw1, buf, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -167,7 +167,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t buf2[] = u"test2";
             char16_t sw2[] = u"-e";
             char16_t* pbuf[]{ path, sw1, buf, buf2, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -182,7 +182,7 @@ TEST_CASE(CmdlineUnitTest) {
             char16_t sw2[] = u"-e";
             char16_t sw3[] = u"-f";
             char16_t* pbuf[]{ path, sw1, buf, buf2, sw2, sw3 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -206,7 +206,7 @@ TEST_CASE(CmdlineUnitTest) {
             // *.exe tst.//\p
             wchar_t buf[] = L"tst.//\\p";
             wchar_t* pbuf[]{ path, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -215,7 +215,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t sw[] = L"-s123";
             wchar_t buf[] = L"tst.//\\p";
             wchar_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(CommandLine::getMap().empty());
         }
 
@@ -224,7 +224,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t sw[] = L"--s123";
             wchar_t buf[] = L"tst.//\\p";
             wchar_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s123"), u"tst.//\\p");
         }
@@ -234,7 +234,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t sw[] = L"-s";
             wchar_t buf[] = L"tst.//\\p";
             wchar_t* pbuf[]{ path, sw, buf };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"tst.//\\p");
         }
@@ -245,7 +245,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t buf[] = L"test";
             wchar_t sw2[] = L"-e";
             wchar_t* pbuf[]{ path, sw1, buf, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -259,7 +259,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t buf2[] = L"test2";
             wchar_t sw2[] = L"-e";
             wchar_t* pbuf[]{ path, sw1, buf, buf2, sw2 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));
@@ -274,7 +274,7 @@ TEST_CASE(CmdlineUnitTest) {
             wchar_t sw2[] = L"-e";
             wchar_t sw3[] = L"-f";
             wchar_t* pbuf[]{ path, sw1, buf, buf2, sw2, sw3 };
-            CommandLine::initialize(std::size(pbuf), pbuf);
+            CommandLine::initialize(int(std::size(pbuf)), pbuf);
             TEST_TRUE(!CommandLine::getMap().empty());
             TEST_E(CommandLine::getValue("s"), u"test");
             TEST_TRUE(CommandLine::hasName("e"));

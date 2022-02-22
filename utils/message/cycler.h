@@ -33,7 +33,7 @@ namespace utl {
         using nsp = TimeUtils::nsp;
 
         Cycler();
-        explicit Cycler(MessagePump* pump);
+        explicit Cycler(const std::weak_ptr<MessagePump>& pump);
         virtual ~Cycler();
 
         void setListener(CyclerListener* l);
@@ -64,7 +64,7 @@ namespace utl {
         static ns now();
 
     private:
-        MessagePump* pump_;
+        std::weak_ptr<MessagePump> pump_;
         CyclerListener* listener_;
     };
 

@@ -35,9 +35,8 @@ namespace utl {
         static void quitNow();
         static void destroy();
 
-        static MessagePump* getMain();
-        static MessagePump* getCurrent();
-        static MessageQueue* getCurrentQueue();
+        static std::shared_ptr<MessagePump> getMain();
+        static std::shared_ptr<MessagePump> getCurrent();
 
     protected:
         struct MPContext {
@@ -56,7 +55,7 @@ namespace utl {
 
     private:
         static std::mutex sync_;
-        static MessagePump* main_pump_;
+        static std::weak_ptr<MessagePump> main_pump_;
         static thread_local std::shared_ptr<MessagePump> cur_pump_;
     };
 

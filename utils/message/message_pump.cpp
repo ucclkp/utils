@@ -27,7 +27,7 @@
 namespace utl {
 
     std::mutex MessagePump::sync_;
-    MessagePump* MessagePump::main_pump_ = nullptr;
+    std::weak_ptr<MessagePump> MessagePump::main_pump_;
     thread_local std::shared_ptr<MessagePump> MessagePump::cur_pump_;
 
 
@@ -82,7 +82,7 @@ namespace utl {
 #endif
         cur_pump_ = pump;
 
-        if (main_pump_) {
+        if (main_pump_.lock()) {
             return;
         }
         main_pump_ = getCurrent();
@@ -90,7 +90,7 @@ namespace utl {
 
     // static
     void MessagePump::run() {
-        MessagePump* pump = getCurrent();
+        auto pump = getCurrent();
         if (!pump) {
             LOG(Log::ERR) << "Current thread dose not have a MessagePump!";
             return;
@@ -107,7 +107,7 @@ namespace utl {
 
     // static
     void MessagePump::quit() {
-        MessagePump* pump = getCurrent();
+        auto pump = getCurrent();
         if (!pump) {
             LOG(Log::ERR) << "Current thread dose not have a MessagePump!";
             return;
@@ -119,7 +119,7 @@ namespace utl {
 
     // static
     void MessagePump::quitNow() {
-        MessagePump* pump = getCurrent();
+        auto pump = getCurrent();
         if (!pump) {
             jour_e("MessagePump::create() wasn't called on this thread!");
             return;
@@ -135,20 +135,16 @@ namespace utl {
     }
 
     // static
-    MessagePump* MessagePump::getMain() {
-        std::lock_guard<std::mutex> lk(sync_);
-        return main_pump_;
+    std::shared_ptr<MessagePump> MessagePump::getMain() {
+        auto ptr = main_pump_.lock();
+        assert(ptr);
+        return ptr;
     }
 
     // static
-    MessagePump* MessagePump::getCurrent() {
+    std::shared_ptr<MessagePump> MessagePump::getCurrent() {
         assert(cur_pump_);
-        return cur_pump_.get();
-    }
-
-    // static
-    MessageQueue* MessagePump::getCurrentQueue() {
-        return getCurrent()->getQueue();
+        return cur_pump_;
     }
 
     bool MessagePump::cosume() {

@@ -21,13 +21,16 @@ namespace utl {
           listener_(nullptr) {
     }
 
-    Cycler::Cycler(MessagePump* pump)
+    Cycler::Cycler(const std::weak_ptr<MessagePump>& pump)
         : pump_(pump),
           listener_(nullptr) {
     }
 
     Cycler::~Cycler() {
-        pump_->getQueue()->remove(this);
+        auto ptr = pump_.lock();
+        if (ptr) {
+            ptr->getQueue()->remove(this);
+        }
     }
 
     void Cycler::setListener(CyclerListener* l) {
@@ -96,16 +99,26 @@ namespace utl {
 
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
-        pump_->getQueue()->enqueue(*msg);
-        pump_->wakeup();
+        auto ptr = pump_.lock();
+        if (ptr) {
+            ptr->getQueue()->enqueue(*msg);
+            ptr->wakeup();
+        }
     }
 
     bool Cycler::hasMessages(int id) {
-        return pump_->getQueue()->contains(this, id);
+        auto ptr = pump_.lock();
+        if (ptr) {
+            return ptr->getQueue()->contains(this, id);
+        }
+        return false;
     }
 
     void Cycler::removeMessages(int id) {
-        pump_->getQueue()->remove(this, id);
+        auto ptr = pump_.lock();
+        if (ptr) {
+            ptr->getQueue()->remove(this, id);
+        }
     }
 
     void Cycler::dispatchMessage(const Message& msg) {
