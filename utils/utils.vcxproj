@@ -216,6 +216,9 @@
     <ClInclude Include="event_handler.hpp" />
     <ClInclude Include="executable.h" />
     <ClInclude Include="files\file_utils.h" />
+    <ClInclude Include="math\algebra\geocal.hpp" />
+    <ClInclude Include="math\algebra\point.hpp" />
+    <ClInclude Include="math\algebra\special_matrix.hpp" />
     <ClInclude Include="memory\aligments.hpp" />
     <ClInclude Include="memory\win\com_pptr.hpp" />
     <ClInclude Include="memory\win\com_ptr.hpp" />

@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef MATH_ALGEBRA_OPTIMIZATION_HPP_
-#define MATH_ALGEBRA_OPTIMIZATION_HPP_
+#ifndef UTILS_MATH_ALGEBRA_OPTIMIZATION_HPP_
+#define UTILS_MATH_ALGEBRA_OPTIMIZATION_HPP_
 
 #include <cmath>
 
@@ -130,4 +130,4 @@ namespace math {
 }
 }
 
-#endif  // MATH_ALGEBRA_OPTIMIZATION_HPP_
+#endif  // UTILS_MATH_ALGEBRA_OPTIMIZATION_HPP_

@@ -62,6 +62,9 @@
 		67311F7127933AA900DA0425 /* assuming.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67311F6427933AA900DA0425 /* assuming.hpp */; };
 		67311F7927933AA900DA0425 /* endian_internal.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67311F6C27933AA900DA0425 /* endian_internal.hpp */; };
 		67311F7B27933AD100DA0425 /* test_log.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67311F7A27933AD100DA0425 /* test_log.hpp */; };
+		676EBC4627D4BB0D00A42799 /* point.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 676EBC4327D4BB0D00A42799 /* point.hpp */; };
+		676EBC4727D4BB0D00A42799 /* geocal.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 676EBC4427D4BB0D00A42799 /* geocal.hpp */; };
+		676EBC4827D4BB0D00A42799 /* special_matrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 676EBC4527D4BB0D00A42799 /* special_matrix.hpp */; };
 		677392652607575E00D03228 /* message_pump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 677392632607575E00D03228 /* message_pump.cpp */; };
 		677392662607575E00D03228 /* message_pump.h in Headers */ = {isa = PBXBuildFile; fileRef = 677392642607575E00D03228 /* message_pump.h */; };
 		6783F41C24C4878300056DA1 /* command_line_mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6783F41924C4878300056DA1 /* command_line_mac.mm */; };
@@ -154,6 +157,9 @@
 		67311F6427933AA900DA0425 /* assuming.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = assuming.hpp; sourceTree = "<group>"; };
 		67311F6C27933AA900DA0425 /* endian_internal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = endian_internal.hpp; sourceTree = "<group>"; };
 		67311F7A27933AD100DA0425 /* test_log.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = test_log.hpp; sourceTree = "<group>"; };
+		676EBC4327D4BB0D00A42799 /* point.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = point.hpp; sourceTree = "<group>"; };
+		676EBC4427D4BB0D00A42799 /* geocal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = geocal.hpp; sourceTree = "<group>"; };
+		676EBC4527D4BB0D00A42799 /* special_matrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = special_matrix.hpp; sourceTree = "<group>"; };
 		677392632607575E00D03228 /* message_pump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = message_pump.cpp; sourceTree = "<group>"; };
 		677392642607575E00D03228 /* message_pump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_pump.h; sourceTree = "<group>"; };
 		6783F41924C4878300056DA1 /* command_line_mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = command_line_mac.mm; sourceTree = "<group>"; };
@@ -298,8 +304,11 @@
 			children = (
 				6724E6FB24A8F2EB003FA2B2 /* dynamic_matrix.hpp */,
 				6724E6FD24A8F2EB003FA2B2 /* dynamic_optimization.hpp */,
+				676EBC4427D4BB0D00A42799 /* geocal.hpp */,
 				6724E6FE24A8F2EB003FA2B2 /* matrix.hpp */,
 				6724E6FC24A8F2EB003FA2B2 /* optimization.hpp */,
+				676EBC4327D4BB0D00A42799 /* point.hpp */,
+				676EBC4527D4BB0D00A42799 /* special_matrix.hpp */,
 			);
 			path = algebra;
 			sourceTree = "<group>";
@@ -412,6 +421,7 @@
 				6796F0F82711B2A2009D0E59 /* multi_callbacks.hpp in Headers */,
 				671A1DE027B7E88C007E823D /* usformat_any_internal.hpp in Headers */,
 				67311F7127933AA900DA0425 /* assuming.hpp in Headers */,
+				676EBC4627D4BB0D00A42799 /* point.hpp in Headers */,
 				67B85C0124A609B9005C89A9 /* log.h in Headers */,
 				6707D0962766361C00B19D0C /* define_utils.hpp in Headers */,
 				6724E6F124A8F225003FA2B2 /* xml_pedometer.h in Headers */,
@@ -422,6 +432,7 @@
 				671A1DE327B7E88C007E823D /* string_utils_types.hpp in Headers */,
 				6724E6F524A8F225003FA2B2 /* xml_parser.h in Headers */,
 				671A1DE927B7E88C007E823D /* ustring_print_internal.hpp in Headers */,
+				676EBC4727D4BB0D00A42799 /* geocal.hpp in Headers */,
 				6724E6F824A8F225003FA2B2 /* xml_writer.h in Headers */,
 				6724E70624A8F318003FA2B2 /* file_utils.h in Headers */,
 				6724E70024A8F2EB003FA2B2 /* optimization.hpp in Headers */,
@@ -456,6 +467,7 @@
 				671A1DE227B7E88C007E823D /* float_conv_big_num.hpp in Headers */,
 				67B85BF024A609B9005C89A9 /* command_line.h in Headers */,
 				67B95E1824AA3CF9005DD0AD /* message_pump_mac.h in Headers */,
+				676EBC4827D4BB0D00A42799 /* special_matrix.hpp in Headers */,
 				671A1DDC27B7E88C007E823D /* usprintf_internal.hpp in Headers */,
 				6724E6E424A8F201003FA2B2 /* json_parser.h in Headers */,
 				672DD03C26EE363C00E49039 /* message_pump_ui_mac.h in Headers */,

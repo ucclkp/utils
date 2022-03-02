@@ -4,8 +4,8 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_
-#define MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_
+#ifndef UTILS_MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_
+#define UTILS_MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_
 
 #include "utils/math/algebra/dynamic_matrix.hpp"
 
@@ -27,8 +27,8 @@ namespace math {
             const DMatrixT<Ty>& T,
             DMatrixT<Ty>* out)
         {
-            auto N = x.row;
-            auto M = out->row;
+            auto N = x.row_sz;
+            auto M = out->row_sz;
 
             DMatrixT<double> X(N, M);
             for (decltype(N) i = 0; i < N; ++i) {
@@ -70,8 +70,8 @@ namespace math {
             const DMatrixT<Ty>& T,
             Ty lambda, DMatrixT<Ty>* out)
         {
-            auto N = x.row;
-            auto M = out->row;
+            auto N = x.row_sz;
+            auto M = out->row_sz;
 
             DMatrixT<double> X(N, M);
             for (decltype(N) i = 0; i < N; ++i) {
@@ -136,11 +136,11 @@ namespace math {
             Ty lambda,
             DMatrixT<Ty>* out)
         {
-            *out = (1 / Ty(W.row)) * (X.T()*X*W + lambda * DMatrixT<Ty>::I(W.row)*W - X.T()*T);
+            *out = (1 / Ty(W.row_sz)) * (X.T()*X*W + lambda * DMatrixT<Ty>::I(W.row_sz)*W - X.T()*T);
         }
     };
 
 }
 }
 
-#endif  // MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_
+#endif  // UTILS_MATH_ALGEBRA_DYNAMIC_OPTIMIZATION_HPP_

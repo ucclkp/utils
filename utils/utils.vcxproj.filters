@@ -273,6 +273,15 @@
     <ClInclude Include="sync\win\critical_section.hpp">
       <Filter>sync\win</Filter>
     </ClInclude>
+    <ClInclude Include="math\algebra\point.hpp">
+      <Filter>math\algebra</Filter>
+    </ClInclude>
+    <ClInclude Include="math\algebra\special_matrix.hpp">
+      <Filter>math\algebra</Filter>
+    </ClInclude>
+    <ClInclude Include="math\algebra\geocal.hpp">
+      <Filter>math\algebra</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">
