@@ -1,5 +1,5 @@
 // Copyright (c) 2016 ucclkp <ucclkp@gmail.com>.
-// This file is part of ukive project.
+// This file is part of utils project.
 //
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
@@ -7,6 +7,7 @@
 #ifndef UTILS_MEMORY_WIN_COMPTR_HPP_
 #define UTILS_MEMORY_WIN_COMPTR_HPP_
 
+#include <cassert>
 #include <cstddef>
 
 
@@ -65,6 +66,7 @@ namespace win {
         }
 
         Ty* operator->() const {
+            assert(ptr_);
             return ptr_;
         }
 

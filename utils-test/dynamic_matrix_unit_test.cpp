@@ -386,12 +386,43 @@ TEST_CASE(DMatrixUnitTest) {
 
         TEST_E(m.row(1), DMatrix(1, 2, {-7, -9}));
         TEST_E(m.col(1), DMatrix(2, 1, {-5, -9}));
+        m.minus();
+
+        m.add_row(1, 1);
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 8, 10 }));
+        m.sub_row(1, 1);
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+        m.add_row(1, DMatrix(1, 2, { 1, 2 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 8, 11 }));
+        m.sub_row(1, DMatrix(1, 2, { 1, 2 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
 
         m.mul_row(1, 2);
-        TEST_E(m, DMatrix(2, 2, { -1, -5, -14, -18 }));
-        m = { -1, -5, -7, -9 };
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 14, 18 }));
+        m.div_row(1, 2);
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+        m.mul_row(1, DMatrix(1, 2, { 2, 3 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 14, 27 }));
+        m.div_row(1, DMatrix(1, 2, { 2, 3 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+
+        m.add_col(1, 1);
+        TEST_E(m, DMatrix(2, 2, { 1, 6, 7, 10 }));
+        m.sub_col(1, 1);
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+        m.add_col(1, DMatrix(2, 1, { 1, 2 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 6, 7, 11 }));
+        m.sub_col(1, DMatrix(2, 1, { 1, 2 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+
         m.mul_col(1, 2);
-        TEST_E(m, DMatrix(2, 2, { -1, -10, -7, -18 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 10, 7, 18 }));
+        m.div_col(1, 2);
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
+        m.mul_col(1, DMatrix(2, 1, { 2, 3 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 10, 7, 27 }));
+        m.div_col(1, DMatrix(2, 1, { 2, 3 }));
+        TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
 
         m.zero();
         TEST_E(m, DMatrix(2, 2, { 0, 0, 0, 0 }));

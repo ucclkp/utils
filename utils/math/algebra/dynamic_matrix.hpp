@@ -335,6 +335,38 @@ namespace internal {
             return result;
         }
 
+        DMatrixT& add_row(size_t index, Ty val) {
+            assert(index < row_sz);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] += val;
+            }
+            return *this;
+        }
+
+        DMatrixT& add_row(size_t index, const DMatrixT& m) {
+            assert(index < row_sz && m.col_sz == col_sz && m.row_sz == 1);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] += m(i);
+            }
+            return *this;
+        }
+
+        DMatrixT& sub_row(size_t index, Ty val) {
+            assert(index < row_sz);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] -= val;
+            }
+            return *this;
+        }
+
+        DMatrixT& sub_row(size_t index, const DMatrixT& m) {
+            assert(index < row_sz && m.col_sz == col_sz && m.row_sz == 1);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] -= m(i);
+            }
+            return *this;
+        }
+
         DMatrixT& mul_row(size_t index, Ty val) {
             assert(index < row_sz);
             for (size_t i = 0; i < col_sz; ++i) {
@@ -343,10 +375,90 @@ namespace internal {
             return *this;
         }
 
+        DMatrixT& mul_row(size_t index, const DMatrixT& m) {
+            assert(index < row_sz && m.col_sz == col_sz && m.row_sz == 1);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] *= m(i);
+            }
+            return *this;
+        }
+
+        DMatrixT& div_row(size_t index, Ty val) {
+            assert(index < row_sz);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] /= val;
+            }
+            return *this;
+        }
+
+        DMatrixT& div_row(size_t index, const DMatrixT& m) {
+            assert(index < row_sz && m.col_sz == col_sz && m.row_sz == 1);
+            for (size_t i = 0; i < col_sz; ++i) {
+                data[index * col_sz + i] /= m(i);
+            }
+            return *this;
+        }
+
+        DMatrixT& add_col(size_t index, Ty val) {
+            assert(index < col_sz);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] += val;
+            }
+            return *this;
+        }
+
+        DMatrixT& add_col(size_t index, const DMatrixT& m) {
+            assert(index < col_sz && m.row_sz == row_sz && m.col_sz == 1);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] += m(i);
+            }
+            return *this;
+        }
+
+        DMatrixT& sub_col(size_t index, Ty val) {
+            assert(index < col_sz);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] -= val;
+            }
+            return *this;
+        }
+
+        DMatrixT& sub_col(size_t index, const DMatrixT& m) {
+            assert(index < col_sz && m.row_sz == row_sz && m.col_sz == 1);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] -= m(i);
+            }
+            return *this;
+        }
+
         DMatrixT& mul_col(size_t index, Ty val) {
             assert(index < col_sz);
             for (size_t i = 0; i < row_sz; ++i) {
                 data[i * col_sz + index] *= val;
+            }
+            return *this;
+        }
+
+        DMatrixT& mul_col(size_t index, const DMatrixT& m) {
+            assert(index < col_sz && m.row_sz == row_sz && m.col_sz == 1);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] *= m(i);
+            }
+            return *this;
+        }
+
+        DMatrixT& div_col(size_t index, Ty val) {
+            assert(index < col_sz);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] /= val;
+            }
+            return *this;
+        }
+
+        DMatrixT& div_col(size_t index, const DMatrixT& m) {
+            assert(index < col_sz && m.row_sz == row_sz && m.col_sz == 1);
+            for (size_t i = 0; i < row_sz; ++i) {
+                data[i * col_sz + index] /= m(i);
             }
             return *this;
         }

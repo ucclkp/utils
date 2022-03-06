@@ -243,6 +243,82 @@ namespace internal {
             return out;
         }
 
+        MatrixT& add_row(size_t index, Ty val) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] += val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_row(Ty val) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& add_row(size_t index, const MatrixT<Ty, 1, Col>& m) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] += m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_row(const MatrixT<Ty, 1, Col>& m) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] += m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& sub_row(size_t index, Ty val) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] -= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_row(Ty val) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_row(size_t index, const MatrixT<Ty, 1, Col>& m) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] -= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_row(const MatrixT<Ty, 1, Col>& m) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] -= m(i);
+            }
+            return *this;
+        }
+
         MatrixT& mul_row(size_t index, Ty val) {
             assert(index < Row);
             for (size_t i = 0; i < Col; ++i) {
@@ -262,6 +338,139 @@ namespace internal {
             return *this;
         }
 
+        MatrixT& mul_row(size_t index, const MatrixT<Ty, 1, Col>& m) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] *= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& mul_row(const MatrixT<Ty, 1, Col>& m) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(size_t index, Ty val) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] /= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_row(Ty val) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(size_t index, const MatrixT<Ty, 1, Col>& m) {
+            assert(index < Row);
+            for (size_t i = 0; i < Col; ++i) {
+                data[index * Col + i] /= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_row(const MatrixT<Ty, 1, Col>& m) {
+            if constexpr (Idx >= Row) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Col; ++i) {
+                data[Idx * Col + i] /= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& add_col(size_t index, Ty val) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] += val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_col(Ty val) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& add_col(size_t index, const MatrixT<Ty, Row, 1>& m) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] += m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_col(const MatrixT<Ty, Row, 1>& m) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] += m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& sub_col(size_t index, Ty val) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] -= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_col(Ty val) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_col(size_t index, const MatrixT<Ty, Row, 1>& m) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] -= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_col(const MatrixT<Ty, Row, 1>& m) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] -= m(i);
+            }
+            return *this;
+        }
+
         MatrixT& mul_col(size_t index, Ty val) {
             assert(index < Col);
             for (size_t i = 0; i < Row; ++i) {
@@ -277,6 +486,63 @@ namespace internal {
             }
             for (size_t i = 0; i < Row; ++i) {
                 data[i * Col + Idx] *= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_col(size_t index, const MatrixT<Ty, Row, 1>& m) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] *= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& mul_col(const MatrixT<Ty, Row, 1>& m) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(size_t index, Ty val) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] /= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_col(Ty val) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(size_t index, const MatrixT<Ty, Row, 1>& m) {
+            assert(index < Col);
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + index] /= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_col(const MatrixT<Ty, Row, 1>& m) {
+            if constexpr (Idx >= Col) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Row; ++i) {
+                data[i * Col + Idx] /= m(i);
             }
             return *this;
         }
@@ -726,6 +992,82 @@ namespace internal {
             return out;
         }
 
+        MatrixT& add_row(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] += val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_row(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& add_row(size_t index, const MatrixT<Ty, 1, Num>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] += m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_row(const MatrixT<Ty, 1, Num>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] += m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& sub_row(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] -= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_row(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_row(size_t index, const MatrixT<Ty, 1, Num>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] -= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_row(const MatrixT<Ty, 1, Num>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] -= m(i);
+            }
+            return *this;
+        }
+
         MatrixT& mul_row(size_t index, Ty val) {
             assert(index < Num);
             for (size_t i = 0; i < Num; ++i) {
@@ -745,6 +1087,139 @@ namespace internal {
             return *this;
         }
 
+        MatrixT& mul_row(size_t index, const MatrixT<Ty, 1, Num>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] *= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& mul_row(const MatrixT<Ty, 1, Num>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] /= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_row(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(size_t index, const MatrixT<Ty, 1, Num>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[index * Num + i] /= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_row(const MatrixT<Ty, 1, Num>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[Idx * Num + i] /= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& add_col(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] += val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_col(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& add_col(size_t index, const MatrixT<Ty, Num, 1>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] += m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& add_col(const MatrixT<Ty, Num, 1>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] += m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& sub_col(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] -= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_col(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_col(size_t index, const MatrixT<Ty, Num, 1>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] -= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& sub_col(const MatrixT<Ty, Num, 1>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] -= m(i);
+            }
+            return *this;
+        }
+
         MatrixT& mul_col(size_t index, Ty val) {
             assert(index < Num);
             for (size_t i = 0; i < Num; ++i) {
@@ -760,6 +1235,63 @@ namespace internal {
             }
             for (size_t i = 0; i < Num; ++i) {
                 data[i * Num + Idx] *= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_col(size_t index, const MatrixT<Ty, Num, 1>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] *= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& mul_col(const MatrixT<Ty, Num, 1>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(size_t index, Ty val) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] /= val;
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_col(Ty val) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(size_t index, const MatrixT<Ty, Num, 1>& m) {
+            assert(index < Num);
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + index] /= m(i);
+            }
+            return *this;
+        }
+
+        template <size_t Idx>
+        MatrixT& div_col(const MatrixT<Ty, Num, 1>& m) {
+            if constexpr (Idx >= Num) {
+                static_assert(sat_stub<Ty>::value, "Invalid index!");
+            }
+            for (size_t i = 0; i < Num; ++i) {
+                data[i * Num + Idx] /= m(i);
             }
             return *this;
         }
@@ -1279,6 +1811,48 @@ namespace internal {
             return out;
         }
 
+        MatrixT& add_col(Ty val) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_col(Ty val) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_col(Ty val) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] *= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_col(const MatrixT<Ty, Row, 1>& m) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(Ty val) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_col(const MatrixT<Ty, Row, 1>& m) {
+            for (size_t i = 0; i < Row; ++i) {
+                data[i] /= m(i);
+            }
+            return *this;
+        }
+
         MatrixT& set(size_t index, Ty val) {
             assert(index < Row);
             data[index] = val;
@@ -1645,6 +2219,48 @@ namespace internal {
                 out.data[c] = rowMulCol(*this, 0, rhs, c);
             }
             return out;
+        }
+
+        MatrixT& add_row(Ty val) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] += val;
+            }
+            return *this;
+        }
+
+        MatrixT& sub_row(Ty val) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] -= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_row(Ty val) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] *= val;
+            }
+            return *this;
+        }
+
+        MatrixT& mul_row(const MatrixT<Ty, 1, Col>& m) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] *= m(i);
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(Ty val) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] /= val;
+            }
+            return *this;
+        }
+
+        MatrixT& div_row(const MatrixT<Ty, 1, Col>& m) {
+            for (size_t i = 0; i < Col; ++i) {
+                data[i] /= m(i);
+            }
+            return *this;
         }
 
         MatrixT& set(size_t index, Ty val) {

@@ -173,6 +173,20 @@ TEST_CASE(MatrixUnitTest) {
         m.minus();
         TEST_E(m, Matrix1x3({ -2, -1, -3 }));
         TEST_E(-m, Matrix1x3({ 2, 1, 3 }));
+        m.minus();
+
+        m.add_row(1);
+        TEST_E(m, Matrix1x3({ 3, 2, 4 }));
+        m.sub_row(1);
+        TEST_E(m, Matrix1x3({ 2, 1, 3 }));
+        m.mul_row(2);
+        TEST_E(m, Matrix1x3({ 4, 2, 6 }));
+        m.mul_row({ 1, 2, 3 });
+        TEST_E(m, Matrix1x3({ 4, 4, 18 }));
+        m.div_row(2);
+        TEST_E(m, Matrix1x3({ 2, 2, 9 }));
+        m.div_row({ 2, 2, 9 });
+        TEST_E(m, Matrix1x3({ 1, 1, 1 }));
 
         m.zero();
         TEST_E(m, Matrix1x3({ 0, 0, 0 }));
@@ -298,6 +312,20 @@ TEST_CASE(MatrixUnitTest) {
         m.minus();
         TEST_E(m, Matrix3x1({ -2, -1, -3 }));
         TEST_E(-m, Matrix3x1({ 2, 1, 3 }));
+        m.minus();
+
+        m.add_col(1);
+        TEST_E(m, Matrix3x1({ 3, 2, 4 }));
+        m.sub_col(1);
+        TEST_E(m, Matrix3x1({ 2, 1, 3 }));
+        m.mul_col(2);
+        TEST_E(m, Matrix3x1({ 4, 2, 6 }));
+        m.mul_col({ 1, 2, 3 });
+        TEST_E(m, Matrix3x1({ 4, 4, 18 }));
+        m.div_col(2);
+        TEST_E(m, Matrix3x1({ 2, 2, 9 }));
+        m.div_col({ 2, 2, 9 });
+        TEST_E(m, Matrix3x1({ 1, 1, 1 }));
 
         m.zero();
         TEST_E(m, Matrix3x1({ 0, 0, 0 }));
@@ -437,15 +465,79 @@ TEST_CASE(MatrixUnitTest) {
         TEST_E(m.row<1>(), (MatrixT<double, 1, 2>{-7, -9}));
         TEST_E(m.col(1), (MatrixT<double, 2, 1>{-5, -9}));
         TEST_E(m.col<1>(), (MatrixT<double, 2, 1>{-5, -9}));
+        m.minus();
+
+        m.add_row(1, 1);
+        TEST_E(m, Matrix2x2({ 1, 5, 8, 10 }));
+        m.sub_row(1, 1);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.add_row(1, { 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 8, 11 }));
+        m.sub_row(1, { 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
+        m.add_row<1>(1);
+        TEST_E(m, Matrix2x2({ 1, 5, 8, 10 }));
+        m.sub_row<1>(1);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.add_row<1>({ 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 8, 11 }));
+        m.sub_row<1>({ 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
 
         m.mul_row(1, 2);
-        TEST_E(m, Matrix2x2({ -1, -5, -14, -18 }));
-        m.mul_row<1>(0.5);
-        TEST_E(m, Matrix2x2({ -1, -5, -7, -9 }));
+        TEST_E(m, Matrix2x2({ 1, 5, 14, 18 }));
+        m.div_row(1, 2);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.mul_row(1, { 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 14, 27 }));
+        m.div_row(1, { 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
+        m.mul_row<1>(2);
+        TEST_E(m, Matrix2x2({ 1, 5, 14, 18 }));
+        m.div_row<1>(2);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.mul_row<1>({ 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 14, 27 }));
+        m.div_row<1>({ 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
+        m.add_col(1, 1);
+        TEST_E(m, Matrix2x2({ 1, 6, 7, 10 }));
+        m.sub_col(1, 1);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.add_col(1, { 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 6, 7, 11 }));
+        m.sub_col(1, { 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
+        m.add_col<1>(1);
+        TEST_E(m, Matrix2x2({ 1, 6, 7, 10 }));
+        m.sub_col<1>(1);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.add_col<1>({ 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 6, 7, 11 }));
+        m.sub_col<1>({ 1, 2 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
         m.mul_col(1, 2);
-        TEST_E(m, Matrix2x2({ -1, -10, -7, -18 }));
-        m.mul_col<1>(0.5);
-        TEST_E(m, Matrix2x2({ -1, -5, -7, -9 }));
+        TEST_E(m, Matrix2x2({ 1, 10, 7, 18 }));
+        m.div_col(1, 2);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.mul_col(1, { 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 10, 7, 27 }));
+        m.div_col(1, { 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+
+        m.mul_col<1>(2);
+        TEST_E(m, Matrix2x2({ 1, 10, 7, 18 }));
+        m.div_col<1>(2);
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
+        m.mul_col<1>({ 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 10, 7, 27 }));
+        m.div_col<1>({ 2, 3 });
+        TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
 
         m.zero();
         TEST_E(m, Matrix2x2({ 0, 0, 0, 0 }));
@@ -744,30 +836,206 @@ TEST_CASE(MatrixUnitTest) {
         TEST_E(m.row<1>(), (MatrixT<double, 1, 5>{-1, -1, -1, -10, -7}));
         TEST_E(m.col(1), (MatrixT<double, 3, 1>{-3, -1, -9}));
         TEST_E(m.col<1>(), (MatrixT<double, 3, 1>{-3, -1, -9}));
+        m.minus();
+
+        m.add_row(1, 1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            2, 2, 2, 11, 8,
+            4, 9, 8,  5, 1,
+        }));
+        m.sub_row(1, 1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.add_row(1, { 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            2, 3, 4, 14, 12,
+            4, 9, 8,  5, 1,
+        }));
+        m.sub_row(1, { 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
+        m.add_row<1>(1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            2, 2, 2, 11, 8,
+            4, 9, 8,  5, 1,
+        }));
+        m.sub_row<1>(1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.add_row<1>({ 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            2, 3, 4, 14, 12,
+            4, 9, 8,  5, 1,
+        }));
+        m.sub_row<1>({ 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
 
         m.mul_row(1, 2);
         TEST_E(m, Matrix3x5({
-            -2, -3, -1,  -4, -5,
-            -2, -2, -2, -20, -14,
-            -4, -9, -8,  -5, -1,
+            2, 3, 1,  4, 5,
+            2, 2, 2, 20, 14,
+            4, 9, 8,  5, 1,
         }));
-        m.mul_row<1>(0.5);
+        m.div_row(1, 2);
         TEST_E(m, Matrix3x5({
-            -2, -3, -1,  -4, -5,
-            -1, -1, -1, -10, -7,
-            -4, -9, -8,  -5, -1,
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
         }));
+        m.mul_row(1, { 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 2, 3, 40, 35,
+            4, 9, 8,  5, 1,
+        }));
+        m.div_row(1, { 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
+        m.mul_row<1>(2);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            2, 2, 2, 20, 14,
+            4, 9, 8,  5, 1,
+        }));
+        m.div_row<1>(2);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.mul_row<1>({ 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 2, 3, 40, 35,
+            4, 9, 8,  5, 1,
+        }));
+        m.div_row<1>({ 1, 2, 3, 4, 5 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
+        m.add_col(1, 1);
+        TEST_E(m, Matrix3x5({
+            2, 4,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 10, 8,  5, 1,
+        }));
+        m.sub_col(1, 1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.add_col(1, { 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 4,  1,  4, 5,
+            1, 3,  1, 10, 7,
+            4, 12, 8,  5, 1,
+        }));
+        m.sub_col(1, { 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
+        m.add_col<1>(1);
+        TEST_E(m, Matrix3x5({
+            2, 4,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 10, 8,  5, 1,
+        }));
+        m.sub_col<1>(1);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.add_col<1>({ 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 4,  1,  4, 5,
+            1, 3,  1, 10, 7,
+            4, 12, 8,  5, 1,
+        }));
+        m.sub_col<1>({ 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
         m.mul_col(1, 2);
         TEST_E(m, Matrix3x5({
-            -2, -6, -1,  -4, -5,
-            -1, -2, -1, -10, -7,
-            -4, -18, -8,  -5, -1,
+            2, 6,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 18, 8,  5, 1,
         }));
-        m.mul_col<1>(0.5);
+        m.div_col(1, 2);
         TEST_E(m, Matrix3x5({
-            -2, -3, -1,  -4, -5,
-            -1, -1, -1, -10, -7,
-            -4, -9, -8,  -5, -1,
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.mul_col(1, { 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 27, 8,  5, 1,
+        }));
+        m.div_col(1, { 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+
+        m.mul_col<1>(2);
+        TEST_E(m, Matrix3x5({
+            2, 6,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 18, 8,  5, 1,
+        }));
+        m.div_col<1>(2);
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
+        }));
+        m.mul_col<1>({ 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3,  1,  4, 5,
+            1, 2,  1, 10, 7,
+            4, 27, 8,  5, 1,
+        }));
+        m.div_col<1>({ 1, 2, 3 });
+        TEST_E(m, Matrix3x5({
+            2, 3, 1,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 9, 8,  5, 1,
         }));
 
         m.zero();
