@@ -130,6 +130,7 @@ namespace utl {
         static bool isDebuggerPresent();
 
         static bool openConsole();
+        static bool setUTF8Console();
         static bool closeConsole();
         static bool writeConsole(const std::string_view& msg);
         static void modifyTarget(unsigned int* target);

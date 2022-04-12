@@ -70,7 +70,13 @@ namespace utl {
         if (console_output_handle_) {
             enableVT(console_output_handle_, true);
         }
+
         return true;
+    }
+
+    // static
+    bool Log::setUTF8Console() {
+        return ::SetConsoleOutputCP(CP_UTF8) != 0;
     }
 
     // static
@@ -93,8 +99,13 @@ namespace utl {
             return false;
         }
 
+        auto u16_msg = UTF8ToUTF16(msg);
+        std::wstring w_msg(u16_msg.begin(), u16_msg.end());
+
         BOOL ret = ::WriteConsoleW(
-            console_output_handle_, msg.data(), num_cast<DWORD>(msg.length()), nullptr, nullptr);
+            console_output_handle_,
+            w_msg.data(), num_cast<DWORD>(w_msg.length()),
+            nullptr, nullptr);
         return ret != 0;
     }
 

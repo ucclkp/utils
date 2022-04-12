@@ -5,6 +5,7 @@
 // found in the LICENSE file.
 
 #include "utils/log.h"
+#include "utils/strings/string_utils_types.hpp"
 #include "utils/unit_test/test_collector.h"
 
 
@@ -19,6 +20,8 @@ TEST_CASE(LogUnitTest) {
         jour_i("123: %d");
         jour_i("123: %d", 123);
         ubassert(true);
+
+        jour_i(u8p("鷿"));
 
         //jour_e("ERROR: %d not found!\n", 233);
 

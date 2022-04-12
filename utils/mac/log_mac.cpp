@@ -60,6 +60,11 @@ namespace utl {
     }
 
     // static
+    bool Log::setUTF8Console() {
+        return true;
+    }
+
+    // static
     bool Log::closeConsole() {
         if (!is_alloc_console_) {
             return true;

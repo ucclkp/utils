@@ -41,6 +41,10 @@ namespace utl {
         }
         if (log_params_.target & Log::OutputTarget::CONSOLE) {
             Log::openConsole();
+            Log::setUTF8Console();
+        }
+        if (log_params_.target & Log::OutputTarget::STANDARD) {
+            Log::setUTF8Console();
         }
 
         Log::setVTEnabled(params.enable_vt);
