@@ -13,6 +13,7 @@
 #include "utils/multi_callbacks.hpp"
 
 #define WM_WAKELOOP  (WM_APP + 1)
+#define WM_PUSHLOOP  (WM_APP + 2)
 
 
 namespace utl {
@@ -37,7 +38,16 @@ namespace win {
         }
 
         /**
-         * 在调用 GetMessage / PeekMessage 耗尽系统队列中的消息时收到通知。
+         * 在消息发送到窗口过程前收到通知。
+         * 用于监听应用程序切换到前台/后台的消息。
+         */
+        cwp_hook_ = ::SetWindowsHookExW(WH_CALLWNDPROC, ModalLoopCWPHookProc, nullptr, ui_thread_id_);
+        if (!cwp_hook_) {
+            LOG(Log::ERR) << "Cannot create hook: " << ::GetLastError();
+        }
+
+        /**
+         * 在调用 GetMessage / PeekMessage 耗尽系统队列中的消息，且程序位于前台时收到通知。
          * 消息泵初始化时即安装钩子，但只在 setInSizeModalLoop 或 setInMoveModalLoop 设置
          * 为 true 时做事。
          */
@@ -51,7 +61,7 @@ namespace win {
 
     MessagePumpUIWin::~MessagePumpUIWin() {
         if (waiting_thread_) {
-            wt_finished_ = true;
+            wt_finished_.store(true, std::memory_order_relaxed);
             ::SetEvent(waiting_event_);
             ::WaitForSingleObject(waiting_thread_, INFINITE);
             ::CloseHandle(waiting_thread_);
@@ -64,6 +74,9 @@ namespace win {
         }
         if (msg_hook_) {
             ::UnhookWindowsHookEx(msg_hook_);
+        }
+        if (cwp_hook_) {
+            ::UnhookWindowsHookEx(cwp_hook_);
         }
         if (idle_hook_) {
             ::UnhookWindowsHookEx(idle_hook_);
@@ -87,7 +100,7 @@ namespace win {
     }
 
     void MessagePumpUIWin::wakeup() {
-        if (is_in_mml_ || is_in_sml_ || is_in_dml_) {
+        if (isInAnyModalLoop()) {
             ::PostThreadMessageW(ui_thread_id_, WM_WAKELOOP, 0, 0);
             return;
         }
@@ -128,23 +141,33 @@ namespace win {
     }
 
     void MessagePumpUIWin::setInSizeModalLoop(bool in_sml) {
-        is_in_sml_ = in_sml;
+        is_in_sml_.store(in_sml, std::memory_order_relaxed);
     }
 
     void MessagePumpUIWin::setInMoveModalLoop(bool in_mml) {
-        is_in_mml_ = in_mml;
+        is_in_mml_.store(in_mml, std::memory_order_relaxed);
     }
 
     void MessagePumpUIWin::setInDialogModalLoop(bool in_dml) {
-        is_in_dml_ = in_dml;
+        is_in_dml_.store(in_dml, std::memory_order_relaxed);
     }
 
     bool MessagePumpUIWin::isInSizeModalLoop() const {
-        return is_in_sml_;
+        return is_in_sml_.load(std::memory_order_relaxed);
     }
 
     bool MessagePumpUIWin::isInMoveModalLoop() const {
-        return is_in_mml_;
+        return is_in_mml_.load(std::memory_order_relaxed);
+    }
+
+    bool MessagePumpUIWin::isInDialogModalLoop() const {
+        return is_in_dml_.load(std::memory_order_relaxed);
+    }
+
+    bool MessagePumpUIWin::isInAnyModalLoop() const {
+        return is_in_sml_.load(std::memory_order_relaxed) ||
+            is_in_mml_.load(std::memory_order_relaxed) ||
+            is_in_dml_.load(std::memory_order_relaxed);
     }
 
     void MessagePumpUIWin::addIntercepter(WinMessageIntercepter* i) {
@@ -229,6 +252,11 @@ namespace win {
         }
     }
 
+    bool MessagePumpUIWin::needPolling() const {
+        return (!is_app_active_.load(std::memory_order_relaxed) &&
+                is_in_dml_.load(std::memory_order_relaxed));
+    }
+
     // static
     LRESULT CALLBACK MessagePumpUIWin::ModalLoopMsgHookProc(int code, WPARAM wParam, LPARAM lParam) {
         /**
@@ -237,32 +265,69 @@ namespace win {
          */
         auto mp_ptr = getCurrent();
         auto This = static_cast<MessagePumpUIWin*>(mp_ptr.get());
-        if (code == HC_ACTION) {
-            if (This->is_in_sml_ || This->is_in_mml_) {
-                UINT remove_flag = UINT(wParam);
-                MSG* msg = reinterpret_cast<MSG*>(lParam);
-                //LOG(Log::INFO) << "============ MSG HOOK: " << msg->message;
+        if (code == HC_ACTION &&
+            UINT(wParam) == PM_REMOVE)
+        {
+            bool should_process = false;
+            MSG* msg = reinterpret_cast<MSG*>(lParam);
+            switch (msg->message) {
+            case WM_PUSHLOOP:
+                should_process |= This->isInAnyModalLoop();
+                break;
 
-                if (remove_flag == PM_REMOVE && msg->hwnd) {
-                    bool should_process = false;
-                    if (This->is_in_sml_) {
-                        // 调整窗口大小时，似乎监听不到 WM_SIZE，最好的时机似乎只有 WM_MOUSEMOVE
-                        should_process |= msg->message == WM_MOUSEMOVE;
-                    }
-                    if (This->is_in_mml_) {
-                        // 移动窗口时，只监听 WM_MOVE 消息就足够了
-                        should_process |= msg->message == WM_MOVE;
-                    }
+            default:
+                break;
+            }
 
-                    if (should_process) {
-                        int64_t delay_ns;
-                        This->cosume();
-                        This->cosumeDelayed(&delay_ns);
-                    }
-                }
+            if (should_process) {
+                int64_t delay_ns;
+                This->cosume();
+                This->cosumeDelayed(&delay_ns);
             }
         }
 
+        return ::CallNextHookEx(This->msg_hook_, code, wParam, lParam);
+    }
+
+    // static
+    LRESULT CALLBACK MessagePumpUIWin::ModalLoopCWPHookProc(int code, WPARAM wParam, LPARAM lParam) {
+        /**
+         * 当程序位于前台（即属于该程序的某个窗口位于前台）时，可依靠 WH_FOREGROUNDIDLE 获得
+         * 处理我们自己的消息队列的机会。但当程序切换到后台时，WH_FOREGROUNDIDLE 不再起作用。
+         * 目前没有比较好的办法来解决这个问题，只能借用 waiting_thread_ 轮询处理了。
+         */
+        auto mp_ptr = getCurrent();
+        auto This = static_cast<MessagePumpUIWin*>(mp_ptr.get());
+        if (code == HC_ACTION) {
+            auto msg = reinterpret_cast<CWPSTRUCT*>(lParam);
+            switch (msg->message) {
+            case WM_ACTIVATEAPP:
+                if (msg->wParam == TRUE) {
+                    This->is_app_active_.store(true, std::memory_order_relaxed);
+                } else {
+                    This->is_app_active_.store(false, std::memory_order_relaxed);
+                    ::SetEvent(This->waiting_event_);
+                }
+                break;
+
+            case WM_MOVE:
+                // 移动窗口时维持我们的消息队列
+                if (msg->hwnd && This->is_in_mml_.load(std::memory_order_relaxed)) {
+                    ::PostThreadMessageW(This->ui_thread_id_, WM_PUSHLOOP, 0, 0);
+                }
+                break;
+
+            case WM_SIZE:
+                // 调整窗口大小时维持我们的消息队列
+                if (msg->hwnd && This->is_in_sml_.load(std::memory_order_relaxed)) {
+                    ::PostThreadMessageW(This->ui_thread_id_, WM_PUSHLOOP, 0, 0);
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
         return ::CallNextHookEx(This->msg_hook_, code, wParam, lParam);
     }
 
@@ -275,14 +340,17 @@ namespace win {
         auto mp_ptr = getCurrent();
         auto This = static_cast<MessagePumpUIWin*>(mp_ptr.get());
         if (code == HC_ACTION) {
-            if (This->is_in_sml_ || This->is_in_mml_ || This->is_in_dml_) {
-                int64_t delay_ns;
-                bool has_more_work = This->cosume();
-                has_more_work |= This->cosumeDelayed(&delay_ns);
-                if (has_more_work) {
-                    ::PostThreadMessageW(This->ui_thread_id_, WM_WAKELOOP, 0, 0);
+            if (This->isInAnyModalLoop()) {
+                /**
+                 * 不要在这里直接处理队列消息。
+                 * WH_FOREGROUNDIDLE 对于回调中的函数调用有一些限制，参见微软文档：
+                 * https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms644980
+                 */
+                auto delayed_time = This->getDelayedTime();
+                if (This->hasMessages(MessageQueue::ML_NORMAL) || delayed_time == 0) {
+                    ::PostThreadMessageW(This->ui_thread_id_, WM_PUSHLOOP, 0, 0);
                 } else {
-                    This->waiting_ns_ = delay_ns;
+                    This->waiting_ns_.store(delayed_time, std::memory_order_relaxed);
                     ::SetEvent(This->waiting_event_);
                 }
             }
@@ -295,23 +363,27 @@ namespace win {
     DWORD WINAPI MessagePumpUIWin::waitingThreadProc(LPVOID param) {
         auto This = static_cast<MessagePumpUIWin*>(param);
         for (;;) {
-            int64_t timeout = This->waiting_ns_.exchange(-1);
+            int64_t timeout;
+            if (This->needPolling()) {
+                timeout = 1;
+            } else {
+                timeout = This->waiting_ns_.exchange(-1, std::memory_order_relaxed);
+            }
+
             if (timeout == -1) {
                 timeout = INFINITE;
             }
 
             DWORD ret = ::WaitForSingleObject(This->waiting_event_, DWORD(timeout));
-            if (This->wt_finished_) {
+            if (This->wt_finished_.load(std::memory_order_relaxed)) {
                 break;
             }
 
-            //LOG(Log::INFO) << "============ Waiting thread resumed: " << timeout;
-
             if (ret == WAIT_TIMEOUT) {
-                ::PostThreadMessageW(This->ui_thread_id_, WM_WAKELOOP, 0, 0);
+                ::PostThreadMessageW(This->ui_thread_id_, WM_PUSHLOOP, 0, 0);
             }
 
-            if (This->wt_finished_) {
+            if (This->wt_finished_.load(std::memory_order_relaxed)) {
                 break;
             }
         }

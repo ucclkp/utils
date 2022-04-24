@@ -165,7 +165,7 @@ namespace utl {
         }
         msg_queue_->removeBarrier();
 
-        return msg_queue_->hasMessage();
+        return msg_queue_->hasMessages(MessageQueue::ML_NORMAL);
     }
 
     bool MessagePump::cosumeDelayed(int64_t* delay_ns) {
@@ -184,6 +184,14 @@ namespace utl {
             }
         }
         return false;
+    }
+
+    bool MessagePump::hasMessages(unsigned int lists) {
+        return msg_queue_->hasMessages(lists);
+    }
+
+    int64_t MessagePump::getDelayedTime() {
+        return msg_queue_->getDelayedTime();
     }
 
 }

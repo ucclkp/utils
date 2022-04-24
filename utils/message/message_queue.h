@@ -18,11 +18,13 @@ namespace utl {
 
     class MessageQueue {
     public:
+        enum MessageList {
+            ML_NORMAL  = 1 << 0,
+            ML_DELAYED = 1 << 1,
+        };
+
         MessageQueue();
         ~MessageQueue();
-
-        void clear();
-        bool hasMessage();
 
         bool enqueue(const Message& msg);
 
@@ -47,7 +49,18 @@ namespace utl {
 
         void remove(Cycler* c);
         void remove(Cycler* c, int id);
+        void clear();
+
         bool contains(Cycler* c, int id);
+        bool hasMessages(unsigned int lists);
+
+        /**
+         * 获取延时队列中最近将要执行的消息还有多长时间可以执行。
+         * @return 如果延时队列中无消息，返回 -1;
+         *         如果最近的消息已经可以执行了，返回 0;
+         *         如果最近的消息还不到时间，返回距执行所需的时间，单位为纳秒。
+         */
+        int64_t getDelayedTime();
 
         void addBarrier();
         void removeBarrier();

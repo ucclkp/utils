@@ -21,17 +21,6 @@ namespace utl {
     MessageQueue::~MessageQueue() {
     }
 
-    void MessageQueue::clear() {
-        std::lock_guard<std::mutex> lk(queue_sync_);
-        message_.clear();
-        delayed_.clear();
-    }
-
-    bool MessageQueue::hasMessage() {
-        std::lock_guard<std::mutex> lk(queue_sync_);
-        return !message_.empty();
-    }
-
     bool MessageQueue::enqueue(const Message& msg) {
         if (msg.is_barrier) {
             LOG(Log::ERR) << "Illegal msg!";
@@ -219,6 +208,12 @@ namespace utl {
         }
     }
 
+    void MessageQueue::clear() {
+        std::lock_guard<std::mutex> lk(queue_sync_);
+        message_.clear();
+        delayed_.clear();
+    }
+
     bool MessageQueue::contains(Cycler* c, int id) {
         if (!c) {
             return false;
@@ -237,6 +232,32 @@ namespace utl {
             }
         }
         return false;
+    }
+
+    bool MessageQueue::hasMessages(unsigned int lists) {
+        std::lock_guard<std::mutex> lk(queue_sync_);
+        bool result = false;
+        if (lists & ML_NORMAL) {
+            result |= !message_.empty();
+        }
+        if (lists & ML_DELAYED) {
+            result |= !delayed_.empty();
+        }
+        return result;
+    }
+
+    int64_t MessageQueue::getDelayedTime() {
+        std::lock_guard<std::mutex> lk(queue_sync_);
+
+        auto ptr = delayed_.begin();
+        if (ptr != delayed_.end()) {
+            auto cur = Cycler::now().count();
+            if (ptr->time_ns <= uint64_t(cur)) {
+                return 0;
+            }
+            return ptr->time_ns - cur;
+        }
+        return -1;
     }
 
     void MessageQueue::addBarrier() {

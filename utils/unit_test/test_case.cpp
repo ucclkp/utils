@@ -7,6 +7,7 @@
 #include "test_case.h"
 
 #include "utils/log.h"
+#include "utils/strings/string_utils_types.hpp"
 #include "utils/unit_test/test_collector.h"
 #include "utils/unit_test/test_log.hpp"
 
@@ -54,15 +55,15 @@ namespace test {
             }
 
             UTLOG << Log::vt_format(Log::VT_FG_YELLOW)
-                << "[测] " << Log::vt_format(Log::VT_DEFAULT) << desc;
+                << u8p("[测] ") << Log::vt_format(Log::VT_DEFAULT) << desc;
             ++total_;
 
             if (t.func()) {
                 UTLOG << "\r" << Log::vt_format(Log::VT_FG_GREEN)
-                    << "[可] " << Log::vt_format(Log::VT_DEFAULT) << desc << "\n";
+                    << u8p("[可] ") << Log::vt_format(Log::VT_DEFAULT) << desc << "\n";
             } else {
                 UTLOG << "\r" << Log::vt_format(Log::VT_FG_RED)
-                    << "[否] " << Log::vt_format(Log::VT_DEFAULT) << desc << "\n";
+                    << u8p("[否] ") << Log::vt_format(Log::VT_DEFAULT) << desc << "\n";
                 ++error_;
             }
         }

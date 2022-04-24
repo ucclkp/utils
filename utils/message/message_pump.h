@@ -49,6 +49,9 @@ namespace utl {
         bool cosume();
         bool cosumeDelayed(int64_t* delay_ns);
 
+        bool hasMessages(unsigned int lists);
+        int64_t getDelayedTime();
+
         int nested_count_ = -1;
         MessageQueue* msg_queue_;
         std::stack<MPContext> context_;

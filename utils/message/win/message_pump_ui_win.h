@@ -44,6 +44,8 @@ namespace win {
 
         bool isInSizeModalLoop() const;
         bool isInMoveModalLoop() const;
+        bool isInDialogModalLoop() const;
+        bool isInAnyModalLoop() const;
 
         void addIntercepter(WinMessageIntercepter* i);
         void removeIntercepter(WinMessageIntercepter* i);
@@ -64,7 +66,10 @@ namespace win {
         bool notifyAfterTranslateMessage(MSG* msg);
         void notifyPostProcessMessage(MSG* msg);
 
+        bool needPolling() const;
+
         static LRESULT CALLBACK ModalLoopMsgHookProc(int code, WPARAM wParam, LPARAM lParam);
+        static LRESULT CALLBACK ModalLoopCWPHookProc(int code, WPARAM wParam, LPARAM lParam);
         static LRESULT CALLBACK ModalLoopIdleHookProc(int code, WPARAM wParam, LPARAM lParam);
         static DWORD WINAPI waitingThreadProc(LPVOID param);
 
@@ -75,11 +80,13 @@ namespace win {
         std::atomic_int64_t waiting_ns_ = -1;
 
         HHOOK msg_hook_;
+        HHOOK cwp_hook_;
         HHOOK idle_hook_;
         HANDLE event_;
-        bool is_in_sml_ = false;
-        bool is_in_mml_ = false;
-        bool is_in_dml_ = false;
+        std::atomic_bool is_in_sml_ = false;
+        std::atomic_bool is_in_mml_ = false;
+        std::atomic_bool is_in_dml_ = false;
+        std::atomic_bool is_app_active_ = false;
         std::vector<WinMessageIntercepter*> intercepters_;
     };
 
