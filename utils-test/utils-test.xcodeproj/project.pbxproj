@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6707D0992766363C00B19D0C /* dynamic_matrix_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6707D0972766363C00B19D0C /* dynamic_matrix_unit_test.cpp */; };
 		6707D09A2766363C00B19D0C /* matrix_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6707D0982766363C00B19D0C /* matrix_unit_test.cpp */; };
+		671BEB31281ADFB700AA65E6 /* point_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 671BEB30281ADFB700AA65E6 /* point_unit_test.cpp */; };
 		6724E6C524A74F26003FA2B2 /* json_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6BE24A74F26003FA2B2 /* json_unit_test.cpp */; };
 		6724E6C724A74F26003FA2B2 /* endian_unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6C024A74F26003FA2B2 /* endian_unit_test.cpp */; };
 		6724E6C824A74F26003FA2B2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6724E6C324A74F26003FA2B2 /* main.cpp */; };
@@ -40,6 +41,7 @@
 /* Begin PBXFileReference section */
 		6707D0972766363C00B19D0C /* dynamic_matrix_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dynamic_matrix_unit_test.cpp; sourceTree = "<group>"; };
 		6707D0982766363C00B19D0C /* matrix_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matrix_unit_test.cpp; sourceTree = "<group>"; };
+		671BEB30281ADFB700AA65E6 /* point_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = point_unit_test.cpp; sourceTree = "<group>"; };
 		6724E6BE24A74F26003FA2B2 /* json_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_unit_test.cpp; sourceTree = "<group>"; };
 		6724E6C024A74F26003FA2B2 /* endian_unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = endian_unit_test.cpp; sourceTree = "<group>"; };
 		6724E6C324A74F26003FA2B2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				679B854627CBB01F0002CECF /* memory_unit_test.cpp */,
 				679B854527CBB01F0002CECF /* message_unit_test.cpp */,
 				6790534D27A423BF00C79D29 /* number_conv_unit_test.cpp */,
+				671BEB30281ADFB700AA65E6 /* point_unit_test.cpp */,
 				67B85B9524A6023E005C89A9 /* Products */,
 				67311F5827933A4D00DA0425 /* string_utils_unit_test.cpp */,
 				67311F5A27933A4D00DA0425 /* unicode_unit_test.cpp */,
@@ -167,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				671BEB31281ADFB700AA65E6 /* point_unit_test.cpp in Sources */,
 				6790534E27A423BF00C79D29 /* number_conv_unit_test.cpp in Sources */,
 				678C89C627C3CF76008D0B21 /* cmd_line_unit_test.cpp in Sources */,
 				6790534C279F0D9B00C79D29 /* log_unit_test.cpp in Sources */,

@@ -22,7 +22,7 @@ namespace math {
 
 namespace internal {
     template <typename Ty>
-    Ty detTrans(const DMatrixT<Ty>& m);
+    Ty det_slow(const DMatrixT<Ty>& m);
 
     template <typename Ty>
     void cofactor(
@@ -540,7 +540,7 @@ namespace internal {
             if (col_sz != row_sz) {
                 throw std::runtime_error("Row must be equal to Col!");
             }
-            return internal::detTrans(*this);
+            return internal::det_slow(*this);
         }
 
         DMatrixT cofactor(
@@ -567,7 +567,7 @@ namespace internal {
                 for (size_t j = 0; j < col_sz; ++j) {
                     DMatrixT<Ty> mt(row_sz - 1, col_sz - 1);
                     internal::cofactor(*this, i, j, &mt);
-                    adj.data[i * col_sz + j] = internal::detTrans(mt) * (int((i + j) % 2) * -2 + 1);
+                    adj.data[i * col_sz + j] = internal::det_slow(mt) * (int((i + j) % 2) * -2 + 1);
                 }
             }
             return adj.transpose();
@@ -811,7 +811,7 @@ namespace internal {
 namespace internal {
 
     template <typename Ty>
-    Ty detTrans(const DMatrixT<Ty>& m) {
+    Ty det_slow(const DMatrixT<Ty>& m) {
         if (m.col_sz == 1) {
             return m.data[0];
         }
@@ -835,7 +835,7 @@ namespace internal {
             auto val = data[i];
             DMatrixT<Ty> mt(m.row_sz - 1, m.col_sz - 1);
             cofactor(m, 0, i, &mt);
-            result += val * detTrans(mt) * (int((i + 0) % 2) * -2 + 1);
+            result += val * det_slow(mt) * (int((i + 0) % 2) * -2 + 1);
         }
 
         return result;

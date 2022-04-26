@@ -182,6 +182,7 @@
     <ClCompile Include="log_unit_test.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix_unit_test.cpp" />
+    <ClCompile Include="point_unit_test.cpp" />
     <ClCompile Include="string_utils_unit_test.cpp" />
     <ClCompile Include="unicode_unit_test.cpp" />
   </ItemGroup>

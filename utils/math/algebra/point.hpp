@@ -16,10 +16,63 @@
 namespace utl {
 namespace math {
 
+namespace internal {
+
     template <typename Ty, size_t Num>
-    class PointT {
+    class PointT_num_methods {
+    public:
+        Ty x() const { return data[0]; }
+        Ty y() const { return data[1]; }
+        Ty z() const { return data[2]; }
+        Ty w() const { return data[3]; }
+        Ty& x() { return data[0]; }
+        Ty& y() { return data[1]; }
+        Ty& z() { return data[2]; }
+        Ty& w() { return data[3]; }
+
+        Ty data[Num];
+    };
+
+    template <typename Ty>
+    class PointT_num_methods<Ty, 1> {
+    public:
+        Ty x() const { return data[0]; }
+        Ty& x() { return data[0]; }
+
+        Ty data[1];
+    };
+
+    template <typename Ty>
+    class PointT_num_methods<Ty, 2> {
+    public:
+        Ty x() const { return data[0]; }
+        Ty y() const { return data[1]; }
+        Ty& x() { return data[0]; }
+        Ty& y() { return data[1]; }
+
+        Ty data[2];
+    };
+
+    template <typename Ty>
+    class PointT_num_methods<Ty, 3> {
+    public:
+        Ty x() const { return data[0]; }
+        Ty y() const { return data[1]; }
+        Ty z() const { return data[2]; }
+        Ty& x() { return data[0]; }
+        Ty& y() { return data[1]; }
+        Ty& z() { return data[2]; }
+
+        Ty data[3];
+    };
+
+}
+
+    template <typename Ty, size_t Num>
+    class PointT : public internal::PointT_num_methods<Ty, Num> {
     public:
         static_assert(Num != 0, "Num must be greater than 0!");
+        static constexpr size_t size = Num;
 
         static PointT Z() {
             PointT m;
@@ -60,132 +113,126 @@ namespace math {
         explicit operator PointT<Cy, Num>() const {
             PointT<Cy, Num> out;
             for (size_t i = 0; i < Num; ++i) {
-                out.data[i] = static_cast<Cy>(data[i]);
+                out.data[i] = static_cast<Cy>(this->data[i]);
             }
             return out;
         }
 
         Ty operator()(size_t index) const {
             assert(index < Num);
-            return data[index];
+            return this->data[index];
         }
         Ty& operator()(size_t index) {
             assert(index < Num);
-            return data[index];
+            return this->data[index];
         }
-
-        template <size_t Idx>
-        Ty operator()() const {
-            if constexpr (Idx >= Num) {
-                static_assert(sat_stub<Ty>::value, "Invalid index!");
-            }
-            return data[Idx];
-        }
-        template <size_t Idx>
-        Ty& operator()() {
-            if constexpr (Idx >= Num) {
-                static_assert(sat_stub<Ty>::value, "Invalid index!");
-            }
-            return data[Idx];
-        }
-
-        Ty x() const { return operator()<0>(); }
-        Ty y() const { return operator()<1>(); }
-        Ty z() const { return operator()<2>(); }
-        Ty w() const { return operator()<3>(); }
-        Ty& x() { return operator()<0>(); }
-        Ty& y() { return operator()<1>(); }
-        Ty& z() { return operator()<2>(); }
-        Ty& w() { return operator()<3>(); }
 
         VectorT<Ty, Num> vec() const {
             VectorT<Ty, Num> out;
             for (size_t i = 0; i < Num; ++i) {
-                out.data[i] = data[i];
+                out.data[i] = this->data[i];
             }
             return out;
         }
         HVectorT<Ty, Num> vec_h() const {
             HVectorT<Ty, Num> out;
             for (size_t i = 0; i < Num; ++i) {
-                out.data[i] = data[i];
+                out.data[i] = this->data[i];
             }
             return out;
         }
 
         template <size_t Re>
-        PointT<Ty, Re> reduce() const {
-            if constexpr (Re >= Num) {
-                static_assert(sat_stub<Ty>::value, "Re must be less than Num!");
-            }
-
+        typename std::enable_if<(Re < Num && Re > 0), PointT<Ty, Re>>::
+        type reduce() const {
             PointT<Ty, Re> out;
             for (size_t i = 0; i < Re; ++i) {
-                out.data[i] = data[i];
+                out.data[i] = this->data[i];
             }
             return out;
         }
 
-        void minus() {
+        PointT& minus() {
             for (size_t i = 0; i < Num; ++i) {
-                data[i] = -data[i];
+                this->data[i] = -this->data[i];
             }
+            return *this;
         }
 
-        void set(size_t index, Ty val) {
+        PointT& set(size_t index, Ty val) {
             assert(index < Num);
-            data[index] = val;
+            this->data[index] = val;
+            return *this;
         }
 
         template <size_t Idx>
-        void set(Ty val) {
-            if constexpr (Idx >= Num) {
-                static_assert(sat_stub<Ty>::value, "Invalid index!");
-            }
-            data[Idx] = val;
+        typename std::enable_if<(Idx < Num)>::
+        type set(Ty val) {
+            this->data[Idx] = val;
         }
 
         Ty get(size_t index) const {
             assert(index < Num);
-            return data[index];
+            return this->data[index];
         }
 
         template <size_t Idx>
-        Ty get() const {
-            if constexpr (Idx >= Num) {
-                static_assert(sat_stub<Ty>::value, "Invalid index!");
-            }
-            return data[Idx];
+        typename std::enable_if<(Idx < Num), Ty>::
+        type get() const {
+            return this->data[Idx];
         }
 
-        void zero() {
-            std::memset(data, 0, sizeof(Ty) * Num);
+        Ty at(size_t index) const {
+            assert(index < Num);
+            return this->data[index];
+        }
+
+        template <size_t Idx>
+        typename std::enable_if<(Idx < Num), Ty>::
+        type at() const {
+            return this->data[Idx];
+        }
+
+        Ty& at(size_t index) {
+            assert(index < Num);
+            return this->data[index];
+        }
+
+        template <size_t Idx>
+        typename std::enable_if<(Idx < Num), Ty&>::
+        type at() {
+            return this->data[Idx];
+        }
+
+        PointT& zero() {
+            std::fill(std::begin(this->data), std::end(this->data), Ty(0));
+            return *this;
         }
 
         PointT& add(const VectorT<Ty, Num>& rhs) {
             for (size_t i = 0; i < Num; ++i) {
-                data[i] += rhs.data[i];
+                this->data[i] += rhs.data[i];
             }
             return *this;
         }
 
         PointT& add(const HVectorT<Ty, Num>& rhs) {
             for (size_t i = 0; i < Num; ++i) {
-                data[i] += rhs.data[i];
+                this->data[i] += rhs.data[i];
             }
             return *this;
         }
 
         PointT& sub(const VectorT<Ty, Num>& rhs) {
             for (size_t i = 0; i < Num; ++i) {
-                data[i] -= rhs.data[i];
+                this->data[i] -= rhs.data[i];
             }
             return *this;
         }
 
         PointT& sub(const HVectorT<Ty, Num>& rhs) {
             for (size_t i = 0; i < Num; ++i) {
-                data[i] -= rhs.data[i];
+                this->data[i] -= rhs.data[i];
             }
             return *this;
         }
@@ -193,7 +240,7 @@ namespace math {
         VectorT<Ty, Num> sub(const PointT& rhs) {
             VectorT<Ty, Num> out;
             for (size_t i = 0; i < Num; ++i) {
-                out.data[i] = data[i] - rhs.data[i];
+                out.data[i] = this->data[i] - rhs.data[i];
             }
             return out;
         }
@@ -201,23 +248,134 @@ namespace math {
         HVectorT<Ty, Num> sub_h(const PointT& rhs) {
             HVectorT<Ty, Num> out;
             for (size_t i = 0; i < Num; ++i) {
-                out.data[i] = data[i] - rhs.data[i];
+                out.data[i] = this->data[i] - rhs.data[i];
             }
             return out;
         }
 
         bool equal(const PointT& rhs) const {
             for (size_t i = 0; i < Num; ++i) {
-                if (!utl::is_num_equal(data[i], rhs.data[i])) {
+                if (!utl::is_num_equal(this->data[i], rhs.data[i])) {
                     return false;
                 }
             }
             return true;
         }
 
-        size_t size() const { return Num; }
+    };
 
-        Ty data[Num];
+    template <typename Ty>
+    class PointT<Ty, 1> : public internal::PointT_num_methods<Ty, 1> {
+    public:
+        static constexpr size_t size = 1u;
+
+        static PointT Z() {
+            PointT m;
+            m.zero();
+            return m;
+        }
+
+        PointT operator+(const VectorT<Ty, 1>& rhs) const {
+            return PointT(*this).add(rhs);
+        }
+        VectorT<Ty, 1> operator-(const PointT& rhs) const {
+            return PointT(*this).sub(rhs);
+        }
+        PointT operator-(const VectorT<Ty, 1>& rhs) const {
+            return PointT(*this).sub(rhs);
+        }
+
+        bool operator==(const PointT& rhs) const {
+            return equal(rhs);
+        }
+        bool operator!=(const PointT& rhs) const {
+            return !equal(rhs);
+        }
+
+        PointT operator-() const {
+            PointT p(*this);
+            p.minus();
+            return p;
+        }
+
+        template<typename Cy>
+        explicit operator PointT<Cy, 1>() const {
+            PointT<Cy, 1> out;
+            out.data[0] = static_cast<Cy>(this->data[0]);
+            return out;
+        }
+
+        Ty operator()() const {
+            return this->data[0];
+        }
+        Ty& operator()() {
+            return this->data[0];
+        }
+
+        VectorT<Ty, 1> vec() const {
+            VectorT<Ty, 1> out;
+            out.data[0] = this->data[0];
+            return out;
+        }
+        HVectorT<Ty, 1> vec_h() const {
+            HVectorT<Ty, 1> out;
+            out.data[0] = this->data[0];
+            return out;
+        }
+
+        PointT& minus() {
+            this->data[0] = -this->data[0];
+            return *this;
+        }
+
+        PointT& set(Ty val) {
+            this->data[0] = val;
+            return *this;
+        }
+
+        Ty get() const {
+            return this->data[0];
+        }
+
+        Ty at() const {
+            return this->data[0];
+        }
+
+        Ty& at() {
+            return this->data[0];
+        }
+
+        PointT& zero() {
+            this->data[0] = 0;
+            return *this;
+        }
+
+        PointT& add(const VectorT<Ty, 1>& rhs) {
+            this->data[0] += rhs.data[0];
+            return *this;
+        }
+
+        PointT& sub(const VectorT<Ty, 1>& rhs) {
+            this->data[0] -= rhs.data[0];
+            return *this;
+        }
+
+        VectorT<Ty, 1> sub(const PointT& rhs) {
+            VectorT<Ty, 1> out;
+            out.data[0] = this->data[0] - rhs.data[0];
+            return out;
+        }
+
+        HVectorT<Ty, 1> sub_h(const PointT& rhs) {
+            HVectorT<Ty, 1> out;
+            out.data[0] = this->data[0] - rhs.data[0];
+            return out;
+        }
+
+        bool equal(const PointT& rhs) const {
+            return utl::is_num_equal(this->data[0], rhs.data[0]);
+        }
+
     };
 
 }

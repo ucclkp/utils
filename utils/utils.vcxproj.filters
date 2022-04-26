@@ -282,6 +282,9 @@
     <ClInclude Include="math\algebra\geocal.hpp">
       <Filter>math\algebra</Filter>
     </ClInclude>
+    <ClInclude Include="math\algebra\matrix_internal.hpp">
+      <Filter>math\algebra</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

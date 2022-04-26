@@ -14,5 +14,6 @@
     <ClCompile Include="cmd_line_unit_test.cpp" />
     <ClCompile Include="memory_unit_test.cpp" />
     <ClCompile Include="message_unit_test.cpp" />
+    <ClCompile Include="point_unit_test.cpp" />
   </ItemGroup>
 </Project>

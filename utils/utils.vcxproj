@@ -217,6 +217,7 @@
     <ClInclude Include="executable.h" />
     <ClInclude Include="files\file_utils.h" />
     <ClInclude Include="math\algebra\geocal.hpp" />
+    <ClInclude Include="math\algebra\matrix_internal.hpp" />
     <ClInclude Include="math\algebra\point.hpp" />
     <ClInclude Include="math\algebra\special_matrix.hpp" />
     <ClInclude Include="memory\aligments.hpp" />
