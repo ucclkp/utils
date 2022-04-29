@@ -533,12 +533,13 @@ namespace math {
     template <typename Ty>
     class MatrixT<Ty, 1, 1> {
     public:
+        using type = Ty;
         static constexpr size_t row_size = 1u;
         static constexpr size_t col_size = 1u;
 
         static MatrixT Z() {
             MatrixT m;
-            m.zero();
+            m.zeros();
             return m;
         }
         static MatrixT I() {
@@ -624,6 +625,11 @@ namespace math {
         Ty x() const { return this->data[0]; }
         Ty& x() { return this->data[0]; }
 
+        MatrixT& x(Ty x) {
+            this->data[0] = x;
+            return *this;
+        }
+
         MatrixT& add(const MatrixT& rhs) {
             this->data[0] += rhs.data[0];
             return *this;
@@ -671,7 +677,7 @@ namespace math {
             return this->data[0];
         }
 
-        MatrixT& zero() {
+        MatrixT& zeros() {
             this->data[0] = 0;
             return *this;
         }

@@ -25,12 +25,13 @@ namespace internal {
         static constexpr size_t Count = Row * Col;
 
     public:
+        using type = Ty;
         static constexpr size_t row_size = Row;
         static constexpr size_t col_size = Col;
 
         static MatrixT Z() {
             MatrixT m;
-            m.zero();
+            m.zeros();
             return m;
         }
 
@@ -100,7 +101,7 @@ namespace internal {
             return m;
         }
 
-        MatrixT& zero() {
+        MatrixT& zeros() {
             std::fill(std::begin(this->data), std::end(this->data), Ty(0));
             return static_cast<MatrixT&>(*this);
         }
@@ -811,6 +812,9 @@ namespace internal {
 
     template <typename Ty, typename Mat, size_t Num>
     class MatrixT_vec_num_methods {
+    private:
+        using MatrixT = Mat;
+
     public:
         Ty x() const { return derived()->data[0]; }
         Ty y() const { return derived()->data[1]; }
@@ -821,9 +825,24 @@ namespace internal {
         Ty& z() { return derived()->data[2]; }
         Ty& w() { return derived()->data[3]; }
 
-    private:
-        using MatrixT = Mat;
+        MatrixT& x(Ty x) {
+            derived()->data[0] = x;
+            return *derived();
+        }
+        MatrixT& y(Ty y) {
+            derived()->data[1] = y;
+            return *derived();
+        }
+        MatrixT& z(Ty z) {
+            derived()->data[2] = z;
+            return *derived();
+        }
+        MatrixT& w(Ty w) {
+            derived()->data[3] = w;
+            return *derived();
+        }
 
+    private:
         MatrixT* derived() {
             return static_cast<MatrixT*>(this);
         }
@@ -837,15 +856,25 @@ namespace internal {
 
     template <typename Ty, typename Mat>
     class MatrixT_vec_num_methods<Ty, Mat, 2> {
+    private:
+        using MatrixT = Mat;
+
     public:
         Ty x() const { return derived()->data[0]; }
         Ty y() const { return derived()->data[1]; }
         Ty& x() { return derived()->data[0]; }
         Ty& y() { return derived()->data[1]; }
 
-    private:
-        using MatrixT = Mat;
+        MatrixT& x(Ty x) {
+            derived()->data[0] = x;
+            return *derived();
+        }
+        MatrixT& y(Ty y) {
+            derived()->data[1] = y;
+            return *derived();
+        }
 
+    private:
         MatrixT* derived() {
             return static_cast<MatrixT*>(this);
         }
@@ -866,6 +895,19 @@ namespace internal {
         Ty& x() { return derived()->data[0]; }
         Ty& y() { return derived()->data[1]; }
         Ty& z() { return derived()->data[2]; }
+
+        MatrixT& x(Ty x) {
+            derived()->data[0] = x;
+            return *derived();
+        }
+        MatrixT& y(Ty y) {
+            derived()->data[1] = y;
+            return *derived();
+        }
+        MatrixT& z(Ty z) {
+            derived()->data[2] = z;
+            return *derived();
+        }
 
         MatrixT operator^(const MatrixT& rhs) const {
             return cross(rhs);

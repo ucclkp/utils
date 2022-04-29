@@ -18,8 +18,11 @@ namespace math {
 
 namespace internal {
 
-    template <typename Ty, size_t Num>
+    template <typename Ty, typename Pt, size_t Num>
     class PointT_num_methods {
+    private:
+        using PointT = Pt;
+
     public:
         Ty x() const { return data[0]; }
         Ty y() const { return data[1]; }
@@ -30,31 +33,57 @@ namespace internal {
         Ty& z() { return data[2]; }
         Ty& w() { return data[3]; }
 
+        PointT& x(Ty x) {
+            data[0] = x;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& y(Ty y) {
+            data[1] = y;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& z(Ty z) {
+            data[2] = z;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& w(Ty w) {
+            data[3] = w;
+            return static_cast<PointT&>(*this);
+        }
+
         Ty data[Num];
     };
 
-    template <typename Ty>
-    class PointT_num_methods<Ty, 1> {
-    public:
-        Ty x() const { return data[0]; }
-        Ty& x() { return data[0]; }
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 1> {};
 
-        Ty data[1];
-    };
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 2> {
+    private:
+        using PointT = Pt;
 
-    template <typename Ty>
-    class PointT_num_methods<Ty, 2> {
     public:
         Ty x() const { return data[0]; }
         Ty y() const { return data[1]; }
         Ty& x() { return data[0]; }
         Ty& y() { return data[1]; }
 
+        PointT& x(Ty x) {
+            data[0] = x;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& y(Ty y) {
+            data[1] = y;
+            return static_cast<PointT&>(*this);
+        }
+
         Ty data[2];
     };
 
-    template <typename Ty>
-    class PointT_num_methods<Ty, 3> {
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 3> {
+    private:
+        using PointT = Pt;
+
     public:
         Ty x() const { return data[0]; }
         Ty y() const { return data[1]; }
@@ -63,21 +92,38 @@ namespace internal {
         Ty& y() { return data[1]; }
         Ty& z() { return data[2]; }
 
+        PointT& x(Ty x) {
+            data[0] = x;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& y(Ty y) {
+            data[1] = y;
+            return static_cast<PointT&>(*this);
+        }
+        PointT& z(Ty z) {
+            data[2] = z;
+            return static_cast<PointT&>(*this);
+        }
+
         Ty data[3];
     };
 
 }
 
     template <typename Ty, size_t Num>
-    class PointT : public internal::PointT_num_methods<Ty, Num> {
+    class PointT :
+        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num>
+    {
     public:
         static_assert(Num != 0, "Num must be greater than 0!");
+
+        using type = Ty;
         static constexpr size_t size = Num;
 
         static PointT Z() {
-            PointT m;
-            m.zero();
-            return m;
+            PointT p;
+            p.zeros();
+            return p;
         }
 
         PointT operator+(const VectorT<Ty, Num>& rhs) const {
@@ -204,7 +250,7 @@ namespace internal {
             return this->data[Idx];
         }
 
-        PointT& zero() {
+        PointT& zeros() {
             std::fill(std::begin(this->data), std::end(this->data), Ty(0));
             return *this;
         }
@@ -265,14 +311,15 @@ namespace internal {
     };
 
     template <typename Ty>
-    class PointT<Ty, 1> : public internal::PointT_num_methods<Ty, 1> {
+    class PointT<Ty, 1> {
     public:
+        using type = Ty;
         static constexpr size_t size = 1u;
 
         static PointT Z() {
-            PointT m;
-            m.zero();
-            return m;
+            PointT p;
+            p.zeros();
+            return p;
         }
 
         PointT operator+(const VectorT<Ty, 1>& rhs) const {
@@ -345,7 +392,15 @@ namespace internal {
             return this->data[0];
         }
 
-        PointT& zero() {
+        Ty x() const { return this->data[0]; }
+        Ty& x() { return this->data[0]; }
+
+        PointT& x(Ty x) {
+            this->data[0] = x;
+            return *this;
+        }
+
+        PointT& zeros() {
             this->data[0] = 0;
             return *this;
         }
@@ -376,6 +431,7 @@ namespace internal {
             return utl::is_num_equal(this->data[0], rhs.data[0]);
         }
 
+        Ty data[1];
     };
 
 }

@@ -24,18 +24,18 @@ TEST_CASE(PointUnitTest) {
         auto p_f = PointT<float, 1>(pt);
         TEST_E(p_f.get(), 10);
 
-        pt.x() = 1;
+        pt.x(1);
         TEST_E(pt(), 1);
         TEST_E(pt.x(), 1);
         pt.at() = 4;
         TEST_E(pt.at(), 4);
 
-        pt.set(2);
+        pt.x() = 2;
         TEST_E(pt.get(), 2);
         pt() = 3;
         TEST_E(pt(), 3);
 
-        pt.zero();
+        pt.zeros();
         TEST_E(pt(), 0);
 
         pt() = 1;
@@ -72,10 +72,14 @@ TEST_CASE(PointUnitTest) {
         PointT<double, 2> pt{ 2, 1 };
         TEST_E(pt.x(), 2);
         TEST_E(pt.y(), 1);
-        pt.x() = 1;
-        pt.y() = 10;
+        pt.x(1);
+        pt.y(10);
         TEST_E(pt.x(), 1);
         TEST_E(pt.y(), 10);
+        pt.x() = 3;
+        pt.y() = 4;
+        TEST_E(pt.x(), 3);
+        TEST_E(pt.y(), 4);
 
         return true;
     };
@@ -98,9 +102,9 @@ TEST_CASE(PointUnitTest) {
         TEST_E(p_f(1), 1);
         TEST_E(p_f(2), 2);
 
-        pt.x() = 1;
-        pt.y() = 10;
-        pt.z() = 100;
+        pt.x(1);
+        pt.y(10);
+        pt.z(100);
         TEST_E(pt(0), 1);
         TEST_E(pt(1), 10);
         TEST_E(pt(2), 100);
@@ -120,6 +124,13 @@ TEST_CASE(PointUnitTest) {
         TEST_E(pt.at<1>(), 8);
         TEST_E(pt.at<2>(), 9);
 
+        pt.x() = 2;
+        pt.y() = 20;
+        pt.z() = 200;
+        TEST_E(pt(0), 2);
+        TEST_E(pt(1), 20);
+        TEST_E(pt(2), 200);
+
         pt.set(0, 2);
         pt.set(1, 8);
         pt.set(2, 16);
@@ -133,7 +144,7 @@ TEST_CASE(PointUnitTest) {
         TEST_E(pt(1), 7);
         TEST_E(pt(2), 9);
 
-        pt.zero();
+        pt.zeros();
         TEST_E(pt(0), 0);
         TEST_E(pt(1), 0);
         TEST_E(pt(2), 0);
@@ -185,14 +196,22 @@ TEST_CASE(PointUnitTest) {
         TEST_E(pt.y(), 2);
         TEST_E(pt.z(), 3);
         TEST_E(pt.w(), 4);
-        pt.x() = 5;
-        pt.y() = 6;
-        pt.z() = 7;
-        pt.w() = 8;
+        pt.x(5);
+        pt.y(6);
+        pt.z(7);
+        pt.w(8);
         TEST_E(pt.x(), 5);
         TEST_E(pt.y(), 6);
         TEST_E(pt.z(), 7);
         TEST_E(pt.w(), 8);
+        pt.x() = 9;
+        pt.y() = 10;
+        pt.z() = 11;
+        pt.w() = 12;
+        TEST_E(pt.x(), 9);
+        TEST_E(pt.y(), 10);
+        TEST_E(pt.z(), 11);
+        TEST_E(pt.w(), 12);
 
         return true;
     };

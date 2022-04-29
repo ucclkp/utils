@@ -65,7 +65,7 @@ TEST_CASE(MatrixUnitTest) {
         m = -m;
         TEST_E(m.get(), 5);
 
-        m.zero();
+        m.zeros();
         TEST_E(m.get(), 0);
 
         TEST_E(m, Matrix1x1::Z());
@@ -77,10 +77,10 @@ TEST_CASE(MatrixUnitTest) {
         m() = 10;
         TEST_NUM_E(m(), 10.0);
 
-        m.x() = 20;
+        m.x(20);
         TEST_NUM_E(m.x(), 20.0);
 
-        m.set(5);
+        m.x() = 5;
         TEST_NUM_E(m.det(), 5.0);
 
         MatrixT<double, 1, 1> cof_result{1};
@@ -101,6 +101,22 @@ TEST_CASE(MatrixUnitTest) {
 
         TEST_E(m.row_size, 1);
         TEST_E(m.col_size, 1);
+
+        return true;
+    };
+
+    TEST_DEF("Matrix 1x2 tests.") {
+        using Matrix1x2 = MatrixT<double, 1, 2>;
+
+        Matrix1x2 m{ 1, 2 };
+        m.x(5);
+        m.y(6);
+        TEST_E(m.x(), 5);
+        TEST_E(m.y(), 6);
+        m.x() = 7;
+        m.y() = 8;
+        TEST_E(m.x(), 7);
+        TEST_E(m.y(), 8);
 
         return true;
     };
@@ -192,19 +208,26 @@ TEST_CASE(MatrixUnitTest) {
         m.div_row({ 2, 2, 9 });
         TEST_E(m, Matrix1x3({ 1, 1, 1 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, Matrix1x3({ 0, 0, 0 }));
         TEST_E(m, Matrix1x3::Z());
         TEST_TRUE(m.equal(Matrix1x3::Z()));
 
-        m.x() = 10;
+        m.x(10);
         TEST_E(m.x(), 10);
-        m.y() = 20;
+        m.y(20);
         TEST_E(m.y(), 20);
-        m.z() = 30;
+        m.z(30);
         TEST_E(m.z(), 30);
         m.set<0>(11);
         TEST_E(m.x(), 11);
+
+        m.x() = 11;
+        TEST_E(m.x(), 11);
+        m.y() = 21;
+        TEST_E(m.y(), 21);
+        m.z() = 31;
+        TEST_E(m.z(), 31);
 
         m = { 1, 2, 3 };
 
@@ -244,6 +267,31 @@ TEST_CASE(MatrixUnitTest) {
 
         TEST_E(m.row_size, 1);
         TEST_E(m.col_size, 3);
+
+        return true;
+    };
+
+    TEST_DEF("Matrix 1x4 tests.") {
+        using Matrix1x4 = MatrixT<double, 1, 4>;
+
+        Matrix1x4 m{ 1, 2, 3, 4 };
+        m.x(5);
+        m.y(6);
+        m.z(7);
+        m.w(8);
+        TEST_E(m.x(), 5);
+        TEST_E(m.y(), 6);
+        TEST_E(m.z(), 7);
+        TEST_E(m.w(), 8);
+
+        m.x() = 10;
+        m.y() = 11;
+        m.z() = 12;
+        m.w() = 13;
+        TEST_E(m.x(), 10);
+        TEST_E(m.y(), 11);
+        TEST_E(m.z(), 12);
+        TEST_E(m.w(), 13);
 
         return true;
     };
@@ -335,16 +383,16 @@ TEST_CASE(MatrixUnitTest) {
         m.div_col({ 2, 2, 9 });
         TEST_E(m, Matrix3x1({ 1, 1, 1 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, Matrix3x1({ 0, 0, 0 }));
         TEST_E(m, Matrix3x1::Z());
         TEST_TRUE(m.equal(Matrix3x1::Z()));
 
-        m.x() = 10;
+        m.x(10);
         TEST_E(m.x(), 10);
-        m.y() = 20;
+        m.y(20);
         TEST_E(m.y(), 20);
-        m.z() = 30;
+        m.z(30);
         TEST_E(m.z(), 30);
         m.set<0>(11);
         TEST_E(m.x(), 11);
@@ -551,7 +599,7 @@ TEST_CASE(MatrixUnitTest) {
         m.div_col<1>({ 2, 3 });
         TEST_E(m, Matrix2x2({ 1, 5, 7, 9 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, Matrix2x2({ 0, 0, 0, 0 }));
         TEST_E(Matrix2x2::Z(), Matrix2x2({ 0, 0, 0, 0 }));
         TEST_TRUE(m.equal(Matrix2x2::Z()));
@@ -1053,7 +1101,7 @@ TEST_CASE(MatrixUnitTest) {
             4, 9, 8,  5, 1,
         }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, Matrix3x5({
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
