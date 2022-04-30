@@ -24,6 +24,9 @@ TEST_CASE(MatrixUnitTest) {
         auto m_f = MatrixT<float, 1, 1>(m);
         TEST_E(m_f.get(), 5);
 
+        m_f = m.cast<float>();
+        TEST_E(m_f.get(), 5);
+
         TEST_E(double(m), 5);
 
         m.at() = 8;
@@ -82,6 +85,7 @@ TEST_CASE(MatrixUnitTest) {
 
         m.x() = 5;
         TEST_NUM_E(m.det(), 5.0);
+        TEST_NUM_E(m.det_prec(), 5.0);
 
         MatrixT<double, 1, 1> cof_result{1};
         TEST_E(m.cofactor(), cof_result);
@@ -98,6 +102,21 @@ TEST_CASE(MatrixUnitTest) {
 
         MatrixT<double, 1, 1> inv_result{ 1 / 5.0 };
         TEST_E(m.inverse(), inv_result);
+
+        TEST_E((m.gain_rc<2, 2>({ 7, 8, 9 })), (MatrixT<double, 2, 2>{5, 7, 8, 9}));
+        TEST_E((m.gain_rc<2, 2>({ 7, 8 })), (MatrixT<double, 2, 2>{5, 7, 8, 0}));
+        TEST_E((m.gain_rc<2, 2>({ 7 })), (MatrixT<double, 2, 2>{5, 7, 0, 0}));
+        TEST_E((m.gain_rc<2, 2>()), (MatrixT<double, 2, 2>{5, 0, 0, 0}));
+
+        TEST_E((m.gain_row<2>({ 7 })), (MatrixT<double, 2, 1>{5, 7}));
+        TEST_E((m.gain_row<2>()), (MatrixT<double, 2, 1>{5, 0}));
+        TEST_E((m.gain_col<2>({ 7 })), (MatrixT<double, 1, 2>{5, 7}));
+        TEST_E((m.gain_col<2>()), (MatrixT<double, 1, 2>{5, 0}));
+
+        TEST_E((m.shape<0, 0, 2, 2>({ 7, 8, 9 })), (MatrixT<double, 2, 2>{5, 7, 8, 9}));
+        TEST_E((m.shape<0, 0, 2, 2>({ 7, 8 })), (MatrixT<double, 2, 2>{5, 7, 8, 0}));
+        TEST_E((m.shape<0, 0, 2, 2>({ 7 })), (MatrixT<double, 2, 2>{5, 7, 0, 0}));
+        TEST_E((m.shape<0, 0, 2, 2>()), (MatrixT<double, 2, 2>{5, 0, 0, 0}));
 
         TEST_E(m.row_size, 1);
         TEST_E(m.col_size, 1);
@@ -118,6 +137,12 @@ TEST_CASE(MatrixUnitTest) {
         TEST_E(m.x(), 7);
         TEST_E(m.y(), 8);
 
+        TEST_E(m.gain({ 10 }), (MatrixT<double, 1, 3>{7, 8, 10}));
+        TEST_E(m.gain<3>(), (MatrixT<double, 1, 3>{7, 8, 0}));
+        TEST_E((m.gain_rc<2, 2>({ 1, 2 })), (MatrixT<double, 2, 2>{7, 8, 1, 2}));
+        TEST_E((m.gain_rc<2, 2>({ 1 })), (MatrixT<double, 2, 2>{7, 8, 1, 0}));
+        TEST_E((m.gain_rc<2, 2>()), (MatrixT<double, 2, 2>{7, 8, 0, 0}));
+
         return true;
     };
 
@@ -129,6 +154,14 @@ TEST_CASE(MatrixUnitTest) {
         Matrix1x3 m2{ 4, 5, 6 };
 
         auto m_f = MatrixT<float, 1, 3>(m);
+        TEST_E(m_f(0), 1);
+        TEST_E(m_f(1), 2);
+        TEST_E(m_f(2), 3);
+        TEST_E(m_f.get<0>(), 1);
+        TEST_E(m_f.get<1>(), 2);
+        TEST_E(m_f.get<2>(), 3);
+
+        m_f = m.cast<float>();
         TEST_E(m_f(0), 1);
         TEST_E(m_f(1), 2);
         TEST_E(m_f(2), 3);
@@ -264,6 +297,24 @@ TEST_CASE(MatrixUnitTest) {
         auto m4 = m.reduce<2>();
         TEST_E(m4.get(0), 1 / std::sqrt(14));
         TEST_E(m4.get(1), 2 / std::sqrt(14));
+
+        m = { 1, 2, 3 };
+        TEST_E((m.gain_rc<2, 4>({ 4, 5, 6, 7, 8 })),
+            (MatrixT<double, 2, 4>{1, 2, 3, 4, 5, 6, 7, 8}));
+        TEST_E((m.gain_rc<2, 4>({ 4, 5 })),
+            (MatrixT<double, 2, 4>{1, 2, 3, 4, 5, 0, 0, 0}));
+        TEST_E((m.gain_rc<2, 4>()),
+            (MatrixT<double, 2, 4>{1, 2, 3, 0, 0, 0, 0, 0}));
+        TEST_E((m.gain_row<2>({ 4, 5, 6 })),
+            (MatrixT<double, 2, 3>{1, 2, 3, 4, 5, 6}));
+        TEST_E((m.gain_row<2>({ 4, 5 })),
+            (MatrixT<double, 2, 3>{1, 2, 3, 4, 5, 0}));
+        TEST_E((m.gain_row<2>()),
+            (MatrixT<double, 2, 3>{1, 2, 3, 0, 0, 0}));
+        TEST_E((m.gain_col<4>({ 4 })),
+            (MatrixT<double, 1, 4>{1, 2, 3, 4}));
+        TEST_E((m.gain_col<4>()),
+            (MatrixT<double, 1, 4>{1, 2, 3, 0}));
 
         TEST_E(m.row_size, 1);
         TEST_E(m.col_size, 3);
@@ -435,6 +486,10 @@ TEST_CASE(MatrixUnitTest) {
 
         TEST_E(m.row_size, 3);
         TEST_E(m.col_size, 1);
+
+        m = { 1, 2, 3 };
+        TEST_E(m.gain({ 10 }), (MatrixT<double, 4, 1>{1, 2, 3, 10}));
+        TEST_E(m.gain<4>(), (MatrixT<double, 4, 1>{1, 2, 3, 0}));
 
         return true;
     };
@@ -614,6 +669,7 @@ TEST_CASE(MatrixUnitTest) {
         m = { 5, 1, 9, 7 };
 
         TEST_NUM_E(m.det(), 26.0);
+        TEST_NUM_E(m.det_prec(), 26.0);
 
         MatrixT<double, 1, 1> cof1_result{7};
         MatrixT<double, 1, 1> cof2_result{5};
@@ -649,6 +705,7 @@ TEST_CASE(MatrixUnitTest) {
             2, 3, 4
         };
         TEST_NUM_E(m.det(), 52.0);
+        TEST_NUM_E(m.det_prec(), 52.0);
 
         auto cof1 = m.cofactor(0, 0);
         auto cof2 = m.cofactor(1, 1);
@@ -675,6 +732,30 @@ TEST_CASE(MatrixUnitTest) {
         };
         TEST_E(m.inverse(), inv_result);
 
+        TEST_E((m.shape<0, 0, 3, 3>()), (MatrixT<double, 3, 3>{
+            5, 1, 4,
+            9, 7, 8,
+            2, 3, 4}));
+        TEST_E((m.shape<0, 0, 2, 2>()), (MatrixT<double, 2, 2>{5, 1, 9, 7}));
+        TEST_E((m.shape<0, 0, 1, 1>()), (MatrixT<double, 1, 1>{5}));
+        TEST_E((m.shape<1, 1, 2, 2>()), (MatrixT<double, 2, 2>{7, 8, 3, 4}));
+        TEST_E((m.shape<2, 2, 2, 2>()), (MatrixT<double, 2, 2>{4, 0, 0, 0}));
+        TEST_E((m.shape<2, 2, 2, 2>({ 1 })), (MatrixT<double, 2, 2>{4, 1, 0, 0}));
+        TEST_E((m.shape<2, 2, 2, 2>({ 1, 2 })), (MatrixT<double, 2, 2>{4, 1, 2, 0}));
+        TEST_E((m.shape<2, 2, 2, 2>({ 1, 2, 3 })), (MatrixT<double, 2, 2>{4, 1, 2, 3}));
+        TEST_E((m.shape<1, 2, 3, 3>()), (MatrixT<double, 3, 3>{
+            8, 0, 0,
+            4, 0, 0,
+            0, 0, 0}));
+        TEST_E((m.shape<1, 2, 3, 3>({ 1 })), (MatrixT<double, 3, 3>{
+            8, 1, 0,
+            4, 0, 0,
+            0, 0, 0}));
+        TEST_E((m.shape<1, 2, 3, 3>({ 1, 2, 3 })), (MatrixT<double, 3, 3>{
+            8, 1, 2,
+            4, 3, 0,
+            0, 0, 0}));
+
         return true;
     };
 
@@ -687,6 +768,7 @@ TEST_CASE(MatrixUnitTest) {
             1, 5, 3,  7, 4,
         };
         TEST_NUM_E(m.det(), -5373.0);
+        TEST_NUM_E(m.det_prec(), -5373.0);
 
         auto cof1 = m.cofactor(0, 0);
         auto cof2 = m.cofactor(1, 1);
@@ -1165,6 +1247,7 @@ TEST_CASE(MatrixUnitTest) {
             97, 43, 87, 1, 0, 91, 87, 46, 78, 13
         };
         TEST_NUM_E(std::round(m.det()), 228902704.0);
+        TEST_NUM_E(m.det_prec(), 228902704.0);
 
         auto e_m = m.rref();
         auto rref_result = MatrixT<double, 10, 10>::I();
@@ -1272,6 +1355,71 @@ TEST_CASE(MatrixUnitTest) {
         persp4x4<double>(-1, 1);
         camera4x4<double>({}, {}, {});
         cameraInverse4x4<double>({}, {}, {});
+
+        return true;
+    };
+
+    TEST_DEF("Matrix Array tests.") {
+        TEST_TRUE((std::is_aggregate<MatrixT<float, 3, 3>>::value));
+        TEST_TRUE((std::is_standard_layout<MatrixT<float, 3, 3>>::value));
+        TEST_TRUE((std::is_trivial<MatrixT<float, 3, 3>>::value));
+        TEST_TRUE((std::is_pod<MatrixT<float, 3, 3>>::value));
+
+        TEST_TRUE((std::is_aggregate<VectorT<double, 3>>::value));
+        TEST_TRUE((std::is_standard_layout<VectorT<double, 3>>::value));
+        TEST_TRUE((std::is_trivial<VectorT<double, 3>>::value));
+        TEST_TRUE((std::is_pod<VectorT<double, 3>>::value));
+
+        VectorT<float, 3> arr[]{
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+            {10, 11, 12},
+        };
+        TEST_E(arr[0], (VectorT<float, 3>{1, 2, 3}));
+        TEST_E(arr[1], (VectorT<float, 3>{4, 5, 6}));
+        TEST_E(arr[2], (VectorT<float, 3>{7, 8, 9}));
+        TEST_E(arr[3], (VectorT<float, 3>{10, 11, 12}));
+
+        MatrixT<float, 3, 3> arr2[]{
+            {
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9
+            },
+            {
+                10, 11, 12,
+                13, 14, 15,
+                16, 17, 18
+            },
+            {
+                19, 20, 21,
+                22, 23, 24,
+                25, 26, 27
+            },
+            {
+                28, 29, 30,
+                31, 32, 33,
+                34, 35, 36
+            }
+        };
+
+        TEST_E(arr2[0], (MatrixT<float, 3, 3>{
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9}));
+        TEST_E(arr2[1], (MatrixT<float, 3, 3>{
+            10, 11, 12,
+            13, 14, 15,
+            16, 17, 18}));
+        TEST_E(arr2[2], (MatrixT<float, 3, 3>{
+            19, 20, 21,
+            22, 23, 24,
+            25, 26, 27}));
+        TEST_E(arr2[3], (MatrixT<float, 3, 3>{
+            28, 29, 30,
+            31, 32, 33,
+            34, 35, 36}));
 
         return true;
     };

@@ -24,10 +24,10 @@ namespace math {
         public internal::MatrixT_base<Ty, MatrixT<Ty, Row, Col>, Row, Col>,
         public internal::MatrixT_row_col_methods<Ty, MatrixT<Ty, Row, Col>, Row, Col>
     {
-    public:
         static_assert(Row != 0 && Col != 0, "Row and Col must be greater than 0!");
         using super = internal::MatrixT_base<Ty, MatrixT, Row, Col>;
 
+    public:
         using super::operator*;
 
         template <size_t RCol>
@@ -67,10 +67,10 @@ namespace math {
         public internal::MatrixT_base<Ty, MatrixT<Ty, Num, Num>, Num, Num>,
         public internal::MatrixT_row_col_methods<Ty, MatrixT<Ty, Num, Num>, Num, Num>
     {
-    public:
         static_assert(Num != 0, "Num must be greater than 0!");
         using super = internal::MatrixT_base<Ty, MatrixT, Num, Num>;
 
+    public:
         static MatrixT I() {
             MatrixT m;
             m.identity();
@@ -194,14 +194,13 @@ namespace math {
     template <typename Ty, size_t Row>
     class MatrixT<Ty, Row, 1> :
         public internal::MatrixT_base<Ty, MatrixT<Ty, Row, 1>, Row, 1>,
-        public internal::MatrixT_vec_base<Ty, MatrixT<Ty, Row, 1>, Row>,
-        public internal::MatrixT_vec_num_methods<Ty, MatrixT<Ty, Row, 1>, Row>
+        public internal::MatrixT_vec_base<Ty, MatrixT<Ty, Row, 1>, Row>
     {
-    public:
         static_assert(Row != 0, "Row must be greater than 0!");
         using super = internal::MatrixT_base<Ty, MatrixT, Row, 1>;
         using vec_super = internal::MatrixT_vec_base<Ty, MatrixT<Ty, Row, 1>, Row>;
 
+    public:
         using super::operator*;
         using vec_super::operator*;
 
@@ -211,12 +210,30 @@ namespace math {
         }
 
         template <size_t Re>
-        typename std::enable_if<(Re <= Row), MatrixT<Ty, Re, 1>>::
+        typename std::enable_if<(Re < Row), MatrixT<Ty, Re, 1>>::
         type reduce() const {
             MatrixT<Ty, Re, 1> out;
             for (size_t i = 0; i < Re; ++i) {
                 out.data[i] = this->data[i];
             }
+            return out;
+        }
+
+        template <size_t NRow>
+        typename std::enable_if<(NRow > Row), MatrixT<Ty, NRow, 1>>::
+        type gain() const {
+            MatrixT<Ty, NRow, 1> out;
+            std::copy(this->data, this->data + Row, out.data);
+            std::fill(out.data + Row, out.data + NRow, Ty());
+            return out;
+        }
+
+        template <size_t NExt>
+        typename std::enable_if<(NExt > 0), MatrixT<Ty, (Row + NExt), 1>>::
+        type gain(const Ty(&args)[NExt]) const {
+            MatrixT<Ty, (Row + NExt), 1> out;
+            std::copy(this->data, this->data + Row, out.data);
+            std::copy(args, args + NExt, out.data + Row);
             return out;
         }
 
@@ -380,14 +397,13 @@ namespace math {
     template <typename Ty, size_t Col>
     class MatrixT<Ty, 1, Col> :
         public internal::MatrixT_base<Ty, MatrixT<Ty, 1, Col>, 1, Col>,
-        public internal::MatrixT_vec_base<Ty, MatrixT<Ty, 1, Col>, Col>,
-        public internal::MatrixT_vec_num_methods<Ty, MatrixT<Ty, 1, Col>, Col>
+        public internal::MatrixT_vec_base<Ty, MatrixT<Ty, 1, Col>, Col>
     {
-    public:
         static_assert(Col != 0, "Col must be greater than 0!");
         using super = internal::MatrixT_base<Ty, MatrixT, 1, Col>;
         using vec_super = internal::MatrixT_vec_base<Ty, MatrixT<Ty, 1, Col>, Col>;
 
+    public:
         using super::operator*;
         using vec_super::operator*;
 
@@ -397,12 +413,30 @@ namespace math {
         }
 
         template <size_t Re>
-        typename std::enable_if<(Re <= Col), MatrixT<Ty, 1, Re>>::
+        typename std::enable_if<(Re < Col), MatrixT<Ty, 1, Re>>::
         type reduce() const {
             MatrixT<Ty, 1, Re> out;
             for (size_t i = 0; i < Re; ++i) {
                 out.data[i] = this->data[i];
             }
+            return out;
+        }
+
+        template <size_t NCol>
+        typename std::enable_if<(NCol > Col), MatrixT<Ty, 1, NCol>>::
+        type gain() const {
+            MatrixT<Ty, 1, NCol> out;
+            std::copy(this->data, this->data + Col, out.data);
+            std::fill(out.data + Col, out.data + NCol, Ty());
+            return out;
+        }
+
+        template <size_t NExt>
+        typename std::enable_if<(NExt > 0), MatrixT<Ty, 1, (Col + NExt)>>::
+        type gain(const Ty(&args)[NExt]) const {
+            MatrixT<Ty, 1, (Col + NExt)> out;
+            std::copy(this->data, this->data + Col, out.data);
+            std::copy(args, args + NExt, out.data + Col);
             return out;
         }
 
@@ -531,84 +565,28 @@ namespace math {
     };
 
     template <typename Ty>
-    class MatrixT<Ty, 1, 1> {
-    public:
-        using type = Ty;
-        static constexpr size_t row_size = 1u;
-        static constexpr size_t col_size = 1u;
+    class MatrixT<Ty, 1, 1> :
+        public internal::MatrixT_base<Ty, MatrixT<Ty, 1, 1>, 1, 1>,
+        public internal::MatrixT_vec_num_methods<Ty, MatrixT<Ty, 1, 1>, 1>
+    {
+        using super = internal::MatrixT_base<Ty, MatrixT, 1, 1>;
 
-        static MatrixT Z() {
-            MatrixT m;
-            m.zeros();
-            return m;
-        }
+    public:
         static MatrixT I() {
             MatrixT m;
             m.identity();
             return m;
         }
 
-        bool operator==(const MatrixT& rhs) const {
-            return equal(rhs);
-        }
-        bool operator!=(const MatrixT& rhs) const {
-            return !equal(rhs);
-        }
-
         explicit operator Ty() const {
             return this->data[0];
         }
 
-        MatrixT operator+(const MatrixT& rhs) const {
-            MatrixT m(*this);
-            m.add(rhs);
-            return m;
-        }
-        MatrixT operator-(const MatrixT& rhs) const {
-            MatrixT m(*this);
-            m.sub(rhs);
-            return m;
-        }
-        MatrixT operator*(Ty val) const {
-            MatrixT m(*this);
-            m.mul(val);
-            return m;
-        }
-        MatrixT operator/(Ty val) const {
-            MatrixT m(*this);
-            m.div(val);
-            return m;
-        }
+        using super::operator*;
 
         template <size_t RCol>
         MatrixT<Ty, 1, RCol> operator*(const MatrixT<Ty, 1, RCol>& rhs) const {
-            return mul(rhs);
-        }
-
-        MatrixT& operator+=(const MatrixT& rhs) {
-            return add(rhs);
-        }
-        MatrixT& operator-=(const MatrixT& rhs) {
-            return sub(rhs);
-        }
-        MatrixT& operator*=(Ty val) {
-            return mul(val);
-        }
-        MatrixT& operator/=(Ty val) {
-            return div(val);
-        }
-
-        MatrixT operator-() const {
-            MatrixT m(*this);
-            m.minus();
-            return m;
-        }
-
-        template<typename Cy>
-        explicit operator MatrixT<Cy, 1, 1>() const {
-            MatrixT<Cy, 1, 1> out;
-            out.data[0] = static_cast<Cy>(this->data[0]);
-            return out;
+            return this->mul(rhs);
         }
 
         Ty operator()() const {
@@ -622,38 +600,7 @@ namespace math {
             return transpose();
         }
 
-        Ty x() const { return this->data[0]; }
-        Ty& x() { return this->data[0]; }
-
-        MatrixT& x(Ty x) {
-            this->data[0] = x;
-            return *this;
-        }
-
-        MatrixT& add(const MatrixT& rhs) {
-            this->data[0] += rhs.data[0];
-            return *this;
-        }
-
-        MatrixT& sub(const MatrixT& rhs) {
-            this->data[0] -= rhs.data[0];
-            return *this;
-        }
-
-        MatrixT& minus() {
-            this->data[0] = -this->data[0];
-            return *this;
-        }
-
-        MatrixT& mul(Ty val) {
-            this->data[0] *= val;
-            return *this;
-        }
-
-        MatrixT& div(Ty val) {
-            this->data[0] /= val;
-            return *this;
-        }
+        using super::mul;
 
         template <size_t RCol>
         MatrixT<Ty, 1, RCol> mul(const MatrixT<Ty, 1, RCol>& rhs) const {
@@ -677,11 +624,6 @@ namespace math {
             return this->data[0];
         }
 
-        MatrixT& zeros() {
-            this->data[0] = 0;
-            return *this;
-        }
-
         MatrixT& identity() {
             this->data[0] = 1;
             return *this;
@@ -691,11 +633,11 @@ namespace math {
             return *this;
         }
 
-        bool equal(const MatrixT& rhs) const {
-            return utl::is_num_equal(this->data[0], rhs.data[0]);
+        Ty det() const {
+            return this->data[0];
         }
 
-        Ty det() const {
+        Ty det_prec() const {
             return this->data[0];
         }
 
@@ -739,8 +681,6 @@ namespace math {
             out.data[0] = 1 / this->data[0];
             return out;
         }
-
-        Ty data[1];
 
     private:
         template <size_t RCol>

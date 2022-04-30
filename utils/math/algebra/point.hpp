@@ -16,107 +16,15 @@
 namespace utl {
 namespace math {
 
+    template <typename Ty, size_t Num>
+    class PointT;
+
 namespace internal {
 
     template <typename Ty, typename Pt, size_t Num>
-    class PointT_num_methods {
-    private:
+    class PointT_base {
         using PointT = Pt;
-
     public:
-        Ty x() const { return data[0]; }
-        Ty y() const { return data[1]; }
-        Ty z() const { return data[2]; }
-        Ty w() const { return data[3]; }
-        Ty& x() { return data[0]; }
-        Ty& y() { return data[1]; }
-        Ty& z() { return data[2]; }
-        Ty& w() { return data[3]; }
-
-        PointT& x(Ty x) {
-            data[0] = x;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& y(Ty y) {
-            data[1] = y;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& z(Ty z) {
-            data[2] = z;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& w(Ty w) {
-            data[3] = w;
-            return static_cast<PointT&>(*this);
-        }
-
-        Ty data[Num];
-    };
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 1> {};
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 2> {
-    private:
-        using PointT = Pt;
-
-    public:
-        Ty x() const { return data[0]; }
-        Ty y() const { return data[1]; }
-        Ty& x() { return data[0]; }
-        Ty& y() { return data[1]; }
-
-        PointT& x(Ty x) {
-            data[0] = x;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& y(Ty y) {
-            data[1] = y;
-            return static_cast<PointT&>(*this);
-        }
-
-        Ty data[2];
-    };
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 3> {
-    private:
-        using PointT = Pt;
-
-    public:
-        Ty x() const { return data[0]; }
-        Ty y() const { return data[1]; }
-        Ty z() const { return data[2]; }
-        Ty& x() { return data[0]; }
-        Ty& y() { return data[1]; }
-        Ty& z() { return data[2]; }
-
-        PointT& x(Ty x) {
-            data[0] = x;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& y(Ty y) {
-            data[1] = y;
-            return static_cast<PointT&>(*this);
-        }
-        PointT& z(Ty z) {
-            data[2] = z;
-            return static_cast<PointT&>(*this);
-        }
-
-        Ty data[3];
-    };
-
-}
-
-    template <typename Ty, size_t Num>
-    class PointT :
-        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num>
-    {
-    public:
-        static_assert(Num != 0, "Num must be greater than 0!");
-
         using type = Ty;
         static constexpr size_t size = Num;
 
@@ -125,6 +33,104 @@ namespace internal {
             p.zeros();
             return p;
         }
+
+        Ty data[Num];
+    };
+
+    template <typename Ty, typename Pt>
+    class PointT_x_methods {
+        using PointT = Pt;
+        PointT* derived() { return static_cast<PointT*>(this); }
+        const PointT* derived() const { return static_cast<const PointT*>(this); }
+    public:
+        Ty x() const { return derived()->data[0]; }
+        Ty& x() { return derived()->data[0]; }
+        PointT& x(Ty x) {
+            derived()->data[0] = x;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Pt>
+    class PointT_y_methods {
+        using PointT = Pt;
+        PointT* derived() { return static_cast<PointT*>(this); }
+        const PointT* derived() const { return static_cast<const PointT*>(this); }
+    public:
+        Ty y() const { return derived()->data[1]; }
+        Ty& y() { return derived()->data[1]; }
+        PointT& y(Ty y) {
+            derived()->data[1] = y;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Pt>
+    class PointT_z_methods {
+        using PointT = Pt;
+        PointT* derived() { return static_cast<PointT*>(this); }
+        const PointT* derived() const { return static_cast<const PointT*>(this); }
+    public:
+        Ty z() const { return derived()->data[2]; }
+        Ty& z() { return derived()->data[2]; }
+        PointT& z(Ty z) {
+            derived()->data[2] = z;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Pt>
+    class PointT_w_methods {
+        using PointT = Pt;
+        PointT* derived() { return static_cast<PointT*>(this); }
+        const PointT* derived() const { return static_cast<const PointT*>(this); }
+    public:
+        Ty w() const { return derived()->data[3]; }
+        Ty& w() { return derived()->data[3]; }
+        PointT& w(Ty w) {
+            derived()->data[3] = w;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Pt, size_t Num>
+    class PointT_num_methods :
+        public PointT_x_methods<Ty, Pt>,
+        public PointT_y_methods<Ty, Pt>,
+        public PointT_z_methods<Ty, Pt>,
+        public PointT_w_methods<Ty, Pt> {};
+
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 1> :
+        public PointT_x_methods<Ty, Pt> {};
+
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 2> :
+        public PointT_x_methods<Ty, Pt>,
+        public PointT_y_methods<Ty, Pt> {};
+
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 3> :
+        public PointT_x_methods<Ty, Pt>,
+        public PointT_y_methods<Ty, Pt>,
+        public PointT_z_methods<Ty, Pt> {};
+
+    template <typename Ty, typename Pt>
+    class PointT_num_methods<Ty, Pt, 4> :
+        public PointT_x_methods<Ty, Pt>,
+        public PointT_y_methods<Ty, Pt>,
+        public PointT_z_methods<Ty, Pt>,
+        public PointT_w_methods<Ty, Pt> {};
+
+}
+
+    template <typename Ty, size_t Num>
+    class PointT :
+        public internal::PointT_base<Ty, PointT<Ty, Num>, Num>,
+        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num>
+    {
+    public:
+        static_assert(Num != 0, "Num must be greater than 0!");
 
         PointT operator+(const VectorT<Ty, Num>& rhs) const {
             return PointT(*this).add(rhs);
@@ -142,6 +148,43 @@ namespace internal {
             return PointT(*this).sub(rhs);
         }
 
+        PointT operator*(Ty val) const {
+            PointT out(*this);
+            out.mul(val);
+            return out;
+        }
+        PointT operator*(const MatrixT<Ty, Num, Num>& rhs) const {
+            PointT<Ty, Num> out(*this);
+            out.mulr(rhs);
+            return out;
+        }
+        PointT operator*(const MatrixT<Ty, Num + 1, Num + 1>& rhs) const {
+            PointT<Ty, Num> out(*this);
+            out.mulr(rhs);
+            return out;
+        }
+        PointT operator/(Ty val) const {
+            PointT out(*this);
+            out.div(val);
+            return out;
+        }
+        PointT& operator*=(Ty val) {
+            mul(val);
+            return *this;
+        }
+        PointT& operator*=(const MatrixT<Ty, Num, Num>& rhs) {
+            mulr(rhs);
+            return *this;
+        }
+        PointT& operator*=(const MatrixT<Ty, Num + 1, Num + 1>& rhs) {
+            mulr(rhs);
+            return *this;
+        }
+        PointT& operator/=(Ty val) {
+            div(val);
+            return *this;
+        }
+
         bool operator==(const PointT& rhs) const {
             return equal(rhs);
         }
@@ -157,6 +200,15 @@ namespace internal {
 
         template<typename Cy>
         explicit operator PointT<Cy, Num>() const {
+            PointT<Cy, Num> out;
+            for (size_t i = 0; i < Num; ++i) {
+                out.data[i] = static_cast<Cy>(this->data[i]);
+            }
+            return out;
+        }
+
+        template<typename Cy>
+        PointT<Cy, Num> cast() const {
             PointT<Cy, Num> out;
             for (size_t i = 0; i < Num; ++i) {
                 out.data[i] = static_cast<Cy>(this->data[i]);
@@ -195,6 +247,15 @@ namespace internal {
             for (size_t i = 0; i < Re; ++i) {
                 out.data[i] = this->data[i];
             }
+            return out;
+        }
+
+        template <size_t N>
+        typename std::enable_if<(N > 0), PointT<Ty, (Num + N)>>::
+        type gain(const Ty(&args)[N]) const {
+            PointT<Ty, (Num + N)> out;
+            std::copy(this->data, this->data + Num, out.data);
+            std::copy(args, args + N, out.data + Num);
             return out;
         }
 
@@ -299,6 +360,70 @@ namespace internal {
             return out;
         }
 
+        PointT& mul(Ty val) {
+            for (size_t i = 0; i < Num; ++i) {
+                this->data[i] *= val;
+            }
+            return *this;
+        }
+
+        PointT& mull(const MatrixT<Ty, Num, Num>& lhs) {
+            // m * p
+            PointT out{};
+            for (size_t r = 0; r < Num; ++r) {
+                for (size_t c = 0; c < Num; ++c) {
+                    out.data[r] += lhs.data[r * Num + c] * this->data[c];
+                }
+            }
+            *this = out;
+            return *this;
+        }
+
+        PointT& mull(const MatrixT<Ty, Num + 1, Num + 1>& lhs) {
+            // m * p
+            PointT out{};
+            for (size_t r = 0; r < Num; ++r) {
+                for (size_t c = 0; c < Num; ++c) {
+                    out.data[r] += lhs.data[r * (Num + 1) + c] * this->data[c];
+                }
+                out.data[r] += lhs.data[r * (Num + 1) + Num];
+            }
+            *this = out;
+            return *this;
+        }
+
+        PointT& mulr(const MatrixT<Ty, Num, Num>& rhs) {
+            // p * m
+            PointT out{};
+            for (size_t c = 0; c < Num; ++c) {
+                for (size_t r = 0; r < Num; ++r) {
+                    out.data[c] += rhs.data[r * Num + c] * this->data[r];
+                }
+            }
+            *this = out;
+            return *this;
+        }
+
+        PointT& mulr(const MatrixT<Ty, Num + 1, Num + 1>& rhs) {
+            // p * m
+            PointT out{};
+            for (size_t c = 0; c < Num; ++c) {
+                for (size_t r = 0; r < Num; ++r) {
+                    out.data[c] += rhs.data[r * (Num + 1) + c] * this->data[r];
+                }
+                out.data[c] += rhs.data[Num * (Num + 1) + c];
+            }
+            *this = out;
+            return *this;
+        }
+
+        PointT& div(Ty val) {
+            for (size_t i = 0; i < Num; ++i) {
+                this->data[i] /= val;
+            }
+            return *this;
+        }
+
         bool equal(const PointT& rhs) const {
             for (size_t i = 0; i < Num; ++i) {
                 if (!utl::is_num_equal(this->data[i], rhs.data[i])) {
@@ -307,21 +432,14 @@ namespace internal {
             }
             return true;
         }
-
     };
 
     template <typename Ty>
-    class PointT<Ty, 1> {
+    class PointT<Ty, 1> :
+        public internal::PointT_base<Ty, PointT<Ty, 1>, 1>,
+        public internal::PointT_num_methods<Ty, PointT<Ty, 1>, 1>
+    {
     public:
-        using type = Ty;
-        static constexpr size_t size = 1u;
-
-        static PointT Z() {
-            PointT p;
-            p.zeros();
-            return p;
-        }
-
         PointT operator+(const VectorT<Ty, 1>& rhs) const {
             return PointT(*this).add(rhs);
         }
@@ -330,6 +448,43 @@ namespace internal {
         }
         PointT operator-(const VectorT<Ty, 1>& rhs) const {
             return PointT(*this).sub(rhs);
+        }
+
+        PointT operator*(Ty val) const {
+            PointT out(*this);
+            out.mul(val);
+            return out;
+        }
+        PointT operator*(const MatrixT<Ty, 1, 1>& rhs) const {
+            PointT<Ty, 1> out(*this);
+            out.mulr(rhs);
+            return out;
+        }
+        PointT operator*(const MatrixT<Ty, 2, 2>& rhs) const {
+            PointT<Ty, 1> out(*this);
+            out.mulr(rhs);
+            return out;
+        }
+        PointT operator/(Ty val) const {
+            PointT out(*this);
+            out.div(val);
+            return out;
+        }
+        PointT& operator*=(Ty val) {
+            mul(val);
+            return *this;
+        }
+        PointT& operator*=(const MatrixT<Ty, 1, 1>& rhs) {
+            mulr(rhs);
+            return *this;
+        }
+        PointT& operator*=(const MatrixT<Ty, 2, 2>& rhs) {
+            mulr(rhs);
+            return *this;
+        }
+        PointT& operator/=(Ty val) {
+            div(val);
+            return *this;
         }
 
         bool operator==(const PointT& rhs) const {
@@ -347,6 +502,13 @@ namespace internal {
 
         template<typename Cy>
         explicit operator PointT<Cy, 1>() const {
+            PointT<Cy, 1> out;
+            out.data[0] = static_cast<Cy>(this->data[0]);
+            return out;
+        }
+
+        template<typename Cy>
+        PointT<Cy, 1> cast() const {
             PointT<Cy, 1> out;
             out.data[0] = static_cast<Cy>(this->data[0]);
             return out;
@@ -370,6 +532,15 @@ namespace internal {
             return out;
         }
 
+        template <size_t N>
+        typename std::enable_if<(N > 0), PointT<Ty, (1 + N)>>::
+        type gain(const Ty(&args)[N]) const {
+            PointT<Ty, (1 + N)> out;
+            out.data[0] = this->data[0];
+            std::copy(args, args + N, out.data + 1);
+            return out;
+        }
+
         PointT& minus() {
             this->data[0] = -this->data[0];
             return *this;
@@ -390,14 +561,6 @@ namespace internal {
 
         Ty& at() {
             return this->data[0];
-        }
-
-        Ty x() const { return this->data[0]; }
-        Ty& x() { return this->data[0]; }
-
-        PointT& x(Ty x) {
-            this->data[0] = x;
-            return *this;
         }
 
         PointT& zeros() {
@@ -427,12 +590,74 @@ namespace internal {
             return out;
         }
 
+        PointT& mul(Ty val) {
+            this->data[0] *= val;
+            return *this;
+        }
+
+        PointT& mull(const MatrixT<Ty, 1, 1>& lhs) {
+            // m * p
+            PointT out;
+            out.data[0] = lhs.data[0] * this->data[0];
+            *this = out;
+            return *this;
+        }
+
+        PointT& mull(const MatrixT<Ty, 2, 2>& lhs) {
+            // m * p
+            PointT out;
+            out.data[0] = lhs.data[0] * this->data[0] + lhs.data[1];
+            *this = out;
+            return *this;
+        }
+
+        PointT& mulr(const MatrixT<Ty, 1, 1>& rhs) {
+            // p * m
+            PointT out;
+            out.data[0] = rhs.data[0] * this->data[0];
+            *this = out;
+            return *this;
+        }
+
+        PointT& mulr(const MatrixT<Ty, 2, 2>& rhs) {
+            // p * m
+            PointT out;
+            out.data[0] = rhs.data[0] * this->data[0] + rhs.data[2];
+            *this = out;
+            return *this;
+        }
+
+        PointT& div(Ty val) {
+            this->data[0] /= val;
+            return *this;
+        }
+
         bool equal(const PointT& rhs) const {
             return utl::is_num_equal(this->data[0], rhs.data[0]);
         }
-
-        Ty data[1];
     };
+
+
+    template <typename Ty, size_t Num>
+    PointT<Ty, Num> operator*(Ty val, const PointT<Ty, Num>& p) {
+        PointT<Ty, Num> out(p);
+        out.mul(val);
+        return out;
+    }
+
+    template <typename Ty, size_t Num>
+    PointT<Ty, Num> operator*(const MatrixT<Ty, Num, Num>& m, const PointT<Ty, Num>& p) {
+        PointT<Ty, Num> out(p);
+        out.mull(m);
+        return out;
+    }
+
+    template <typename Ty, size_t Num>
+    PointT<Ty, Num> operator*(const MatrixT<Ty, Num + 1, Num + 1>& m, const PointT<Ty, Num>& p) {
+        PointT<Ty, Num> out(p);
+        out.mull(m);
+        return out;
+    }
 
 }
 

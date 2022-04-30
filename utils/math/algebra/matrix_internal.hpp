@@ -44,6 +44,246 @@ namespace internal {
             return out;
         }
 
+        template<typename Cy>
+        math::MatrixT<Cy, Row, Col> cast() const {
+            math::MatrixT<Cy, Row, Col> out;
+            for (size_t i = 0; i < Count; ++i) {
+                out.data[i] = static_cast<Cy>(this->data[i]);
+            }
+            return out;
+        }
+
+        template<size_t GaRow, size_t GaCol>
+        typename std::enable_if<
+            (GaRow >= Row && GaCol >= Col &&
+                (GaRow != Row || GaCol != Col)),
+            math::MatrixT<Ty, GaRow, GaCol>>::
+        type gain_rc() const {
+            size_t r = 0;
+            math::MatrixT<Ty, GaRow, GaCol> out;
+            for (; r < Row; ++r) {
+                std::copy(
+                    this->data + r * Col,
+                    this->data + r * Col + Col,
+                    out.data + r * GaCol);
+                if constexpr (Col < GaCol) {
+                    std::fill(
+                        out.data + r * GaCol + Col,
+                        out.data + r * GaCol + GaCol, Ty());
+                }
+            }
+            if constexpr (Row < GaRow) {
+                std::fill(
+                    out.data + Row * GaCol,
+                    out.data + GaRow * GaCol, Ty());
+            }
+            return out;
+        }
+
+        template<size_t GaRow, size_t GaCol, size_t N>
+        typename std::enable_if<
+            (GaRow >= Row && GaCol >= Col &&
+                (GaRow != Row || GaCol != Col) && N > 0),
+            math::MatrixT<Ty, GaRow, GaCol>>::
+        type gain_rc(const Ty(&args)[N]) const {
+            size_t r = 0;
+            size_t src = 0;
+            math::MatrixT<Ty, GaRow, GaCol> out;
+            for (; r < Row; ++r) {
+                std::copy(
+                    this->data + r * Col,
+                    this->data + r * Col + Col,
+                    out.data + r * GaCol);
+                if constexpr (Col < GaCol) {
+                    size_t rem_count = (std::min)(GaCol - Col, N - src);
+                    std::copy(
+                        args + src,
+                        args + src + rem_count,
+                        out.data + r * GaCol + Col);
+                    src += rem_count;
+                    if (rem_count < GaCol - Col) {
+                        std::fill(
+                            out.data + r * GaCol + Col + rem_count,
+                            out.data + r * GaCol + GaCol, Ty());
+                    }
+                }
+            }
+
+            if constexpr (Row < GaRow) {
+                size_t rem_count = (std::min)((GaRow - Row) * GaCol, N - src);
+                std::copy(
+                    args + src,
+                    args + src + rem_count,
+                    out.data + Row * GaCol);
+                if (rem_count < (GaRow - Row) * GaCol) {
+                    std::fill(
+                        out.data + Row * GaCol + rem_count,
+                        out.data + GaRow * GaCol, Ty());
+                }
+            }
+            return out;
+        }
+
+        template <size_t GaRow>
+        typename std::enable_if<
+            (GaRow > Row), math::MatrixT<Ty, GaRow, Col>>::
+        type gain_row() const {
+            math::MatrixT<Ty, GaRow, Col> out;
+            std::copy(
+                this->data,
+                this->data + Row * Col,
+                out.data);
+            std::fill(
+                out.data + Row * Col,
+                out.data + GaRow * Col, Ty());
+            return out;
+        }
+
+        template <size_t GaRow, size_t N>
+        typename std::enable_if<
+            (GaRow > Row && N > 0), math::MatrixT<Ty, GaRow, Col>>::
+        type gain_row(const Ty(&args)[N]) const {
+            size_t src = 0;
+            math::MatrixT<Ty, GaRow, Col> out;
+            std::copy(
+                this->data,
+                this->data + Row * Col,
+                out.data);
+
+            size_t rem_count = (std::min)((GaRow - Row) * Col, N - src);
+            std::copy(
+                args + src,
+                args + src + rem_count,
+                out.data + Row * Col);
+            if (rem_count < (GaRow - Row) * Col) {
+                std::fill(
+                    out.data + Row * Col + rem_count,
+                    out.data + GaRow * Col, Ty());
+            }
+
+            return out;
+        }
+
+        template <size_t GaCol>
+        typename std::enable_if<
+            (GaCol > Col), math::MatrixT<Ty, Row, GaCol>>::
+        type gain_col() const {
+            size_t r = 0;
+            math::MatrixT<Ty, Row, GaCol> out;
+            for (; r < Row; ++r) {
+                std::copy(
+                    this->data + r * Col,
+                    this->data + r * Col + Col,
+                    out.data + r * GaCol);
+                std::fill(
+                    out.data + r * GaCol + Col,
+                    out.data + r * GaCol + GaCol, Ty());
+            }
+            return out;
+        }
+
+        template <size_t GaCol, size_t N>
+        typename std::enable_if<
+            (GaCol > Col && N > 0), math::MatrixT<Ty, Row, GaCol>>::
+        type gain_col(const Ty(&args)[N]) const {
+            size_t r = 0;
+            size_t src = 0;
+            math::MatrixT<Ty, Row, GaCol> out;
+            for (; r < Row; ++r) {
+                std::copy(
+                    this->data + r * Col,
+                    this->data + r * Col + Col,
+                    out.data + r * GaCol);
+                size_t rem_count = (std::min)(GaCol - Col, N - src);
+                std::copy(
+                    args + src,
+                    args + src + rem_count,
+                    out.data + r * GaCol + Col);
+                src += rem_count;
+                if (rem_count < GaCol - Col) {
+                    std::fill(
+                        out.data + r * GaCol + Col + rem_count,
+                        out.data + r * GaCol + GaCol, Ty());
+                }
+            }
+            return out;
+        }
+
+        template <size_t IRow, size_t ICol, size_t NRow, size_t NCol>
+        typename std::enable_if<
+            (IRow < Row && ICol < Col && NRow > 0 && NCol > 0),
+            math::MatrixT<Ty, NRow, NCol>>::
+        type shape() const {
+            size_t r = IRow;
+            size_t dr = 0;
+            math::MatrixT<Ty, NRow, NCol> out;
+            constexpr size_t _R = (IRow + NRow > Row) ? (Row - IRow) : NRow;
+            constexpr size_t _C = (ICol + NCol > Col) ? Col : (ICol + NCol);
+            for (; dr < _R; ++dr, ++r) {
+                std::copy(
+                    this->data + r * Col + ICol,
+                    this->data + r * Col + _C,
+                    out.data + dr * NCol);
+                if constexpr (ICol + NCol > Col) {
+                    std::fill(
+                        out.data + dr * NCol + _C - ICol,
+                        out.data + dr * NCol + NCol, Ty());
+                }
+            }
+            if constexpr (_R < NRow) {
+                std::fill(
+                    out.data + _R * NCol,
+                    out.data + NRow * NCol, Ty());
+            }
+            return out;
+        }
+
+        template <size_t IRow, size_t ICol, size_t NRow, size_t NCol, size_t N>
+        typename std::enable_if<
+            (IRow < Row && ICol < Col && NRow > 0 && NCol > 0),
+            math::MatrixT<Ty, NRow, NCol>>::
+        type shape(const Ty(&args)[N]) const {
+            size_t r = IRow;
+            size_t dr = 0;
+            size_t src = 0;
+            math::MatrixT<Ty, NRow, NCol> out;
+            constexpr size_t _R = (IRow + NRow > Row) ? (Row - IRow) : NRow;
+            constexpr size_t _C = (ICol + NCol > Col) ? Col : (ICol + NCol);
+            for (; dr < _R; ++dr, ++r) {
+                std::copy(
+                    this->data + r * Col + ICol,
+                    this->data + r * Col + _C,
+                    out.data + dr * NCol);
+                if constexpr (ICol + NCol > Col) {
+                    size_t rem_count = (std::min)(ICol + NCol - Col, N - src);
+                    std::copy(
+                        args + src,
+                        args + src + rem_count,
+                        out.data + dr * NCol + _C - ICol);
+                    src += rem_count;
+                    if (rem_count < ICol + NCol - Col) {
+                        std::fill(
+                            out.data + dr * NCol + _C - ICol + rem_count,
+                            out.data + dr * NCol + NCol, Ty());
+                    }
+                }
+            }
+
+            if constexpr (IRow + NRow > Row) {
+                size_t rem_count = (std::min)((IRow + NRow - Row) * NCol, N - src);
+                std::copy(
+                    args + src,
+                    args + src + rem_count,
+                    out.data + _R * NCol);
+                if (rem_count < (IRow + NRow - Row) * NCol) {
+                    std::fill(
+                        out.data + _R * NCol + rem_count,
+                        out.data + NRow * NCol, Ty());
+                }
+            }
+            return out;
+        }
+
         bool operator==(const MatrixT& rhs) const {
             return equal(rhs);
         }
@@ -75,7 +315,6 @@ namespace internal {
             m.mul(val);
             return m;
         }
-
         MatrixT operator/(Ty val) const {
             MatrixT m(static_cast<const MatrixT&>(*this));
             m.div(val);
@@ -207,7 +446,7 @@ namespace internal {
 
         template <size_t IRow, size_t ICol>
         typename std::enable_if<(IRow < Row&& ICol < Col), Ty>::
-            type at() const {
+        type at() const {
             return derived()->data[IRow * Col + ICol];
         }
 
@@ -223,7 +462,9 @@ namespace internal {
         }
 
         template <size_t ReRow, size_t ReCol>
-        typename std::enable_if<(ReRow <= Row && ReCol <= Col), math::MatrixT<Ty, ReRow, ReCol>>::
+        typename std::enable_if<
+            (ReRow <= Row && ReCol <= Col && (ReRow != Row || ReCol != Col)),
+            math::MatrixT<Ty, ReRow, ReCol>>::
         type reduce() const {
             math::MatrixT<Ty, ReRow, ReCol> out;
             for (size_t r = 0; r < ReRow; ++r) {
@@ -705,8 +946,110 @@ namespace internal {
         }
     };
 
+    template <typename Ty, typename Mat>
+    class MatrixT_x_methods {
+        using MatrixT = Mat;
+        MatrixT* derived() { return static_cast<MatrixT*>(this); }
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
+    public:
+        Ty x() const { return derived()->data[0]; }
+        Ty& x() { return derived()->data[0]; }
+        MatrixT& x(Ty x) {
+            derived()->data[0] = x;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Mat>
+    class MatrixT_y_methods {
+        using MatrixT = Mat;
+        MatrixT* derived() { return static_cast<MatrixT*>(this); }
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
+    public:
+        Ty y() const { return derived()->data[1]; }
+        Ty& y() { return derived()->data[1]; }
+        MatrixT& y(Ty y) {
+            derived()->data[1] = y;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Mat>
+    class MatrixT_z_methods {
+        using MatrixT = Mat;
+        MatrixT* derived() { return static_cast<MatrixT*>(this); }
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
+    public:
+        Ty z() const { return derived()->data[2]; }
+        Ty& z() { return derived()->data[2]; }
+        MatrixT& z(Ty z) {
+            derived()->data[2] = z;
+            return *derived();
+        }
+    };
+
+    template <typename Ty, typename Mat>
+    class MatrixT_w_methods {
+        using MatrixT = Mat;
+        MatrixT* derived() { return static_cast<MatrixT*>(this); }
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
+    public:
+        Ty w() const { return derived()->data[3]; }
+        Ty& w() { return derived()->data[3]; }
+        MatrixT& w(Ty w) {
+            derived()->data[3] = w;
+            return *derived();
+        }
+    };
+
     template <typename Ty, typename Mat, size_t Num>
-    class MatrixT_vec_base {
+    class MatrixT_vec_num_methods :
+        public MatrixT_x_methods<Ty, Mat>,
+        public MatrixT_y_methods<Ty, Mat>,
+        public MatrixT_z_methods<Ty, Mat>,
+        public MatrixT_w_methods<Ty, Mat> {};
+
+    template <typename Ty, typename Mat>
+    class MatrixT_vec_num_methods<Ty, Mat, 1> :
+        public MatrixT_x_methods<Ty, Mat> {};
+
+    template <typename Ty, typename Mat>
+    class MatrixT_vec_num_methods<Ty, Mat, 2> :
+        public MatrixT_x_methods<Ty, Mat>,
+        public MatrixT_y_methods<Ty, Mat> {};
+
+    template <typename Ty, typename Mat>
+    class MatrixT_vec_num_methods<Ty, Mat, 3> :
+        public MatrixT_x_methods<Ty, Mat>,
+        public MatrixT_y_methods<Ty, Mat>,
+        public MatrixT_z_methods<Ty, Mat>
+    {
+        using MatrixT = Mat;
+        MatrixT* derived() { return static_cast<MatrixT*>(this); }
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
+    public:
+        MatrixT operator^(const MatrixT& rhs) const {
+            return cross(rhs);
+        }
+
+        MatrixT& operator^=(const MatrixT& rhs) {
+            *derived() = cross(rhs);
+            return *derived();
+        }
+
+        MatrixT cross(const MatrixT& rhs) const {
+            MatrixT out;
+            out.data[0] = derived()->data[1] * rhs.data[2] - derived()->data[2] * rhs.data[1];
+            out.data[1] = derived()->data[2] * rhs.data[0] - derived()->data[0] * rhs.data[2];
+            out.data[2] = derived()->data[0] * rhs.data[1] - derived()->data[1] * rhs.data[0];
+            return out;
+        }
+    };
+
+    template <typename Ty, typename Mat, size_t Num>
+    class MatrixT_vec_base :
+        public MatrixT_vec_num_methods<Ty, Mat, Num>
+    {
     private:
         using MatrixT = Mat;
 
@@ -738,7 +1081,7 @@ namespace internal {
 
         template <size_t Idx>
         typename std::enable_if<(Idx < Num), MatrixT&>::
-        type set(Ty val) {
+            type set(Ty val) {
             derived()->data[Idx] = val;
             return *derived();
         }
@@ -750,7 +1093,7 @@ namespace internal {
 
         template <size_t Idx>
         typename std::enable_if<(Idx < Num), Ty>::
-        type get() const {
+            type get() const {
             return derived()->data[Idx];
         }
 
@@ -761,7 +1104,7 @@ namespace internal {
 
         template <size_t Idx>
         typename std::enable_if<(Idx < Num), Ty>::
-        type at() const {
+            type at() const {
             return derived()->data[Idx];
         }
 
@@ -772,7 +1115,7 @@ namespace internal {
 
         template <size_t Idx>
         typename std::enable_if<(Idx < Num), Ty&>::
-        type at() {
+            type at() {
             return derived()->data[Idx];
         }
 
@@ -799,131 +1142,6 @@ namespace internal {
                 result += derived()->data[i] * derived()->data[i];
             }
             return result;
-        }
-
-    private:
-        MatrixT* derived() {
-            return static_cast<MatrixT*>(this);
-        }
-        const MatrixT* derived() const {
-            return static_cast<const MatrixT*>(this);
-        }
-    };
-
-    template <typename Ty, typename Mat, size_t Num>
-    class MatrixT_vec_num_methods {
-    private:
-        using MatrixT = Mat;
-
-    public:
-        Ty x() const { return derived()->data[0]; }
-        Ty y() const { return derived()->data[1]; }
-        Ty z() const { return derived()->data[2]; }
-        Ty w() const { return derived()->data[3]; }
-        Ty& x() { return derived()->data[0]; }
-        Ty& y() { return derived()->data[1]; }
-        Ty& z() { return derived()->data[2]; }
-        Ty& w() { return derived()->data[3]; }
-
-        MatrixT& x(Ty x) {
-            derived()->data[0] = x;
-            return *derived();
-        }
-        MatrixT& y(Ty y) {
-            derived()->data[1] = y;
-            return *derived();
-        }
-        MatrixT& z(Ty z) {
-            derived()->data[2] = z;
-            return *derived();
-        }
-        MatrixT& w(Ty w) {
-            derived()->data[3] = w;
-            return *derived();
-        }
-
-    private:
-        MatrixT* derived() {
-            return static_cast<MatrixT*>(this);
-        }
-        const MatrixT* derived() const {
-            return static_cast<const MatrixT*>(this);
-        }
-    };
-
-    template <typename Ty, typename Mat>
-    class MatrixT_vec_num_methods<Ty, Mat, 1> {};
-
-    template <typename Ty, typename Mat>
-    class MatrixT_vec_num_methods<Ty, Mat, 2> {
-    private:
-        using MatrixT = Mat;
-
-    public:
-        Ty x() const { return derived()->data[0]; }
-        Ty y() const { return derived()->data[1]; }
-        Ty& x() { return derived()->data[0]; }
-        Ty& y() { return derived()->data[1]; }
-
-        MatrixT& x(Ty x) {
-            derived()->data[0] = x;
-            return *derived();
-        }
-        MatrixT& y(Ty y) {
-            derived()->data[1] = y;
-            return *derived();
-        }
-
-    private:
-        MatrixT* derived() {
-            return static_cast<MatrixT*>(this);
-        }
-        const MatrixT* derived() const {
-            return static_cast<const MatrixT*>(this);
-        }
-    };
-
-    template <typename Ty, typename Mat>
-    class MatrixT_vec_num_methods<Ty, Mat, 3> {
-    private:
-        using MatrixT = Mat;
-
-    public:
-        Ty x() const { return derived()->data[0]; }
-        Ty y() const { return derived()->data[1]; }
-        Ty z() const { return derived()->data[2]; }
-        Ty& x() { return derived()->data[0]; }
-        Ty& y() { return derived()->data[1]; }
-        Ty& z() { return derived()->data[2]; }
-
-        MatrixT& x(Ty x) {
-            derived()->data[0] = x;
-            return *derived();
-        }
-        MatrixT& y(Ty y) {
-            derived()->data[1] = y;
-            return *derived();
-        }
-        MatrixT& z(Ty z) {
-            derived()->data[2] = z;
-            return *derived();
-        }
-
-        MatrixT operator^(const MatrixT& rhs) const {
-            return cross(rhs);
-        }
-
-        MatrixT& operator^=(const MatrixT& rhs) {
-            *derived() = cross(rhs);
-            return *derived();
-        }
-
-        MatrixT cross(const MatrixT& rhs) const {
-            MatrixT out;
-            out.data[0] = derived()->data[1] * rhs.data[2] - derived()->data[2] * rhs.data[1];
-            out.data[1] = derived()->data[2] * rhs.data[0] - derived()->data[0] * rhs.data[2];
-            out.data[2] = derived()->data[0] * rhs.data[1] - derived()->data[1] * rhs.data[0];
-            return out;
         }
 
     private:

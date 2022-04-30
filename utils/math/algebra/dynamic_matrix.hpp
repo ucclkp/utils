@@ -21,14 +21,19 @@ namespace math {
     class DMatrixT;
 
 namespace internal {
+
     template <typename Ty>
     Ty det_slow(const DMatrixT<Ty>& m);
+
+    template <typename Ty>
+    Ty det_fast(const DMatrixT<Ty>& matrix);
 
     template <typename Ty>
     void cofactor(
         const DMatrixT<Ty>& m,
         size_t row_index, size_t col_index,
         DMatrixT<Ty>* out);
+
 }
 
     template <typename Ty>
@@ -36,7 +41,7 @@ namespace internal {
     public:
         static DMatrixT Z(size_t row_count, size_t col_count) {
             DMatrixT m(row_count, col_count);
-            m.zero();
+            m.zeros();
             return m;
         }
         static DMatrixT I(size_t size) {
@@ -63,10 +68,13 @@ namespace internal {
             if (row_sz == 0 || col_sz == 0) {
                 throw std::runtime_error("Illegal params!");
             }
-            if (vals.size() > row_sz * col_sz) {
-                throw std::runtime_error("Too many params!");
+
+            auto space_size = row_sz * col_sz;
+            auto data_size = (std::min)(row_sz * col_sz, vals.size());
+            std::copy(vals.begin(), vals.begin() + data_size, data);
+            if (data_size < space_size) {
+                std::fill(data + data_size, data + space_size, Ty());
             }
-            std::copy(vals.begin(), vals.end(), data);
         }
 
         DMatrixT(const DMatrixT& rhs)
@@ -127,10 +135,12 @@ namespace internal {
             return *this;
         }
         DMatrixT& operator=(const std::initializer_list<Ty>& vals) {
-            if (vals.size() > row_sz * col_sz) {
-                throw std::runtime_error("Too many params!");
+            auto space_size = row_sz * col_sz;
+            auto data_size = (std::min)(row_sz * col_sz, vals.size());
+            std::copy(vals.begin(), vals.begin() + data_size, data);
+            if (data_size < space_size) {
+                std::fill(data + data_size, data + space_size, Ty());
             }
-            std::copy(vals.begin(), vals.end(), data);
             return *this;
         }
 
@@ -188,6 +198,179 @@ namespace internal {
             DMatrixT<Cy> out(row_sz, col_sz);
             for (size_t i = 0; i < row_sz * col_sz; ++i) {
                 out.data[i] = static_cast<Cy>(data[i]);
+            }
+            return out;
+        }
+
+        template<typename Cy>
+        DMatrixT<Cy> cast() const {
+            DMatrixT<Cy> out(row_sz, col_sz);
+            for (size_t i = 0; i < row_sz * col_sz; ++i) {
+                out.data[i] = static_cast<Cy>(data[i]);
+            }
+            return out;
+        }
+
+        DMatrixT<Ty> gain_rc(
+            size_t ga_row, size_t ga_col,
+            const std::initializer_list<Ty>& args) const
+        {
+            if (ga_row < row_sz || ga_col < col_sz) {
+                throw std::runtime_error("Invalid params!");
+            }
+
+            size_t r = 0;
+            size_t src = 0;
+            DMatrixT<Ty> out(ga_row, ga_col);
+            for (; r < row_sz; ++r) {
+                std::copy(
+                    this->data + r * col_sz,
+                    this->data + r * col_sz + col_sz,
+                    out.data + r * ga_col);
+                size_t rem_count = (std::min)(ga_col - col_sz, args.size() - src);
+                if (rem_count > 0) {
+                    std::copy(
+                        args.begin() + src,
+                        args.begin() + src + rem_count,
+                        out.data + r * ga_col + col_sz);
+                    src += rem_count;
+                }
+                if (rem_count < ga_col - col_sz) {
+                    std::fill(
+                        out.data + r * ga_col + col_sz + rem_count,
+                        out.data + r * ga_col + ga_col, Ty());
+                }
+            }
+            if (row_sz < ga_row) {
+                size_t rem_count = (std::min)((ga_row - row_sz) * ga_col, args.size() - src);
+                if (rem_count > 0) {
+                    std::copy(
+                        args.begin() + src,
+                        args.begin() + src + rem_count,
+                        out.data + row_sz * ga_col);
+                }
+                if (rem_count < (ga_row - row_sz) * ga_col) {
+                    std::fill(
+                        out.data + row_sz * ga_col + rem_count,
+                        out.data + ga_row * ga_col, Ty());
+                }
+            }
+            return out;
+        }
+
+        DMatrixT<Ty> gain_row(
+            size_t ga_row,
+            const std::initializer_list<Ty>& args) const
+        {
+            if (ga_row < row_sz) {
+                throw std::runtime_error("Invalid params!");
+            }
+
+            size_t src = 0;
+            DMatrixT<Ty> out(ga_row, col_sz);
+            std::copy(
+                this->data,
+                this->data + row_sz * col_sz,
+                out.data);
+
+            size_t rem_count = (std::min)((ga_row - row_sz) * col_sz, args.size() - src);
+            if (rem_count > 0) {
+                std::copy(
+                    args.begin() + src,
+                    args.begin() + src + rem_count,
+                    out.data + row_sz * col_sz);
+            }
+            if (rem_count < (ga_row - row_sz) * col_sz) {
+                std::fill(
+                    out.data + row_sz * col_sz + rem_count,
+                    out.data + ga_row * col_sz, Ty());
+            }
+            return out;
+        }
+
+        DMatrixT<Ty> gain_col(
+            size_t ga_col,
+            const std::initializer_list<Ty>& args) const
+        {
+            if (ga_col < col_sz) {
+                throw std::runtime_error("Invalid params!");
+            }
+
+            size_t r = 0;
+            size_t src = 0;
+            DMatrixT<Ty> out(row_sz, ga_col);
+            for (; r < row_sz; ++r) {
+                std::copy(
+                    this->data + r * col_sz,
+                    this->data + r * col_sz + col_sz,
+                    out.data + r * ga_col);
+                size_t rem_count = (std::min)(ga_col - col_sz, args.size() - src);
+                if (rem_count > 0) {
+                    std::copy(
+                        args.begin() + src,
+                        args.begin() + src + rem_count,
+                        out.data + r * ga_col + col_sz);
+                    src += rem_count;
+                }
+                if (rem_count < ga_col - col_sz) {
+                    std::fill(
+                        out.data + r * ga_col + col_sz + rem_count,
+                        out.data + r * ga_col + ga_col, Ty());
+                }
+            }
+            return out;
+        }
+
+        DMatrixT<Ty> shape(
+            size_t row_idx, size_t col_idx,
+            size_t new_row, size_t new_col,
+            const std::initializer_list<Ty>& args) const
+        {
+            size_t r = row_idx;
+            size_t dr = 0;
+            size_t src = 0;
+            DMatrixT<Ty> out(new_row, new_col);
+            size_t _R = (row_idx + new_row > row_sz) ?
+                (row_sz - row_idx) : new_row;
+            size_t _C = (col_idx + new_col > col_sz) ?
+                col_sz : (col_idx + new_col);
+            for (; dr < _R; ++dr, ++r) {
+                std::copy(
+                    this->data + r * col_sz + col_idx,
+                    this->data + r * col_sz + _C,
+                    out.data + dr * new_col);
+                if (col_idx + new_col > col_sz) {
+                    size_t rem_count = (std::min)(
+                        col_idx + new_col - col_sz, args.size() - src);
+                    if (rem_count > 0) {
+                        std::copy(
+                            args.begin() + src,
+                            args.begin() + src + rem_count,
+                            out.data + dr * new_col + _C - col_idx);
+                        src += rem_count;
+                    }
+                    if (rem_count < col_idx + new_col - col_sz) {
+                        std::fill(
+                            out.data + dr * new_col + _C - col_idx + rem_count,
+                            out.data + dr * new_col + new_col, Ty());
+                    }
+                }
+            }
+
+            if (row_idx + new_row > row_sz) {
+                size_t rem_count = (std::min)(
+                    (row_idx + new_row - row_sz) * new_col, args.size() - src);
+                if (rem_count > 0) {
+                    std::copy(
+                        args.begin() + src,
+                        args.begin() + src + rem_count,
+                        out.data + _R * new_col);
+                }
+                if (rem_count < (row_idx + new_row - row_sz) * new_col) {
+                    std::fill(
+                        out.data + _R * new_col + rem_count,
+                        out.data + new_row * new_col, Ty());
+                }
             }
             return out;
         }
@@ -289,13 +472,6 @@ namespace internal {
         }
 
         Ty dot(const DMatrixT& rhs) const {
-            if (col_sz != 1 && row_sz != 1) {
-                throw std::runtime_error("dot() must be invoked on vector!");
-            }
-            if (col_sz != rhs.col_sz || row_sz != rhs.row_sz) {
-                throw std::runtime_error("Dimensions of *this and rhs of dot() must be equal!");
-            }
-
             Ty result = 0;
             for (size_t i = 0; i < row_sz * col_sz; ++i) {
                 result += data[i] * rhs.data[i];
@@ -495,7 +671,7 @@ namespace internal {
             return data[row_index * col_sz + col_index];
         }
 
-        DMatrixT& zero() {
+        DMatrixT& zeros() {
             for (size_t i = 0; i < row_sz * col_sz; ++i) {
                 data[i] = 0;
             }
@@ -540,6 +716,13 @@ namespace internal {
             if (col_sz != row_sz) {
                 throw std::runtime_error("Row must be equal to Col!");
             }
+            return internal::det_fast(*this);
+        }
+
+        Ty det_prec() const {
+            if (col_sz != row_sz) {
+                throw std::runtime_error("Row must be equal to Col!");
+            }
             return internal::det_slow(*this);
         }
 
@@ -575,29 +758,25 @@ namespace internal {
 
         DMatrixT& swapCol(size_t c1_index, size_t c2_index) {
             assert(c1_index < col_sz && c2_index < col_sz);
-            if (c1_index == c2_index) {
-                return *this;
-            }
-
-            for (size_t i = 0; i < row_sz; ++i) {
-                Ty tmp = data[i * col_sz + c1_index];
-                data[i * col_sz + c1_index] = data[i * col_sz + c2_index];
-                data[i * col_sz + c2_index] = tmp;
+            if (c1_index != c2_index) {
+                for (size_t i = 0; i < row_sz; ++i) {
+                    Ty tmp = data[i * col_sz + c1_index];
+                    data[i * col_sz + c1_index] = data[i * col_sz + c2_index];
+                    data[i * col_sz + c2_index] = tmp;
+                }
             }
             return *this;
         }
 
         DMatrixT& swapRow(size_t r1_index, size_t r2_index) {
             assert(r1_index < row_sz && r2_index < row_sz);
-            if (r1_index == r2_index) {
-                return *this;
+            if (r1_index != r2_index) {
+                auto tmp = new Ty[col_sz];
+                std::memcpy(tmp, &data[r1_index * col_sz], sizeof(Ty) * col_sz);
+                std::memcpy(&data[r1_index * col_sz], &data[r2_index * col_sz], sizeof(Ty) * col_sz);
+                std::memcpy(&data[r2_index * col_sz], tmp, sizeof(Ty) * col_sz);
+                delete[] tmp;
             }
-
-            auto tmp = new Ty[col_sz];
-            std::memcpy(tmp, &data[r1_index * col_sz], sizeof(Ty) * col_sz);
-            std::memcpy(&data[r1_index * col_sz], &data[r2_index * col_sz], sizeof(Ty) * col_sz);
-            std::memcpy(&data[r2_index * col_sz], tmp, sizeof(Ty) * col_sz);
-            delete[] tmp;
             return *this;
         }
 
@@ -710,24 +889,18 @@ namespace internal {
         }
 
         DMatrixT& nor() {
-            if (col_sz != 1 && row_sz != 1) {
-                throw std::runtime_error("nor() must be invoked on vector!");
-            }
+            assert(col_sz == 1 || row_sz == 1);
             div(length());
             return *this;
         }
 
         Ty length() const {
-            if (col_sz != 1 && row_sz != 1) {
-                throw std::runtime_error("nor() must be invoked on vector!");
-            }
+            assert(col_sz == 1 || row_sz == 1);
             return std::sqrt(lengsq());
         }
 
         Ty lengsq() const {
-            if (col_sz != 1 && row_sz != 1) {
-                throw std::runtime_error("nor() must be invoked on vector!");
-            }
+            assert(col_sz == 1 || row_sz == 1);
 
             Ty result = 0;
             for (size_t i = 0; i < col_sz * row_sz; ++i) {
@@ -811,6 +984,22 @@ namespace internal {
 namespace internal {
 
     template <typename Ty>
+    size_t find_primary_max(
+        const DMatrixT<Ty>& m, size_t r, size_t i)
+    {
+        size_t j = m.row_sz;
+        Ty max_val = 0;
+        for (auto k = r; k < m.row_sz; ++k) {
+            auto val = std::abs(m.data[k * m.col_sz + i]);
+            if (val > max_val && !utl::is_num_zero(val)) {
+                max_val = val;
+                j = r;
+            }
+        }
+        return j;
+    }
+
+    template <typename Ty>
     Ty det_slow(const DMatrixT<Ty>& m) {
         if (m.col_sz == 1) {
             return m.data[0];
@@ -838,6 +1027,45 @@ namespace internal {
             result += val * det_slow(mt) * (int((i + 0) % 2) * -2 + 1);
         }
 
+        return result;
+    }
+
+    template <typename Ty>
+    Ty det_fast(const DMatrixT<Ty>& matrix) {
+        size_t r = 0;
+        DMatrixT m = matrix;
+
+        Ty result = 1;
+        for (size_t i = 0; i < m.col_sz; ++i) {
+            size_t j = find_primary_max(matrix, r, i);
+            if (j >= m.row_sz) {
+                continue;
+            }
+
+            if (j != r) {
+                m.swapRow(r, j);
+                result = -result;
+            }
+
+            auto val = m.data[r * m.col_sz + i];
+            for (j = r + 1; j < m.row_sz; ++j) {
+                auto& p = m.data[j * m.col_sz + i];
+                if (utl::is_num_zero(p)) {
+                    continue;
+                }
+
+                auto f = -p / val;
+                p = 0;
+                for (size_t k = i + 1; k < m.col_sz; ++k) {
+                    m.data[j * m.col_sz + k] += m.data[r * m.col_sz + k] * f;
+                }
+            }
+            ++r;
+        }
+
+        for (size_t i = 0; i < m.col_sz; ++i) {
+            result *= m.data[i * m.col_sz + i];
+        }
         return result;
     }
 

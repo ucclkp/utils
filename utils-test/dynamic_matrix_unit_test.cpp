@@ -21,6 +21,7 @@ TEST_CASE(DMatrixUnitTest) {
 
         auto m_f = DMatrixT<float>(m);
         TEST_E(m_f.get(0), 5);
+        TEST_E(m.cast<float>().get(0), 5);
 
         TEST_E(double(m), 5);
 
@@ -62,7 +63,7 @@ TEST_CASE(DMatrixUnitTest) {
         m = -m;
         TEST_E(m.get(0), 5);
 
-        m.zero();
+        m.zeros();
         TEST_E(m.get(0), 0);
 
         TEST_E(m, DMatrix::Z(1, 1));
@@ -76,6 +77,7 @@ TEST_CASE(DMatrixUnitTest) {
         m.set(0, 5);
 
         TEST_NUM_E(m.det(), 5.0);
+        TEST_NUM_E(m.det_prec(), 5.0);
 
         auto cof = m.cofactor(0, 0);
         DMatrixT<double> cof_result(1, 1, {1});
@@ -94,6 +96,20 @@ TEST_CASE(DMatrixUnitTest) {
         DMatrixT<double> inv_result(1, 1, { 1 / 5.0 });
         TEST_E(m.inverse(), inv_result);
 
+        TEST_E(m.gain_rc(2, 2, { 6, 7, 8 }), DMatrix(2, 2, { 5, 6, 7, 8 }));
+        TEST_E(m.gain_rc(2, 2, { 6, 7 }), DMatrix(2, 2, { 5, 6, 7, 0 }));
+        TEST_E(m.gain_rc(2, 2, { 6 }), DMatrix(2, 2, { 5, 6, 0, 0 }));
+        TEST_E(m.gain_rc(2, 2, { }), DMatrix(2, 2, { 5, 0, 0, 0 }));
+        TEST_E(m.gain_row(2, { 6 }), DMatrix(2, 1, { 5, 6 }));
+        TEST_E(m.gain_row(2, { }), DMatrix(2, 1, { 5, 0 }));
+        TEST_E(m.gain_col(2, { 6 }), DMatrix(1, 2, { 5, 6 }));
+        TEST_E(m.gain_col(2, { }), DMatrix(1, 2, { 5, 0 }));
+
+        TEST_E(m.shape(0, 0, 2, 2, { 7, 8, 9 }), DMatrix(2, 2, { 5, 7, 8, 9 }));
+        TEST_E(m.shape(0, 0, 2, 2, { 7, 8 }), DMatrix(2, 2, {5, 7, 8, 0}));
+        TEST_E(m.shape(0, 0, 2, 2, { 7 }), DMatrix(2, 2, {5, 7, 0, 0}));
+        TEST_E(m.shape(0, 0, 2, 2, {}), DMatrix(2, 2, {5, 0, 0, 0}));
+
         TEST_E(m.row_size(), 1);
         TEST_E(m.col_size(), 1);
 
@@ -110,6 +126,7 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m_f(0), 1);
         TEST_E(m_f(1), 2);
         TEST_E(m_f(2), 3);
+        TEST_E(m.cast<float>(), DMatrixT<float>(1, 3, {1, 2, 3}));
 
         TEST_E(m.get(0), 1);
         m.set(0, 7);
@@ -162,7 +179,7 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m, DMatrix(1, 3, { -2, -1, -3 }));
         TEST_E(-m, DMatrix(1, 3, { 2, 1, 3 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, DMatrix(1, 3, { 0, 0, 0 }));
         TEST_E(m, DMatrix::Z(1, 3));
 
@@ -201,6 +218,15 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m4.get(0), 1 / std::sqrt(14));
         TEST_E(m4.get(1), 2 / std::sqrt(14));
 
+        m = { 1, 2, 3 };
+        TEST_E(m.gain_rc(2, 4, { 4, 5, 6, 7, 8 }), DMatrix(2, 4, { 1, 2, 3, 4, 5, 6, 7, 8 }));
+        TEST_E(m.gain_rc(2, 4, { 4, 5 }), DMatrix(2, 4, { 1, 2, 3, 4, 5, 0, 0, 0 }));
+        TEST_E(m.gain_rc(2, 4, { }), DMatrix(2, 4, { 1, 2, 3, 0, 0, 0, 0, 0 }));
+        TEST_E(m.gain_row(2, { 4, 5, 6 }), DMatrix(2, 3, { 1, 2, 3, 4, 5, 6 }));
+        TEST_E(m.gain_row(2, { 4 }), DMatrix(2, 3, { 1, 2, 3, 4, 0, 0 }));
+        TEST_E(m.gain_col(4, { 4 }), DMatrix(1, 4, { 1, 2, 3, 4 }));
+        TEST_E(m.gain_col(4, { }), DMatrix(1, 4, { 1, 2, 3, 0 }));
+
         TEST_E(m.row_size(), 1);
         TEST_E(m.col_size(), 3);
 
@@ -217,6 +243,7 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m_f(0), 1);
         TEST_E(m_f(1), 2);
         TEST_E(m_f(2), 3);
+        TEST_E(m.cast<float>(), DMatrixT<float>(3, 1, { 1, 2, 3 }));
 
         TEST_E(m.get(0), 1);
         m.set(0, 7);
@@ -269,7 +296,7 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m, DMatrix(3, 1, { -2, -1, -3 }));
         TEST_E(-m, DMatrix(3, 1, { 2, 1, 3 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, DMatrix(3, 1, { 0, 0, 0 }));
         TEST_E(m, DMatrix::Z(3, 1));
 
@@ -330,6 +357,7 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m_f(0, 1), 1);
         TEST_E(m_f(1, 0), 9);
         TEST_E(m_f(1, 1), 7);
+        TEST_E(m.cast<float>(), DMatrixT<float>(2, 2, { 5, 1, 9, 7 }));
 
         TEST_E(m.get(1, 0), 9);
         m.set(1, 0, 0);
@@ -424,7 +452,7 @@ TEST_CASE(DMatrixUnitTest) {
         m.div_col(1, DMatrix(2, 1, { 2, 3 }));
         TEST_E(m, DMatrix(2, 2, { 1, 5, 7, 9 }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, DMatrix(2, 2, { 0, 0, 0, 0 }));
         TEST_E(DMatrix::Z(2, 2), DMatrix(2, 2, { 0, 0, 0, 0 }));
 
@@ -435,6 +463,7 @@ TEST_CASE(DMatrixUnitTest) {
         m = { 5, 1, 9, 7 };
 
         TEST_NUM_E(m.det(), 26.0);
+        TEST_NUM_E(m.det_prec(), 26.0);
 
         DMatrixT<double> cof1_result(1, 1, {7});
         DMatrixT<double> cof2_result(1, 1, {5});
@@ -465,12 +494,15 @@ TEST_CASE(DMatrixUnitTest) {
     };
 
     TEST_DEF("DMatrix 3x3 tests.") {
+        using DMatrix = DMatrixT<double>;
+
         DMatrixT<double> m(3, 3, {
             5, 1, 4,
             9, 7, 8,
             2, 3, 4
         });
         TEST_NUM_E(m.det(), 52.0);
+        TEST_NUM_E(m.det_prec(), 52.0);
 
         DMatrixT<double> cof1 = m.cofactor(0, 0);
         DMatrixT<double> cof2 = m.cofactor(1, 1);
@@ -498,6 +530,30 @@ TEST_CASE(DMatrixUnitTest) {
         });
         TEST_E(inv_m, inv_result);
 
+        TEST_E(m.shape(0, 0, 3, 3, {}), DMatrix(3, 3, {
+            5, 1, 4,
+            9, 7, 8,
+            2, 3, 4}));
+        TEST_E(m.shape(0, 0, 2, 2, {}), DMatrix(2, 2, {5, 1, 9, 7}));
+        TEST_E(m.shape(0, 0, 1, 1, {}), DMatrix(1, 1, {5}));
+        TEST_E(m.shape(1, 1, 2, 2, {}), DMatrix(2, 2, {7, 8, 3, 4}));
+        TEST_E(m.shape(2, 2, 2, 2, {}), DMatrix(2, 2, {4, 0, 0, 0}));
+        TEST_E(m.shape(2, 2, 2, 2, { 1 }), DMatrix(2, 2, {4, 1, 0, 0}));
+        TEST_E(m.shape(2, 2, 2, 2, { 1, 2 }), DMatrix(2, 2, {4, 1, 2, 0}));
+        TEST_E(m.shape(2, 2, 2, 2, { 1, 2, 3 }), DMatrix(2, 2, {4, 1, 2, 3}));
+        TEST_E(m.shape(1, 2, 3, 3, {}), DMatrix(3, 3, {
+            8, 0, 0,
+            4, 0, 0,
+            0, 0, 0}));
+        TEST_E(m.shape(1, 2, 3, 3, { 1 }), DMatrix(3, 3, {
+            8, 1, 0,
+            4, 0, 0,
+            0, 0, 0}));
+        TEST_E(m.shape(1, 2, 3, 3, { 1, 2, 3 }), DMatrix(3, 3, {
+            8, 1, 2,
+            4, 3, 0,
+            0, 0, 0}));
+
         return true;
     };
 
@@ -510,6 +566,7 @@ TEST_CASE(DMatrixUnitTest) {
             1, 5, 3,  7, 4,
         });
         TEST_NUM_E(m.det(), -5373.0);
+        TEST_NUM_E(m.det_prec(), -5373.0);
 
         DMatrixT<double> cof1 = m.cofactor(0, 0);
         DMatrixT<double> cof2 = m.cofactor(1, 1);
@@ -584,6 +641,12 @@ TEST_CASE(DMatrixUnitTest) {
         TEST_E(m_f(2, 2), 9);
         TEST_E(m_f(2, 3), 5);
         TEST_E(m_f(2, 4), 1);
+        TEST_E(m.cast<float>(), DMatrixT<float>(3, 5,
+            {
+            2, 1, 3,  4, 5,
+            1, 1, 1, 10, 7,
+            4, 8, 9,  5, 1,
+            }));
 
         TEST_E(m.get(1, 1), 1);
         m.set(1, 1, 0);
@@ -724,7 +787,7 @@ TEST_CASE(DMatrixUnitTest) {
             -4, -18, -8,  -5, -1,
         }));
 
-        m.zero();
+        m.zeros();
         TEST_E(m, DMatrix(3, 5, {
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
@@ -781,7 +844,8 @@ TEST_CASE(DMatrixUnitTest) {
              8,  8,  8, 3, 3,  4,  2,  3,  7,  6,
             97, 43, 87, 1, 0, 91, 87, 46, 78, 13
         });
-        TEST_NUM_E(m.det(), 228902704.0);
+        TEST_NUM_E(std::round(m.det()), 228902704.0);
+        TEST_NUM_E(m.det_prec(), 228902704.0);
 
         DMatrixT<double> e_m = m.rref();
         auto rref_result = DMatrixT<double>::I(10);

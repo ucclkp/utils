@@ -48,6 +48,26 @@ namespace utl {
     };
 
 
+    template <typename Ty, typename Arg, typename... Args>
+    class is_all_convertible;
+
+    template <typename Ty, typename Arg>
+    class is_all_convertible<Ty, Arg> {
+    public:
+        using type = Ty;
+        static constexpr auto value =
+            std::is_convertible<Ty, Arg>::value;
+    };
+
+    template <typename Ty, typename Arg, typename... Args>
+    class is_all_convertible {
+    public:
+        using type = Ty;
+        static constexpr auto value =
+            std::is_convertible<Ty, Arg>::value &&
+            is_all_convertible<Ty, Args...>::value;
+    };
+
 }
 
 #endif  // UTILS_TYPE_UTILS_HPP_

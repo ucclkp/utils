@@ -24,6 +24,9 @@ TEST_CASE(PointUnitTest) {
         auto p_f = PointT<float, 1>(pt);
         TEST_E(p_f.get(), 10);
 
+        p_f = pt.cast<float>();
+        TEST_E(p_f.get(), 10);
+
         pt.x(1);
         TEST_E(pt(), 1);
         TEST_E(pt.x(), 1);
@@ -53,6 +56,28 @@ TEST_CASE(PointUnitTest) {
         TEST_E((pt - pt2).x(), -7);
         TEST_E((pt - vec).x(), -6);
 
+        pt() = 1;
+        pt.mul(2);
+        TEST_E(pt(), 2);
+        TEST_E((pt * 2)(), 4);
+        TEST_E((2.0 * pt)(), 4);
+        TEST_E((pt / 2)(), 1);
+        pt.div(2);
+        TEST_E(pt(), 1);
+        pt *= 2;
+        TEST_E(pt(), 2);
+        pt /= 2;
+        TEST_E(pt(), 1);
+
+        pt.mull(MatrixT<double, 1, 1>{ 2 });
+        TEST_E(pt(), 2);
+        pt.mulr(MatrixT<double, 1, 1>{ 2 });
+        TEST_E(pt(), 4);
+        pt *= MatrixT<double, 1, 1>{2};
+        TEST_E(pt(), 8);
+        TEST_E((pt * MatrixT<double, 1, 1>{2})(), 16);
+        TEST_E((MatrixT<double, 1, 1>{2} * pt)(), 16);
+
         pt() = 10;
         TEST_E((-pt)(), -10);
         pt.minus();
@@ -64,6 +89,23 @@ TEST_CASE(PointUnitTest) {
         pt() = 0;
         TEST_E(pt, (PointT<double, 1>::Z()));
         TEST_TRUE(pt.equal(PointT<double, 1>::Z()));
+
+        TEST_E(pt.gain({ 1, 2, 3 }), (PointT<double, 4>{0, 1, 2, 3}));
+
+        pt() = 2;
+        auto m = MatrixT<double, 2, 2>{
+            1, 2,
+            4, 5
+        };
+        TEST_E(pt * m, (PointT<double, 1>{6}));
+        TEST_E(m * pt, (PointT<double, 1>{4}));
+
+        pt2 = pt;
+        pt2.mulr(m);
+        TEST_E(pt2, (PointT<double, 1>{6}));
+        pt2 = pt;
+        pt2.mull(m);
+        TEST_E(pt2, (PointT<double, 1>{4}));
 
         return true;
     };
@@ -80,6 +122,24 @@ TEST_CASE(PointUnitTest) {
         pt.y() = 4;
         TEST_E(pt.x(), 3);
         TEST_E(pt.y(), 4);
+
+        TEST_E(pt.reduce<1>().x(), 3);
+        TEST_E(pt.gain({ 5, 6, 7 }), (PointT<double, 5>{3, 4, 5, 6, 7}));
+
+        auto m = MatrixT<double, 3, 3>{
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9
+        };
+        TEST_E(pt * m, (PointT<double, 2>{26, 34}));
+        TEST_E(m * pt, (PointT<double, 2>{14, 38}));
+
+        auto pt2 = pt;
+        pt2.mulr(m);
+        TEST_E(pt2, (PointT<double, 2>{26, 34}));
+        pt2 = pt;
+        pt2.mull(m);
+        TEST_E(pt2, (PointT<double, 2>{14, 38}));
 
         return true;
     };
@@ -98,6 +158,11 @@ TEST_CASE(PointUnitTest) {
         TEST_E(pt.get<2>(), 2);
 
         auto p_f = PointT<float, 3>(pt);
+        TEST_E(p_f(0), 0);
+        TEST_E(p_f(1), 1);
+        TEST_E(p_f(2), 2);
+
+        p_f = pt.cast<float>();
         TEST_E(p_f(0), 0);
         TEST_E(p_f(1), 1);
         TEST_E(p_f(2), 2);
@@ -179,6 +244,37 @@ TEST_CASE(PointUnitTest) {
         TEST_E((pt - pt2), (VectorT<double, 3>{ -7, -6, -5 }));
         TEST_E((pt - vec), (PointT<double, 3>{ -6, -3, -1 }));
 
+        pt = { 1, 2, 3 };
+        pt.mul(2);
+        TEST_E(pt, (PointT<double, 3>{2, 4, 6}));
+        TEST_E(pt * 2, (PointT<double, 3>{4, 8, 12}));
+        TEST_E(2.0 * pt, (PointT<double, 3>{4, 8, 12}));
+        TEST_E(pt / 2, (PointT<double, 3>{1, 2, 3}));
+        pt.div(2);
+        TEST_E(pt, (PointT<double, 3>{1, 2, 3}));
+        pt *= 2;
+        TEST_E(pt, (PointT<double, 3>{2, 4, 6}));
+        pt /= 2;
+        TEST_E(pt, (PointT<double, 3>{1, 2, 3}));
+
+        MatrixT<double, 3, 3> mat{
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9
+        };
+        auto pt3 = pt;
+        pt3.mull(mat);
+        TEST_E(pt3, (PointT<double, 3>{14, 32, 50}));
+        pt3 = pt;
+        pt3.mulr(mat);
+        TEST_E(pt3, (PointT<double, 3>{30, 36, 42}));
+        pt3 = pt;
+        pt3 *= mat;
+        TEST_E(pt3, (PointT<double, 3>{30, 36, 42}));
+
+        TEST_E(mat * pt, (PointT<double, 3>{14, 32, 50}));
+        TEST_E(pt * mat, (PointT<double, 3>{30, 36, 42}));
+
         pt = { 10, 11, 12 };
         TEST_E(-pt, (PointT<double, 3>{ -10, -11, -12 }));
         pt.minus();
@@ -212,6 +308,55 @@ TEST_CASE(PointUnitTest) {
         TEST_E(pt.y(), 10);
         TEST_E(pt.z(), 11);
         TEST_E(pt.w(), 12);
+
+        return true;
+    };
+
+    TEST_DEF("Point Array tests.") {
+        TEST_TRUE((std::is_aggregate<PointT<float, 3>>::value));
+        TEST_TRUE((std::is_standard_layout<PointT<float, 3>>::value));
+        TEST_TRUE((std::is_trivial<PointT<float, 3>>::value));
+        TEST_TRUE((std::is_pod<PointT<float, 3>>::value));
+
+        TEST_TRUE((std::is_aggregate<PointT<float, 5>>::value));
+        TEST_TRUE((std::is_standard_layout<PointT<float, 5>>::value));
+        TEST_TRUE((std::is_trivial<PointT<float, 5>>::value));
+        TEST_TRUE((std::is_pod<PointT<float, 5>>::value));
+
+        PointT<float, 3> arr[]{
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+            {10, 11, 12},
+        };
+        TEST_E(arr[0], (PointT<float, 3>{1, 2, 3}));
+        TEST_E(arr[1], (PointT<float, 3>{4, 5, 6}));
+        TEST_E(arr[2], (PointT<float, 3>{7, 8, 9}));
+        TEST_E(arr[3], (PointT<float, 3>{10, 11, 12}));
+
+        /*class PointT2_base {
+        public:
+            uint32_t data[3];
+        };
+
+        class PointT2_extra {};
+        class PointT2_extra2 {};
+
+        class PointT2_method :
+            public PointT2_base,
+            public PointT2_extra,
+            public PointT2_extra2 {};
+
+        class PointT2 : public PointT2_method {};
+
+        auto lsdf = std::is_pod<PointT2>::value;
+
+        PointT2 vd[4]{
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+            {10, 11, 12},
+        };*/
 
         return true;
     };
