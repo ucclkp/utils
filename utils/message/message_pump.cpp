@@ -150,18 +150,20 @@ namespace utl {
     bool MessagePump::cosume() {
         msg_queue_->addBarrier();
         for (;;) {
-            Message msg;
+            Message* msg;
             if (!msg_queue_->dequeue(&msg)) {
                 break;
             }
 
-            if (msg.callback) {
-                msg.callback->run();
-            } else if (msg.func) {
-                msg.func();
-            } else if (msg.target) {
-                msg.target->dispatchMessage(msg);
+            if (msg->callback) {
+                msg->callback->run();
+            } else if (msg->func) {
+                msg->func();
+            } else if (msg->target) {
+                msg->target->dispatchMessage(*msg);
             }
+
+            msg->reset();
         }
         msg_queue_->removeBarrier();
 
@@ -170,18 +172,20 @@ namespace utl {
 
     bool MessagePump::cosumeDelayed(int64_t* delay_ns) {
         for (;;) {
-            Message msg;
+            Message* msg;
             if (!msg_queue_->dequeueDelayed(delay_ns, &msg)) {
                 break;
             }
 
-            if (msg.callback) {
-                msg.callback->run();
-            } else if (msg.func) {
-                msg.func();
-            } else if (msg.target) {
-                msg.target->dispatchMessage(msg);
+            if (msg->callback) {
+                msg->callback->run();
+            } else if (msg->func) {
+                msg->func();
+            } else if (msg->target) {
+                msg->target->dispatchMessage(*msg);
             }
+
+            msg->reset();
         }
         return false;
     }

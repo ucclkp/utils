@@ -46,11 +46,11 @@ namespace utl {
     }
 
     void Cycler::postAtTime(Executable* exec, nsp at_time, int id) {
-        Message msg;
-        msg.callback = exec;
-        msg.id = id;
+        Message* msg = Message::get();
+        msg->callback = exec;
+        msg->id = id;
 
-        postAtTime(&msg, at_time);
+        postAtTime(msg, at_time);
     }
 
     void Cycler::post(const std::function<void()>& func, int id) {
@@ -62,11 +62,11 @@ namespace utl {
     }
 
     void Cycler::postAtTime(const std::function<void()>& func, nsp at_time, int id) {
-        Message msg;
-        msg.func = func;
-        msg.id = id;
+        Message* msg = Message::get();
+        msg->func = func;
+        msg->id = id;
 
-        postAtTime(&msg, at_time);
+        postAtTime(msg, at_time);
     }
 
     void Cycler::post(int id) {
@@ -78,10 +78,10 @@ namespace utl {
     }
 
     void Cycler::postAtTime(int id, nsp at_time) {
-        Message msg;
-        msg.id = id;
+        Message* msg = Message::get();
+        msg->id = id;
 
-        postAtTime(&msg, at_time);
+        postAtTime(msg, at_time);
     }
 
     void Cycler::post(Message* msg) {
@@ -101,8 +101,10 @@ namespace utl {
         msg->target = this;
         auto ptr = pump_.lock();
         if (ptr) {
-            ptr->getQueue()->enqueue(*msg);
+            ptr->getQueue()->enqueue(msg);
             ptr->wakeup();
+        } else {
+            msg->reset();
         }
     }
 

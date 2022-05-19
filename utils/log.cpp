@@ -9,6 +9,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 #include "utils/files/file_utils.h"
 #include "utils/strings/string_utils.hpp"
@@ -37,7 +38,7 @@ namespace utl {
                 Log::getDefaultLogPath(&log_params_.log_path);
             }
             log_file_stream_.open(log_params_.log_path / log_params_.file_name, std::ios::out | std::ios::app);
-            assert(!log_file_stream_.fail());
+            ubassert(!log_file_stream_.fail());
         }
         if (log_params_.target & Log::OutputTarget::CONSOLE) {
             Log::openConsole();
@@ -82,7 +83,22 @@ namespace utl {
             file_name_ = fs::path(file_name_).filename().u16string();
         }
 
+        std::stringstream tid_ss;
+        tid_ss << std::this_thread::get_id();
+
+        Calendar ca;
+        getLocalTime(&ca);
+
         std::string msg;
+        msg.append(u8p("["))
+            .append(tid_ss.str())
+            .append(
+                usformat(
+                    " %d/%d/%d %d:%02d:%02d:%d",
+                    ca.year, ca.month, ca.day,
+                    ca.hour, ca.minute, ca.second, ca.milliseconds))
+            .append(u8p("] "));
+
         msg.append(UTF16ToUTF8(file_name_))
             .append(u8p("("))
             .append(std::to_string(line_number_))

@@ -12,6 +12,8 @@
 #include <sys/sysctl.h>
 #include <unistd.h>
 
+#import <Foundation/Foundation.h>
+
 
 namespace {
 
@@ -97,6 +99,41 @@ namespace utl {
     void Log::getDefaultLogPath(std::filesystem::path* path) {
         //log_params.log_path = utl::getExecFileName(true)
         //    .parent_path().parent_path().parent_path();
+    }
+
+    // static
+    void Log::getLocalTime(Calendar* calendar) {
+        NSDate* now = [NSDate date];
+        NSCalendar* cal = [NSCalendar currentCalendar];
+        NSDateComponents* expl = [cal components:
+                                  NSCalendarUnitYear |
+                                  NSCalendarUnitMonth |
+                                  NSCalendarUnitDay |
+                                  NSCalendarUnitWeekday |
+                                  NSCalendarUnitHour |
+                                  NSCalendarUnitMinute |
+                                  NSCalendarUnitSecond |
+                                  NSCalendarUnitNanosecond
+                                       fromDate:now];
+        if (expl) {
+            calendar->year = expl.year;
+            calendar->month = expl.month;
+            calendar->day = expl.day;
+            calendar->day_of_week = expl.weekday;
+            calendar->hour = expl.hour;
+            calendar->minute = expl.minute;
+            calendar->second = expl.second;
+            calendar->milliseconds = expl.nanosecond / 1000000;
+        } else {
+            calendar->year = 0;
+            calendar->month = 0;
+            calendar->day = 0;
+            calendar->day_of_week = 0;
+            calendar->hour = 0;
+            calendar->minute = 0;
+            calendar->second = 0;
+            calendar->milliseconds = 0;
+        }
     }
 
     // static

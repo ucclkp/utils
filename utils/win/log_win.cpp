@@ -131,6 +131,21 @@ namespace utl {
     }
 
     // static
+    void Log::getLocalTime(Calendar* calendar) {
+        SYSTEMTIME st;
+        ::GetLocalTime(&st);
+
+        calendar->year = st.wYear;
+        calendar->month = st.wMonth;
+        calendar->day_of_week = st.wDayOfWeek;
+        calendar->day = st.wDay;
+        calendar->hour = st.wHour;
+        calendar->minute = st.wMinute;
+        calendar->second = st.wSecond;
+        calendar->milliseconds = st.wMilliseconds;
+    }
+
+    // static
     void Log::outputDebugString(const std::string_view& msg) {
         auto u16_msg = UTF8ToUTF16(msg);
         std::wstring w_msg(u16_msg.begin(), u16_msg.end());

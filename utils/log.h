@@ -150,6 +150,18 @@ namespace utl {
         static const char* vt_format(VTFormat f);
 
     private:
+        struct Calendar {
+            uint_fast16_t year;
+            uint_fast16_t month;
+            uint_fast16_t day_of_week;
+            uint_fast16_t day;
+            uint_fast16_t hour;
+            uint_fast16_t minute;
+            uint_fast16_t second;
+            uint_fast16_t milliseconds;
+        };
+
+        static void getLocalTime(Calendar* calendar);
         static void outputDebugString(const std::string_view& msg);
 
         static bool is_vt_enabled_;

@@ -8,6 +8,7 @@
 #define UTILS_MESSAGE_MESSAGE_H_
 
 #include <functional>
+#include <mutex>
 
 
 namespace utl {
@@ -17,8 +18,9 @@ namespace utl {
 
     class Message {
     public:
-        Message();
-        ~Message();
+        static Message* get();
+
+        void reset();
 
         int id;
         uint64_t time_ns;
@@ -31,7 +33,30 @@ namespace utl {
         void* data;
         std::shared_ptr<void> shared_data;
 
+        Message* next;
         bool is_barrier;
+
+    private:
+        class MessagePool {
+        public:
+            MessagePool();
+            ~MessagePool();
+
+            Message* get();
+            void put(Message* m);
+
+        private:
+            void reserve(size_t cnt);
+            void clean();
+
+            Message* pool_;
+            std::mutex pool_sync_;
+        };
+
+        Message();
+        ~Message();
+
+        static MessagePool s_pool_;
     };
 
 }

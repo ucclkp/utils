@@ -16,126 +16,144 @@
 namespace utl {
 
     MessageQueue::MessageQueue()
-        : has_barrier_(false) {}
+        : message_(nullptr),
+          delayed_(nullptr),
+          has_barrier_(false) {}
 
     MessageQueue::~MessageQueue() {
+        clear();
     }
 
-    bool MessageQueue::enqueue(const Message& msg) {
-        if (msg.is_barrier) {
+    bool MessageQueue::enqueue(Message* msg) {
+        if (msg->is_barrier) {
+            msg->reset();
             LOG(Log::ERR) << "Illegal msg!";
             return false;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        for (auto it = message_.begin(); it != message_.end(); ++it) {
-            if (it->is_barrier || msg.time_ns == 0 || msg.time_ns < it->time_ns) {
+        for (auto it = message_; it != nullptr; it = it->next) {
+            if (it->is_barrier ||
+                msg->time_ns == 0 ||
+                msg->time_ns < it->time_ns)
+            {
                 break;
             }
         }
 
-        auto ptr = message_.begin();
+        auto ptr = message_;
 
-        if (ptr == message_.end() ||
+        if (!ptr ||
             ptr->is_barrier ||
-            msg.time_ns == 0 ||
-            msg.time_ns < ptr->time_ns)
+            msg->time_ns == 0 ||
+            msg->time_ns < ptr->time_ns)
         {
-            message_.push_front(msg);
+            // push_front
+            msg->next = message_;
+            message_ = msg;
         } else {
             decltype(ptr) prev;
             for (;;) {
                 prev = ptr;
-                ++ptr;
-                if (ptr == message_.end() || ptr->is_barrier || msg.time_ns < ptr->time_ns) {
+                ptr = ptr->next;
+                if (!ptr ||
+                    ptr->is_barrier ||
+                    msg->time_ns < ptr->time_ns)
+                {
                     break;
                 }
             }
 
-            message_.insert_after(prev, msg);
+            // insert_after prev
+            msg->next = prev->next;
+            prev->next = msg;
         }
 
         return true;
     }
 
-    void MessageQueue::enqueueDelayed(const Message& msg) {
-        assert(!msg.is_barrier);
+    void MessageQueue::enqueueDelayed(Message* msg) {
+        assert(!msg->is_barrier);
 
-        auto ptr = delayed_.begin();
+        auto ptr = delayed_;
 
-        if (ptr == delayed_.end() ||
-            msg.time_ns == 0 ||
-            msg.time_ns < ptr->time_ns)
+        if (!ptr ||
+            msg->time_ns == 0 ||
+            msg->time_ns < ptr->time_ns)
         {
-            delayed_.push_front(msg);
+            msg->next = delayed_;
+            delayed_ = msg;
         } else {
             decltype(ptr) prev;
             for (;;) {
                 prev = ptr;
-                ++ptr;
-                if (ptr == delayed_.end() || msg.time_ns < ptr->time_ns) {
+                ptr = ptr->next;
+                if (!ptr || msg->time_ns < ptr->time_ns) {
                     break;
                 }
             }
 
-            delayed_.insert_after(prev, msg);
+            // insert_after prev
+            msg->next = prev->next;
+            prev->next = msg;
         }
     }
 
-    bool MessageQueue::dequeue(Message* out) {
+    bool MessageQueue::dequeue(Message** out) {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        auto ptr = message_.begin();
+        auto ptr = message_;
 
         // find barrier
-        while (ptr != message_.end() && !ptr->is_barrier) {
-            ++ptr;
+        while (ptr && !ptr->is_barrier) {
+            ptr = ptr->next;
         }
 
-        uthrow_if(ptr == message_.end(), "Cannot find barrier!\n");
+        uthrow_if(!ptr, "Cannot find barrier!\n");
 
         // over the barrier
         auto prev = ptr;
-        ++ptr;
+        ptr = ptr->next;
 
         auto cur = Cycler::now().count();
-        while (ptr != message_.end()) {
+        while (ptr) {
             // 从队列中摘除该消息
-            auto msg = *ptr;
-            message_.erase_after(prev);
+            // erase_after prev
+            prev->next = ptr->next;
 
             // 发现可以执行的消息就立即返回，即使后面可能存在延时消息。
             // 因此外部调用应循环调用 dequeue() 直到消息队列枯竭为止，
             // 否则队列后面的消息可能永远无法执行。
-            if (msg.time_ns <= uint64_t(cur)) {
-                *out = msg;
+            if (ptr->time_ns <= uint64_t(cur)) {
+                *out = ptr;
                 return true;
             }
 
-            enqueueDelayed(msg);
-            ptr = prev;
-            ++ptr;
+            enqueueDelayed(ptr);
+            ptr = prev->next;
         }
 
         return false;
     }
 
-    bool MessageQueue::dequeueDelayed(int64_t* delay_ns, Message* out) {
+    bool MessageQueue::dequeueDelayed(int64_t* delay_ns, Message** out) {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        auto ptr = delayed_.begin();
-        auto prev = delayed_.end();
+        auto ptr = delayed_;
+        decltype(ptr) prev = nullptr;
 
-        if (ptr != delayed_.end()) {
+        if (ptr) {
             auto cur = Cycler::now().count();
             if (ptr->time_ns <= uint64_t(cur)) {
                 // 从队列中摘除该消息
-                *out = *ptr;
-                if (prev != delayed_.end()) {
-                    delayed_.erase_after(prev);
+                *out = ptr;
+                if (prev) {
+                    // erase_after prev
+                    prev->next = ptr->next;
                 } else {
-                    delayed_.pop_front();
+                    // pop_front
+                    delayed_ = ptr->next;
                 }
                 return true;
             }
@@ -158,22 +176,29 @@ namespace utl {
         remove(&delayed_, c);
     }
 
-    void MessageQueue::remove(List* head, Cycler* c) {
-        auto ptr = head->begin();
-        auto prev = head->end();
-        for (; ptr != head->end(); ++ptr) {
+    void MessageQueue::remove(Message** head, Cycler* c) {
+        auto ptr = *head;
+        decltype(ptr) prev = nullptr;
+        for (; ptr; ) {
             if (ptr->target == c) {
-                if (prev != head->end()) {
-                    head->erase_after(prev);
-                    ptr = prev;
+                if (prev) {
+                    // erase_after prev
+                    prev->next = ptr->next;
+                    ptr->reset();
+
+                    ptr = prev->next;
                 } else {
-                    head->pop_front();
-                    ptr = head->before_begin();
+                    // pop_front
+                    *head = ptr->next;
+                    ptr->reset();
+
+                    ptr = *head;
                 }
                 continue;
             }
 
             prev = ptr;
+            ptr = ptr->next;
         }
     }
 
@@ -187,31 +212,50 @@ namespace utl {
         remove(&delayed_, c, id);
     }
 
-    void MessageQueue::remove(List* head, Cycler* c, int id) {
-        auto ptr = head->begin();
-        auto prev = head->end();
-        for (; ptr != head->end(); ++ptr) {
+    void MessageQueue::remove(Message** head, Cycler* c, int id) {
+        auto ptr = *head;
+        decltype(ptr) prev = nullptr;
+        for (; ptr; ) {
             if (ptr->target == c &&
                 ptr->id == id)
             {
-                if (prev != head->end()) {
-                    head->erase_after(prev);
-                    ptr = prev;
+                if (prev) {
+                    // erase_after prev
+                    prev->next = ptr->next;
+                    ptr->reset();
+
+                    ptr = prev->next;
                 } else {
-                    head->pop_front();
-                    ptr = head->before_begin();
+                    // pop_front
+                    *head = ptr->next;
+                    ptr->reset();
+
+                    ptr = *head;
                 }
                 continue;
             }
 
             prev = ptr;
+            ptr = ptr->next;
         }
     }
 
     void MessageQueue::clear() {
         std::lock_guard<std::mutex> lk(queue_sync_);
-        message_.clear();
-        delayed_.clear();
+
+        auto msg = message_;
+        while (msg) {
+            auto tmp = msg;
+            msg = msg->next;
+            tmp->reset();
+        }
+
+        msg = delayed_;
+        while (msg) {
+            auto tmp = msg;
+            msg = msg->next;
+            tmp->reset();
+        }
     }
 
     bool MessageQueue::contains(Cycler* c, int id) {
@@ -220,11 +264,11 @@ namespace utl {
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
-        return contains(&message_, c, id) || contains(&delayed_, c, id);
+        return contains(message_, c, id) || contains(delayed_, c, id);
     }
 
-    bool MessageQueue::contains(List* head, Cycler* c, int id) {
-        for (auto it = head->begin(); it != head->end(); ++it) {
+    bool MessageQueue::contains(Message* head, Cycler* c, int id) {
+        for (auto it = head; it; it = it->next) {
             if (it->target == c &&
                 it->id == id)
             {
@@ -238,10 +282,10 @@ namespace utl {
         std::lock_guard<std::mutex> lk(queue_sync_);
         bool result = false;
         if (lists & ML_NORMAL) {
-            result |= !message_.empty();
+            result |= !!message_;
         }
         if (lists & ML_DELAYED) {
-            result |= !delayed_.empty();
+            result |= !!delayed_;
         }
         return result;
     }
@@ -249,8 +293,8 @@ namespace utl {
     int64_t MessageQueue::getDelayedTime() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        auto ptr = delayed_.begin();
-        if (ptr != delayed_.end()) {
+        auto ptr = delayed_;
+        if (ptr) {
             auto cur = Cycler::now().count();
             if (ptr->time_ns <= uint64_t(cur)) {
                 return 0;
@@ -267,24 +311,30 @@ namespace utl {
             return;
         }
 
-        Message barrier;
-        barrier.is_barrier = true;
-        message_.push_front(barrier);
+        Message* barrier = Message::get();
+        barrier->is_barrier = true;
+        // push_front
+        barrier->next = message_;
+        message_ = barrier;
+
         has_barrier_ = true;
     }
 
     void MessageQueue::removeBarrier() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        auto ptr = message_.begin();
-        auto prev = message_.end();
-        for (; ptr != message_.end(); ++ptr) {
+        auto ptr = message_;
+        Message* prev = nullptr;
+        for (; ptr; ptr = ptr->next) {
             if (ptr->is_barrier) {
-                if (prev != message_.end()) {
-                    message_.erase_after(prev);
+                if (prev) {
+                    // erase_after prev
+                    prev->next = ptr->next;
                 } else {
-                    message_.pop_front();
+                    // pop_front
+                    message_ = ptr->next;
                 }
+                ptr->reset();
                 break;
             }
 

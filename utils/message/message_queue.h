@@ -26,7 +26,7 @@ namespace utl {
         MessageQueue();
         ~MessageQueue();
 
-        bool enqueue(const Message& msg);
+        bool enqueue(Message* msg);
 
         /**
          * 尝试从即时队列中获取一个消息。
@@ -35,7 +35,7 @@ namespace utl {
          * @param out 消息
          * @return 如果队列中无消息，或没有达到指定时间的消息，返回 false，否则返回消息。
          */
-        bool dequeue(Message* out);
+        bool dequeue(Message** out);
 
         /**
          * 尝试从延时队列中获取一个消息。
@@ -45,7 +45,7 @@ namespace utl {
          * @param out 消息
          * @return 如果队列中无消息，或没有达到指定时间的消息，返回 false，否则返回 true。
          */
-        bool dequeueDelayed(int64_t* delay_ns, Message* out);
+        bool dequeueDelayed(int64_t* delay_ns, Message** out);
 
         void remove(Cycler* c);
         void remove(Cycler* c, int id);
@@ -66,16 +66,14 @@ namespace utl {
         void removeBarrier();
 
     private:
-        using List = std::forward_list<Message>;
+        void enqueueDelayed(Message* msg);
 
-        void enqueueDelayed(const Message& msg);
+        void remove(Message** head, Cycler* c);
+        void remove(Message** head, Cycler* c, int id);
+        bool contains(Message* head, Cycler* c, int id);
 
-        void remove(List* head, Cycler* c);
-        void remove(List* head, Cycler* c, int id);
-        bool contains(List* head, Cycler* c, int id);
-
-        List message_;
-        List delayed_;
+        Message* message_;
+        Message* delayed_;
         bool has_barrier_;
         std::mutex queue_sync_;
     };
