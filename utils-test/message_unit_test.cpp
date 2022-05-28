@@ -8,15 +8,15 @@
 #include <future>
 
 #include "utils/message/cycler.h"
-#include "utils/message/message.h"
 #include "utils/message/message_pump.h"
-#include "utils/message/message_queue.h"
 #include "utils/unit_test/test_collector.h"
 
 
 TEST_CASE(MessageUnitTest) {
 
     TEST_DEF("MessagePump tests.") {
+        int count = 0;
+
         std::weak_ptr<utl::MessagePump> pump;
         std::promise<void> promise;
 
@@ -31,6 +31,15 @@ TEST_CASE(MessageUnitTest) {
         promise.get_future().get();
 
         utl::Cycler cycler(pump);
+        for (size_t i = 0; i < 10; ++i) {
+            cycler.post(
+                [pump, &count]() {
+                    ++count;
+                });
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(1ms);
+        }
+
         cycler.post(
             [pump]() {
                 auto ptr = pump.lock();
@@ -40,6 +49,8 @@ TEST_CASE(MessageUnitTest) {
             });
 
         worker.join();
+
+        TEST_E(count, 10);
         return true;
     };
 

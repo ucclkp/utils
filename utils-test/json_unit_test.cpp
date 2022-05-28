@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "utils/json/json_parser.h"
+#include "utils/strings/string_utils_types.hpp"
 #include "utils/unit_test/test_collector.h"
 
 
@@ -115,17 +116,12 @@ const char* test_json = R"({
 
 TEST_CASE(JSONUnitTest) {
 
-    TEST_DEF("JSON parser test.") {
-        std::istringstream iss(std::string(test_json), std::ios::binary);
-        if (!iss) {
-            return false;
-        }
-
+    TEST_DEF("JSON parser test 1.") {
         JSONParser parser;
         JSONParser::ValuePtr value;
-        if (!parser.parse(iss, &value)) {
-            return false;
-        }
+        std::istringstream iss(test_json, std::ios::binary);
+        TEST_TRUE(parser.parse(iss, &value));
+        TEST_TRUE(value->isObject());
 
         auto object = value->asObject();
         json::ArrayValue* list_val;
@@ -139,6 +135,66 @@ TEST_CASE(JSONUnitTest) {
                 continue;
             }
         }
+        return true;
+    };
+
+    TEST_DEF("JSON parser test 2.") {
+        JSONParser parser;
+        JSONParser::ValuePtr value;
+        {
+            std::istringstream iss("{}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_TRUE(value->isObject());
+        }
+        {
+            std::istringstream iss("{a}", std::ios::binary);
+            TEST_FALSE(parser.parse(iss, &value));
+        }
+        {
+            std::istringstream iss("{\"a\":1}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_TRUE(value->isObject());
+        }
+        {
+            std::istringstream iss("{\"a\":\"\u0040\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), "\u0040");
+        }
+        {
+            std::istringstream iss("{\"a\":\"\\u0040\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), "@");
+        }
+        {
+            std::istringstream iss("{\"a\":\"\\u0040\\u0040\\u0040\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), "@@@");
+        }
+        {
+            std::istringstream iss("{\"a\":\"\\u8fd9\\u662f\\u4e00\\u884c\\u6587\\u5b57\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), u8p("这是一行文字"));
+        }
+        {
+            std::istringstream iss("{\"a\":\"\\u0040\\ud83d\\ude00\\ud83d\\ude00\\u0040\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), u8p("@😀😀@"));
+        }
+        {
+            std::istringstream iss("{\"a\":\"\\u0040\\ud83d\\ud83d\\ude00\\u0040\"}", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_E(value->asObject()->getString("a"), u8p("@🐽@"));
+        }
+        {
+            std::istringstream iss("[]", std::ios::binary);
+            TEST_TRUE(parser.parse(iss, &value));
+            TEST_TRUE(value->isArray());
+        }
+        {
+            std::istringstream iss("[a]", std::ios::binary);
+            TEST_FALSE(parser.parse(iss, &value));
+        }
+
         return true;
     };
 

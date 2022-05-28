@@ -7,7 +7,6 @@
 #ifndef UTILS_MESSAGE_MESSAGE_QUEUE_H_
 #define UTILS_MESSAGE_MESSAGE_QUEUE_H_
 
-#include <forward_list>
 #include <mutex>
 
 

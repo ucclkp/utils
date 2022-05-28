@@ -26,8 +26,7 @@
 }
 
 #define ONE_LOOP_S() {  \
-    char l_buf;  \
-    READ_STREAM(l_buf, 1);  \
+    GET_STREAM(char l_buf);  \
     if (!isSpace(l_buf)) RET_FALSE;  \
     pedometer_.space(l_buf);  \
     LOOP_S();  \
@@ -52,9 +51,9 @@ namespace utl {
         PEEK_STREAM(buf);
         if (uint8_t(buf) == 0xEF) {
             SKIP_BYTES(1);
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             if (uint8_t(buf) != 0xBB) RET_FALSE;
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             if (uint8_t(buf) != 0xBF) RET_FALSE;
         }
 
@@ -71,7 +70,7 @@ namespace utl {
                 break;
             }
 
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             if (buf == '<') {
                 if (!char_data.empty()) {
                     Content content;
@@ -178,7 +177,7 @@ namespace utl {
 
     bool XMLParser::parseQuesTag(std::istream& s, QuesTagType* type) {
         char buf;
-        int result = startWith<3>(s, "xml");
+        int result = startWith(s, "xml");
         if (result < 0) RET_FALSE;
         bool is_prolog = result == 1;
 
@@ -193,15 +192,14 @@ namespace utl {
             NEXT_EQUAL("version", 7);
             ADV_PEDO(7);
             if (!eatEq(s)) return false;
-            char cur_sign;
-            READ_STREAM(cur_sign, 1);
+            GET_STREAM(char cur_sign);
             if (cur_sign != '\"' && cur_sign != '\'') RET_FALSE;
             ADV_PEDO(1);
             NEXT_EQUAL("1.", 2);
             ADV_PEDO(2);
 
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 ADV_PEDO(1);
                 if (isDigit(buf)) prolog_.version.push_back(buf);
                 else break;
@@ -232,7 +230,7 @@ namespace utl {
             *type = QuesTagType::PIs;
             // PIs
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '?') {
                     PEEK_STREAM(char l_buf);
                     if (l_buf == '>') {
@@ -261,16 +259,16 @@ namespace utl {
             SKIP_BYTES(1);
 
             // <![CDATA[...]]>
-            result = startWith<6>(s, "CDATA[");
+            result = startWith(s, "CDATA[");
             if (result < 0) RET_FALSE;
             if (result == 1) {
                 if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
                 *type = ExclTagType::CDATA;
                 ADV_PEDO(6);
                 for (;;) {
-                    READ_STREAM(buf, 1);
+                    GET_STREAM(buf);
                     if (buf == ']') {
-                        result = startWith<2>(s, "]>");
+                        result = startWith(s, "]>");
                         if (result < 0) RET_FALSE;
                         if (result == 1) break;
                     }
@@ -289,9 +287,9 @@ namespace utl {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::COND_SECT;
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == ']') {
-                    result = startWith<2>(s, "]>");
+                    result = startWith(s, "]>");
                     if (result < 0) RET_FALSE;
                     if (result == 1) break;
                 }
@@ -307,14 +305,14 @@ namespace utl {
         }
 
         // <!DOCTYPE...>
-        result = startWith<7>(s, "DOCTYPE");
+        result = startWith(s, "DOCTYPE");
         if (result < 0) RET_FALSE;
         if (result == 1) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::DOCTYPE;
             ADV_PEDO(7);
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '>') break;
 
                 // TODO:
@@ -328,14 +326,14 @@ namespace utl {
         }
 
         // <!ENTITY...>
-        result = startWith<6>(s, "ENTITY");
+        result = startWith(s, "ENTITY");
         if (result < 0) RET_FALSE;
         if (result == 1) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ENTITY;
             ADV_PEDO(6);
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '>') break;
 
                 // TODO:
@@ -349,14 +347,14 @@ namespace utl {
         }
 
         // <!ELEMENT...>
-        result = startWith<7>(s, "ELEMENT");
+        result = startWith(s, "ELEMENT");
         if (result < 0) RET_FALSE;
         if (result == 1) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ELEMENT;
             ADV_PEDO(7);
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '>') break;
 
                 // TODO:
@@ -370,14 +368,14 @@ namespace utl {
         }
 
         // <!ATTLIST...>
-        result = startWith<7>(s, "ATTLIST");
+        result = startWith(s, "ATTLIST");
         if (result < 0) RET_FALSE;
         if (result == 1) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ATTLIST;
             ADV_PEDO(7);
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '>') break;
 
                 // TODO:
@@ -391,16 +389,16 @@ namespace utl {
         }
 
         // <!--...-->
-        result = startWith<2>(s, "--");
+        result = startWith(s, "--");
         if (result < 0) RET_FALSE;
         if (result == 1) {
             *type = ExclTagType::COMMENT;
             ADV_PEDO(2);
             bool illegal = false;
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '-') {
-                    result = startWith<2>(s, "->");
+                    result = startWith(s, "->");
                     if (result < 0) RET_FALSE;
                     if (result == 1) break;
 
@@ -435,7 +433,7 @@ namespace utl {
             ADV_PEDO(1);
             bool has_space = false;
             for (;;) {
-                READ_STREAM(buf, 1);
+                GET_STREAM(buf);
                 if (buf == '>') break;
 
                 if (isSpace(buf)) {
@@ -514,17 +512,16 @@ namespace utl {
         NEXT_EQUAL("encoding", 8);
         ADV_PEDO(8);
         if (!eatEq(s)) RET_FALSE;
-        char cur_sign;
-        READ_STREAM(cur_sign, 1);
+        GET_STREAM(char cur_sign);
         if (cur_sign != '\"' && cur_sign != '\'') RET_FALSE;
         ADV_PEDO(1);
 
-        READ_STREAM(buf, 1);
+        GET_STREAM(buf);
         if (!isAlphaBet(buf)) RET_FALSE;
         ADV_PEDO(1);
         prolog_.charset.push_back(buf);
         for (;;) {
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             ADV_PEDO(1);
             if (!isEncNameChar(buf)) break;
             prolog_.charset.push_back(buf);
@@ -538,17 +535,15 @@ namespace utl {
         NEXT_EQUAL("standalone", 10);
         ADV_PEDO(10);
         if (!eatEq(s)) RET_FALSE;
-        char cur_sign;
-        READ_STREAM(cur_sign, 1);
+        GET_STREAM(char cur_sign);
         if (cur_sign != '\"' && cur_sign != '\'') RET_FALSE;
         ADV_PEDO(1);
 
-        char buf;
-        READ_STREAM(buf, 1);
+        GET_STREAM(char buf);
         if (buf == 'y') {
             NEXT_EQUAL("es", 2);
         } else if (buf == 'n') {
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             if (buf != 'o') RET_FALSE;
         } else {
             RET_FALSE;
@@ -560,7 +555,7 @@ namespace utl {
     bool XMLParser::eatEq(std::istream& s) {
         char buf;
         LOOP_S();
-        READ_STREAM(buf, 1);
+        GET_STREAM(buf);
         if (buf != '=') RET_FALSE;
         ADV_PEDO(1);
         LOOP_S();
@@ -588,14 +583,13 @@ namespace utl {
         if (cur->attrs.find(attr_name) != cur->attrs.end()) RET_FALSE;
 
         if (!eatEq(s)) return false;
-        char cur_sign;
-        READ_STREAM(cur_sign, 1);
+        GET_STREAM(char cur_sign);
         if (cur_sign != '\"' && cur_sign != '\'') RET_FALSE;
         ADV_PEDO(1);
 
         std::string attr_val;
         for (;;) {
-            READ_STREAM(buf, 1);
+            GET_STREAM(buf);
             ADV_PEDO(1);
             if (buf == '\"' || buf == '\'') break;
             attr_val.push_back(buf);

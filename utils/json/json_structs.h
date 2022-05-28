@@ -39,6 +39,28 @@ namespace json {
 
         virtual Type getType() const = 0;
 
+        bool isInteger() const {
+            return getType() == JT_INTEGER;
+        }
+        bool isDouble() const {
+            return getType() == JT_DOUBLE;
+        }
+        bool isString() const {
+            return getType() == JT_STRING;
+        }
+        bool isBool() const {
+            return getType() == JT_BOOL;
+        }
+        bool isNull() const {
+            return getType() == JT_NULL;
+        }
+        bool isArray() const {
+            return getType() == JT_ARRAY;
+        }
+        bool isObject() const {
+            return getType() == JT_OBJECT;
+        }
+
         IntegerValue* asInteger() {
             if (getType() != JT_INTEGER) { return nullptr; }
             return reinterpret_cast<IntegerValue*>(this);
@@ -92,7 +114,7 @@ namespace json {
       double getValue() const { return val_; }
 
     private:
-      double val_;
+        double val_;
     };
 
 
@@ -102,7 +124,7 @@ namespace json {
 
         Type getType() const override { return JT_STRING; }
 
-        void getValue(std::string* val) const { *val = val_; }
+        const std::string& getValue() const { return val_; }
 
     private:
         std::string val_;

@@ -6,8 +6,6 @@
 
 #include "utils/message/message_pump.h"
 
-#include <cassert>
-
 #include "utils/log.h"
 #include "utils/executable.h"
 #include "utils/message/cycler.h"
@@ -137,13 +135,13 @@ namespace utl {
     // static
     std::shared_ptr<MessagePump> MessagePump::getMain() {
         auto ptr = main_pump_.lock();
-        assert(ptr);
+        ubassert(ptr);
         return ptr;
     }
 
     // static
     std::shared_ptr<MessagePump> MessagePump::getCurrent() {
-        assert(cur_pump_);
+        ubassert(cur_pump_);
         return cur_pump_;
     }
 

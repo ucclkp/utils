@@ -33,8 +33,6 @@ namespace utl {
     }
 
     void Message::reset() {
-        s_pool_.put(this);
-
         id = -1;
         time_ns = 0;
         target = nullptr;
@@ -45,6 +43,8 @@ namespace utl {
         data = nullptr;
         shared_data.reset();
         is_barrier = false;
+
+        s_pool_.put(this);
     }
 
 

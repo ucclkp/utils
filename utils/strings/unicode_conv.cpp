@@ -507,12 +507,10 @@ namespace utl {
     }
 
     bool utf16_to_utf8(char16_t ch, char* dst, size_t* len) {
-        if ((/*ch >= 0x0000 &&*/ ch <= 0xD7FF) ||
-            (ch >= 0xE000 && ch <= 0xFFFF))
-        {
-            return sv_to_utf8(uint_fast32_t(ch), dst, len);
+        if (IS_SURROGATES(ch)) {
+            return false;
         }
-        return false;
+        return sv_to_utf8(uint_fast32_t(ch), dst, len);
     }
 
     int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len) {
@@ -586,13 +584,11 @@ namespace utl {
     }
 
     bool utf16_to_utf32(char16_t ch, char32_t* out) {
-        if ((/*ch >= 0x0000 &&*/ ch <= 0xD7FF) ||
-            (ch >= 0xE000 && ch <= 0xFFFF))
-        {
-            *out = ch;
-            return true;
+        if (IS_SURROGATES(ch)) {
+            return false;
         }
-        return false;
+        *out = ch;
+        return true;
     }
 
     int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_len) {

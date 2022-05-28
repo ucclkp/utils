@@ -109,7 +109,7 @@ namespace json {
             return false;
         }
 
-        val->asString()->getValue(out);
+        *out = val->asString()->getValue();
         return true;
     }
 
@@ -323,7 +323,7 @@ namespace json {
         if (!get(path, &val) || !val || val->getType() != JT_STRING) {
             return false;
         }
-        val->asString()->getValue(out);
+        *out = val->asString()->getValue();
         return true;
     }
 

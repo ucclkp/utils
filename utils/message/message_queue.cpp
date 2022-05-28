@@ -6,8 +6,6 @@
 
 #include "utils/message/message_queue.h"
 
-#include <cassert>
-
 #include "utils/log.h"
 #include "utils/message/cycler.h"
 #include "utils/message/message.h"
@@ -26,8 +24,8 @@ namespace utl {
 
     bool MessageQueue::enqueue(Message* msg) {
         if (msg->is_barrier) {
+            ubassert(false);
             msg->reset();
-            LOG(Log::ERR) << "Illegal msg!";
             return false;
         }
 
@@ -74,7 +72,7 @@ namespace utl {
     }
 
     void MessageQueue::enqueueDelayed(Message* msg) {
-        assert(!msg->is_barrier);
+        ubassert(!msg->is_barrier);
 
         auto ptr = delayed_;
 

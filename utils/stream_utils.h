@@ -43,6 +43,10 @@
     buf = s.peek();       \
     if (!s) RET_FALSE
 
+#define GET_STREAM(buf)  \
+    buf = s.get();       \
+    if (!s) RET_FALSE
+
 #define SKIP_BYTES(size)  \
     s.seekg(size, std::ios::cur);  \
     if (!s.good()) RET_FALSE
@@ -88,23 +92,25 @@
 namespace utl {
 
     /**
-     * 查看从当前位置开始的流数据是否等于 str[N]。
-     * 如果流中的数据足够，且等于 str[N]，返回 1；
+     * 查看从当前位置开始的流数据是否等于 str。
+     * 如果流中的数据足够，且等于 str，返回 1；
      * 如果中途读取到流末尾，或数据不等，则回退流指针，并返回 0；
      * 如果读取流出错，返回 -1。
      */
-    template <size_t N>
-    int startWith(std::istream& s, const char* str) {
-        char buf[N];
-        s.read(buf, N);
-        if (!s) {
-            if (s.bad()) return -1;
-            if (!s.eof() && s.fail()) return -1;
-        }
-        if (s.eof() || std::strncmp(buf, str, N) != 0) {
-            auto size = s.gcount();
-            s.seekg(-size, std::ios::cur);
-            return 0;
+    inline int startWith(std::istream& s, const std::string_view& str) {
+        auto saved = s.tellg();
+
+        char ch;
+        for (size_t i = 0; i < str.size(); ++i) {
+            s.read(&ch, 1);
+            if (!s) {
+                if (s.bad() || !s.eof()) return -1;
+            }
+            if (s.eof() || str[i] != ch) {
+                s.clear();
+                s.seekg(saved);
+                return 0;
+            }
         }
         return 1;
     }
