@@ -16,7 +16,7 @@ namespace internal {
 
     constexpr uint16_t u16_clut[]
     {
-        //0, 1, 2,  3,    4,
+        //0, 1,  2,    3,     4,
         1u, 10u, 100u, 1000u, 1000'0u
     };
 
@@ -142,6 +142,18 @@ namespace internal {
     };
 
 
+    /**
+     * 单元格数据类型的属性。
+     * UTy 表示单元格的数据类型；
+     * bN 表示单元格中的数位基于几进制进行分割，即实际基数。
+     *
+     * 成员：
+     * udig 表示单元格在与进制中的一位数进行运算时，能确保不溢出的最大可盛放数位数；
+     * uceil 表示单元格中可盛放的的最大数 + 1，超过该数就要进位，也叫单元格基数；
+     * bpow(e) 计算 bN^e ；
+     * dcount(bc) 保守估计一个具有 bc 个二进制位的数需要几个数位来容纳；
+     * ucount(bc) 保守估计一个具有 bc 个二进制位的数需要几个单元格来容纳。
+     */
     template <typename UTy, size_t bN>
     struct UCeilTraits {};
 
@@ -253,6 +265,13 @@ namespace internal {
         }
     };
 
+    /**
+     * 模拟较长的小数位。
+     * FTy 表示关联的浮点数类型；
+     * UTy 表示单元格的数据类型；
+     * bN 表示单元格中的数位基于几进制进行分割；
+     * Unit 表示单元格的总数。
+     */
     template <typename FTy, typename UTy, size_t bN, size_t Unit>
     class BigFloat_bN {
     public:

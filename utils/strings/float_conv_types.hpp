@@ -9,6 +9,10 @@
 
 #include "utils/strings/conv_ret_code.hpp"
 
+/**
+ * 测试用。
+ * 用于模拟非规格化浮点数禁用的情况。
+ */
 #define FORCE_NO_DENORM  false
 
 

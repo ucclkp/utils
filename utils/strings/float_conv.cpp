@@ -83,7 +83,13 @@ namespace internal {
         }
 
         if (ret != UCR_OK) {
-            if (n) *n = str;
+            if (n) {
+                if (ret == UCR_OVERFLOWED) {
+                    *n = str + len;
+                } else {
+                    *n = str;
+                }
+            }
             return ret;
         }
         if (!n && _p != str + len) {

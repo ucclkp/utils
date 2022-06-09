@@ -20,7 +20,7 @@
     {dftos<FTy, UTy, Cy, bN, u, f>(fra, exp_shift, sign, fmt, round, precision, out); return;}
 
 #define dscistof_INVOKE(u, f)  \
-    return dscistof<FTy, UTy, Cy, bN, u, f>(str, len, di, de, sign, exp, fmt, round, out, p);
+    return dscistof<FTy, UTy, Cy, bN, u, f>(str, len, di, de, sign, exp, fmt, round, out);
 
 #define dnorstof_INVOKE(u, f)  \
     return dnorstof<FTy, UTy, Cy, bN, u, f>(str, len, di, sign, round, out, p);
@@ -1082,12 +1082,13 @@ namespace internal {
         constexpr auto maxe_1 = FT::maxe - 1u;
         constexpr auto mine_c = FT::mine_c();
 
+        int_fast32_t exp;
         if (bu.isZero() && bf.isZero()) {
-            zerd(sign, out);
-            return true;
+            exp = -int_fast32_t(maxe_1);
+        } else {
+            exp = 0;
         }
 
-        int_fast32_t exp = 0;
         uint_e fra = 0;
         bool update_exp = bu.isZero();
         for (size_t j = 0; j < FT::maxe; ++j) {
@@ -1233,7 +1234,12 @@ namespace internal {
                 return ret;
             }
             if (_p == di) {
-                bf.fromChars(di + 1, (s + len - di) - 1, &_p);
+                auto _len = (s + len - di) - 1;
+                if (_len) {
+                    bf.fromChars(di + 1, _len, &_p);
+                } else {
+                    _p = di + 1;
+                }
             }
         }
 
@@ -1249,7 +1255,7 @@ namespace internal {
     template <typename FTy, typename UTy, typename Cy, size_t bN, size_t UUnit, size_t FUnit>
     int dscistof(
         const Cy* str, size_t len, const Cy* di, const Cy* de,
-        uint_fast8_t sign, int_fast32_t exp, int fmt, int round, FTy* out, const Cy** p)
+        uint_fast8_t sign, int_fast32_t exp, int fmt, int round, FTy* out)
     {
         using BigUInt = BigUInt_bN<FTy, UTy, bN, UUnit>;
         using BigFloat = BigFloat_bN<FTy, UTy, bN, FUnit>;
@@ -1338,7 +1344,6 @@ namespace internal {
             return UCR_OVERFLOWED;
         }
 
-        *p = _p;
         return UCR_OK;
     }
 
@@ -1473,6 +1478,8 @@ namespace internal {
             uuc = 1;
             fuc = ((de - str) - (exp + ul) + UCTraits::udig - 1) / UCTraits::udig + 1;
         }
+
+        *p = s;
 
         dscistof_IF_INVOKE(1, 1);
         dscistof_IF_INVOKE(2, 2);
@@ -1928,11 +1935,11 @@ namespace internal {
         }
 
         if (!sd) {
-            zerd(sign, out);
-            return UCR_OK;
-        }
+            exp = -int_fast32_t(maxe_1);
+        } else {
+            exp *= bbit;
 
-        exp *= bbit;
+        }
 
         if (!bit_count) {
             for (; s < se; ++s) {
@@ -1972,7 +1979,9 @@ namespace internal {
                 if (!stoi(s, se - s, &_exp, 10, &s)) {
                     return UCR_FAILED;
                 }
-                exp += _exp;
+                if (sd) {
+                    exp += _exp;
+                }
             }
         }
 
@@ -2029,6 +2038,7 @@ namespace internal {
         }
 
         dftof(sign, exp_shift, fra, exp_shift != 0 ? 1 : 0, out);
+        *p = s;
         return UCR_OK;
     }
 

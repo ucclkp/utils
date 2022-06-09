@@ -27,6 +27,200 @@
     val : 0
 
 
+namespace {
+
+    template <typename Cy>
+    using Str = std::basic_string<Cy>;
+    template <typename Cy>
+    using Strv = std::basic_string_view<Cy>;
+
+#ifdef USING_CHARCONV
+    std::chars_format mapcf(int fmt) {
+        std::chars_format cf;
+        if ((fmt & utl::UFF_FIX) &&
+            !(fmt & utl::UFF_SCI) &&
+            !(fmt & utl::UFF_HEX) &&
+            !(fmt & utl::UFF_HEX2))
+        {
+            cf = std::chars_format::fixed;
+        } else if (
+            (fmt & utl::UFF_SCI) &&
+            !(fmt & utl::UFF_FIX) &&
+            !(fmt & utl::UFF_HEX) &&
+            !(fmt & utl::UFF_HEX2))
+        {
+            cf = std::chars_format::scientific;
+        } else if (
+            (fmt & utl::UFF_FIX) &&
+            (fmt & utl::UFF_SCI) &&
+            !(fmt & utl::UFF_HEX) &&
+            !(fmt & utl::UFF_HEX2))
+        {
+            cf = std::chars_format::general;
+        } else if (
+            (fmt & utl::UFF_HEX) ||
+            (fmt & utl::UFF_HEX2))
+        {
+            cf = std::chars_format::hex;
+        } else {
+            cf = std::chars_format::fixed;
+        }
+        return cf;
+    }
+#endif
+
+    template <typename Cy, typename Fy, size_t Sz = 1000>
+    bool tf_fs(
+        Fy val, int precision, const Strv<Cy>& r,
+        int fmt, int rou = utl::UFR_NEAR,
+        size_t buf_size = Sz, size_t real_size = ~0u,
+        bool r2 = true)
+    {
+        if (buf_size > Sz) {
+            buf_size = Sz;
+
+        }
+        Cy buf[Sz]{ 0 };
+        size_t buf_len = buf_size;
+
+        Str<Cy> result;
+        utl::ftos(val, &result, precision, fmt, rou);
+        TEST_E(utl::ftos(val, buf, &buf_len, precision, fmt, rou), r2);
+
+        if (real_size != ~0u) {
+            TEST_E(buf_len, real_size);
+        }
+
+#ifdef USING_CHARCONV
+        Cy buf2[Sz]{ 0 };
+        std::chars_format cf = mapcf(fmt);
+        std::to_chars(std::begin(buf2), std::end(buf2), val, cf, precision);
+#endif
+
+        TEST_E(Str<Cy>(buf, buf_len), r);
+        if (r2) {
+            TEST_E(result, r);
+        }
+        return true;
+    }
+
+    template <typename Cy, typename Fy>
+    bool tf_fs_rand(int fmt, int rou = utl::UFR_NEAR) {
+        std::random_device rd;
+        std::default_random_engine eng(rd());
+        std::uniform_real_distribution<Fy> dist_f(
+            std::numeric_limits<Fy>::denorm_min(), (std::numeric_limits<Fy>::max)());
+        std::uniform_int_distribution<int> dist_i(0, 99);
+
+        for (size_t i = 0; i < RAND_LOOP; ++i) {
+            Fy val = dist_f(eng);
+            int precision = dist_i(eng);
+
+            Str<Cy> result;
+            utl::ftos(val, &result, precision, fmt, rou);
+
+            Cy buf[200]{ 0 };
+            size_t buf_len = 200;
+            TEST_TRUE_BRK(utl::ftos(val, buf, &buf_len, precision, fmt, rou));
+            TEST_E_BRK(std::string(buf, buf_len), result);
+
+#ifdef USING_CHARCONV
+            Cy buf2[200]{ 0 };
+            std::chars_format cf = mapcf(fmt);
+            std::to_chars(std::begin(buf2), std::end(buf2), val, cf, precision);
+            TEST_E_BRK(result, std::string(buf2));
+#endif
+        }
+        return true;
+    }
+
+    template <typename Cy, typename Fy>
+    bool tf_sf(
+        const Strv<Cy>& text, Fy r,
+        int fmt, int rou = utl::UFR_NEAR,
+        size_t poff = ~0u, int r1 = utl::UCR_OK, int r2 = utl::UCR_OK)
+    {
+        if (poff == ~0u) {
+            poff = text.size();
+        }
+
+        Fy result1;
+        TEST_E(utl::stof(text, &result1, fmt, rou), r1);
+
+        Fy result1_1;
+        auto buf = text.data();
+        const typename Strv<Cy>::value_type* p;
+        TEST_E(utl::stof(buf, text.size(), &result1_1, fmt, rou, &p), r2);
+
+#ifdef USING_CHARCONV
+        Fy result2;
+        std::chars_format cf = mapcf(fmt);
+        std::from_chars(text.data(), text.data() + text.size(), result2, cf);
+#endif
+
+        std::string s;
+        TEST_E(result1, r);
+        TEST_E(result1_1, r);
+        TEST_E(p, buf + poff);
+        return true;
+    }
+
+    template <typename Cy, typename Fy>
+    bool tf_sf_nan(
+        const Strv<Cy>& text,
+        int fmt, int rou = utl::UFR_NEAR,
+        size_t poff = ~0u, int r1 = utl::UCR_OK, int r2 = utl::UCR_OK)
+    {
+        if (poff == ~0u) {
+            poff = text.size();
+        }
+
+        Fy result1;
+        TEST_E(utl::stof(text, &result1, fmt, rou), r1);
+
+        Fy result1_1;
+        auto buf = text.data();
+        const typename Strv<Cy>::value_type* p;
+        TEST_E(utl::stof(buf, text.size(), &result1_1, fmt, rou, &p), r2);
+
+#ifdef USING_CHARCONV
+        Fy result2;
+        std::chars_format cf = mapcf(fmt);
+        std::from_chars(text.data(), text.data() + text.size(), result2, cf);
+#endif
+
+        TEST_TRUE(std::isnan(result1));
+        TEST_TRUE(std::isnan(result1_1));
+        TEST_E(p, buf + poff);
+        return true;
+    }
+
+    template <typename Fy>
+    bool tf_sf_fix_c(
+        const Strv<char>& text, Fy r,
+        size_t poff = ~0u, int r1 = utl::UCR_OK, int r2 = utl::UCR_OK)
+    {
+        return tf_sf<char>(text, r, utl::UFF_FIX, utl::UFR_NEAR, poff, r1, r2);
+    }
+
+    template <typename Fy>
+    bool tf_sf_sci_c(
+        const Strv<char>& text, Fy r,
+        size_t poff = ~0u, int r1 = utl::UCR_OK, int r2 = utl::UCR_OK)
+    {
+        return tf_sf<char>(text, r, utl::UFF_SCI, utl::UFR_NEAR, poff, r1, r2);
+    }
+
+    template <typename Fy>
+    bool tf_sf_sci_hex_c(
+        const Strv<char>& text, Fy r,
+        size_t poff = ~0u, int r1 = utl::UCR_OK, int r2 = utl::UCR_OK)
+    {
+        return tf_sf<char>(text, r, utl::UFF_SCI | utl::UFF_HEX, utl::UFR_NEAR, poff, r1, r2);
+    }
+
+}
+
 TEST_CASE(IntegerConv) {
 
     TEST_DEF("Integer -> String.") {
@@ -573,48 +767,11 @@ TEST_CASE(FloatingConv_Float_Dec) {
 
     TEST_DEF("Float  -> String. (Dec, Nor)") {
         auto _TEST_FUNC = [](float val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_FIX);
         };
 
         auto _TEST_RAND = []() -> bool {
-            std::random_device rd;
-            std::default_random_engine eng(rd());
-            std::uniform_real_distribution<float> dist_f(
-                std::numeric_limits<float>::denorm_min(), (std::numeric_limits<float>::max)());
-            std::uniform_int_distribution<int> dist_i(0, 99);
-
-            for (size_t i = 0; i < RAND_LOOP; ++i) {
-                float val = dist_f(eng);
-                int precision = dist_i(eng);
-
-                std::string result;
-                utl::ftos(val, &result, precision);
-
-                char buf[200]{ 0 };
-                size_t buf_len = 200;
-                TEST_TRUE_BRK(utl::ftos(val, buf, &buf_len, precision));
-                TEST_E_BRK(std::string(buf, buf_len), result);
-
-#ifdef USING_CHARCONV
-                char buf2[200]{ 0 };
-                std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
-
-                TEST_E_BRK(result, std::string(buf2));
-#endif
-            }
-            return true;
+            return tf_fs_rand<char, float>(utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC(0.0f, 0, "0"));
@@ -700,88 +857,16 @@ TEST_CASE(FloatingConv_Float_Dec) {
 
     TEST_DEF("Float  -> String. (Dec, Sci)") {
         auto _TEST_FUNC = [](float val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::scientific, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI);
         };
-
         auto _TEST_FUNC_MIX = [](float val, int precision, const std::string& r) -> bool {
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI | utl::UFF_FIX);
-#ifdef USING_CHARCONV
-            char buf[1000]{ 0 };
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::general, precision);
-#endif
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI | utl::UFF_FIX);
         };
-
         auto _TEST_RAND = []() -> bool {
-            std::random_device rd;
-            std::default_random_engine eng(rd());
-            std::uniform_real_distribution<float> dist_f(
-                std::numeric_limits<float>::denorm_min(), (std::numeric_limits<float>::max)());
-            std::uniform_int_distribution<int> dist_i(0, 99);
-
-            for (size_t i = 0; i < RAND_LOOP; ++i) {
-                float val = dist_f(eng);
-                int precision = dist_i(eng);
-
-                std::string result;
-                utl::ftos(val, &result, precision, utl::UFF_SCI);
-
-                char buf[200]{ 0 };
-                size_t buf_len = 200;
-                TEST_TRUE_BRK(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI));
-                TEST_E_BRK(std::string(buf, buf_len), result);
-
-#ifdef USING_CHARCONV
-                char buf2[200]{ 0 };
-                std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::scientific, precision);
-
-                TEST_E_BRK(result, std::string(buf2));
-#endif
-            }
-            return true;
+            return tf_fs_rand<char, float>(utl::UFF_SCI);
         };
-
         auto _TEST_RAND_MIX = []() -> bool {
-            std::random_device rd;
-            std::default_random_engine eng(rd());
-            std::uniform_real_distribution<float> dist_f(
-                std::numeric_limits<float>::denorm_min(), (std::numeric_limits<float>::max)());
-            std::uniform_int_distribution<int> dist_i(0, 99);
-
-            for (size_t i = 0; i < RAND_LOOP; ++i) {
-                float val = dist_f(eng);
-                int precision = dist_i(eng);
-
-                std::string result;
-                utl::ftos(val, &result, precision, utl::UFF_SCI | utl::UFF_FIX);
-
-                char buf[200]{ 0 };
-                size_t buf_len = 200;
-                TEST_TRUE_BRK(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI | utl::UFF_FIX));
-                TEST_E_BRK(std::string(buf, buf_len), result);
-
-#ifdef USING_CHARCONV
-                //char buf2[200]{ 0 };
-                //std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::general, precision);
-
-                //TEST_E_BRK(result, std::string(buf2));
-#endif
-            }
-            return true;
+            return tf_fs_rand<char, float>(utl::UFF_SCI | utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC_MIX(0.0f, 0, "0"));
@@ -862,79 +947,66 @@ TEST_CASE(FloatingConv_Float_Dec) {
         }
 
         TEST_TRUE(_TEST_RAND());
-        TEST_TRUE(_TEST_RAND_MIX());
+        //TEST_TRUE(_TEST_RAND_MIX());
 
         return true;
     };
 
     TEST_DEF("String -> Float.  (Dec, Nor)") {
-        auto _TEST_FUNC = [](const std::string& text, float r) -> bool {
-            float result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-            TEST_E(result1, result2);
-#endif
-            TEST_E(result1, r);
-            return true;
-        };
-        auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            float result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-#endif
-            return std::isnan(result1);
+        auto _tf_nan = [](const std::string& text) -> bool {
+            return tf_sf_nan<char, float>(text, utl::UFF_FIX);
         };
 
-        TEST_TRUE(_TEST_FUNC("0", 0.0f));
-        TEST_TRUE(_TEST_FUNC("-0", -0.0f));
-        TEST_TRUE(_TEST_FUNC("8.1", 8.1f));
-        TEST_TRUE(_TEST_FUNC("1.", 1.0f));
-        TEST_TRUE(_TEST_FUNC("0.0", 0.0f));
-        TEST_TRUE(_TEST_FUNC("1234567.0", 1234567.0f));
-        TEST_TRUE(_TEST_FUNC("-1234567.0", -1234567.0f));
-        TEST_TRUE(_TEST_FUNC("457686785756874490000000123", 457686785756874490000000123.0f));
-        TEST_TRUE(_TEST_FUNC("1234567978598848646898790", 1234567978598848646898790.0f));
-        TEST_TRUE(_TEST_FUNC("1234567978598848646898790.3", 1234567978598848646898790.3f));
-        TEST_TRUE(_TEST_FUNC("8945745684576845845.45764856784578456", 8945745684576845845.45764856784578456f));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c("0", 0.0f));
+        TEST_TRUE(tf_sf_fix_c("-0", -0.0f));
+        TEST_TRUE(tf_sf_fix_c("8.1", 8.1f));
+        TEST_TRUE(tf_sf_fix_c("1.", 1.0f));
+        TEST_TRUE(tf_sf_fix_c("0.0", 0.0f));
+        TEST_TRUE(tf_sf_fix_c("1234567.0", 1234567.0f));
+        TEST_TRUE(tf_sf_fix_c("-1234567.0", -1234567.0f));
+        TEST_TRUE(tf_sf_fix_c("457686785756874490000000123", 457686785756874490000000123.0f));
+        TEST_TRUE(tf_sf_fix_c("1234567978598848646898790", 1234567978598848646898790.0f));
+        TEST_TRUE(tf_sf_fix_c("1234567978598848646898790.3", 1234567978598848646898790.3f));
+        TEST_TRUE(tf_sf_fix_c("8945745684576845845.45764856784578456", 8945745684576845845.45764856784578456f));
+        TEST_TRUE(tf_sf_fix_c(
             "0.000000000000000000000000000000000000000000001",
             DENORM_VAL(0.000000000000000000000000000000000000000000001f)));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
             "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
-            std::numeric_limits<float>::infinity()));
-        TEST_TRUE(_TEST_FUNC(
+            std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_fix_c(
             "99999999999999999999999999999999999999.0",
             99999999999999999999999999999999999999.0f));
-        TEST_TRUE(_TEST_FUNC("0.123456", 0.123456f));
-        TEST_TRUE(_TEST_FUNC("0.000123456789e-2", 0.000123456789f));
-        TEST_TRUE(_TEST_FUNC("170000000000000000000000000000000000000.0", 170000000000000000000000000000000000000.0f));
-        TEST_TRUE(_TEST_FUNC("340282346638528859811704183484516925440.000000", (std::numeric_limits<float>::max)()));
+        TEST_TRUE(tf_sf_fix_c("0.123456", 0.123456f));
+        TEST_TRUE(tf_sf_fix_c("0.000123456789e-2", 0.000123456789f, 14, utl::UCR_FAILED));
+        TEST_TRUE(tf_sf_fix_c("170000000000000000000000000000000000000.0", 170000000000000000000000000000000000000.0f));
+        TEST_TRUE(tf_sf_fix_c("340282346638528859811704183484516925440.000000", (std::numeric_limits<float>::max)()));
         //                          |
-        TEST_TRUE(_TEST_FUNC("340282446638528859811704183484516925440.0000000", std::numeric_limits<float>::infinity()));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
+            "340282446638528859811704183484516925440.0000000",
+            std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_fix_c(
             "0.0000000000000000000000000000000000000117549435082228750796873653722224567781866555677208752150875170627841725945472717285156250",
             (std::numeric_limits<float>::min)()));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
             "0.0000000000000000000000000000000000000058774717541114375398436826861112283890933277838604376075437585313920862972736358642578125",
             DENORM_VAL(0x1p-127f)));
 
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
             "0.00000000000000000000000000000000000000000000140129846432481707092372958328991613128026194187651577175706828388979108268586060148663818836212158203125000",
             DENORM_VAL(std::numeric_limits<float>::denorm_min())));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
             "0.00000000000000000000000000000000000000000000060129846432481707092372958328991613128026194187651577175706828388979108268586060148663818836212158203125000",
-            0));
+            0.f));
 
-        TEST_TRUE(_TEST_FUNC_NAN("nan"));
-        TEST_TRUE(_TEST_FUNC_NAN("nan()"));
-        TEST_TRUE(_TEST_FUNC_NAN("-nan"));
-        TEST_TRUE(_TEST_FUNC_NAN("nan(ind)"));
-        TEST_TRUE(_TEST_FUNC_NAN("nan(snan)"));
-        TEST_TRUE(_TEST_FUNC_NAN("-nan(snan)"));
+        TEST_TRUE(_tf_nan("nan"));
+        TEST_TRUE(_tf_nan("nan()"));
+        TEST_TRUE(_tf_nan("-nan"));
+        TEST_TRUE(_tf_nan("nan(ind)"));
+        TEST_TRUE(_tf_nan("nan(snan)"));
+        TEST_TRUE(_tf_nan("-nan(snan)"));
 
         /*
          * float
@@ -942,9 +1014,9 @@ TEST_CASE(FloatingConv_Float_Dec) {
          * 4148 -> 8|80
          * 4140 -> 8|70
          */
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144954150", 2.51449549e-29f));
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144954148", 2.51449549e-29f));
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144954140", 2.51449534e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144954150", 2.51449549e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144954148", 2.51449549e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144954140", 2.51449534e-29f));
 
         /*
          * float
@@ -952,32 +1024,19 @@ TEST_CASE(FloatingConv_Float_Dec) {
          * 2640 -> 7|80
          * 2600 -> 7|79
          */
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144952650", 2.51449534e-29f));
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144952640", 2.51449534e-29f));
-        TEST_TRUE(_TEST_FUNC("0.000000000000000000000000000025144952600", 2.51449519e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144952650", 2.51449534e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144952640", 2.51449534e-29f));
+        TEST_TRUE(tf_sf_fix_c("0.000000000000000000000000000025144952600", 2.51449519e-29f));
 
         return true;
     };
 
     TEST_DEF("String -> Float.  (Dec, Sci)") {
         auto _TEST_FUNC = [](const std::string& text, float r) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::scientific);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_SCI);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::scientific);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, float>(text, utl::UFF_SCI);
         };
 
         TEST_TRUE(_TEST_FUNC("8.1", 8.1f));
@@ -997,9 +1056,10 @@ TEST_CASE(FloatingConv_Float_Dec) {
         TEST_TRUE(_TEST_FUNC(
             "0.000000000000000000000000000000000000000000001",
             DENORM_VAL(0.000000000000000000000000000000000000000000001f)));
-        TEST_TRUE(_TEST_FUNC(
-            "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
-            std::numeric_limits<float>::infinity()));
+        TEST_TRUE(tf_sf_sci_c(
+            "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999e0",
+            std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "99999999999999999999999999999999999999",
             99999999999999999999999999999999999999.0f));
@@ -1011,7 +1071,10 @@ TEST_CASE(FloatingConv_Float_Dec) {
         TEST_TRUE(_TEST_FUNC("9.470328e-45", DENORM_VAL(9.470328e-45f)));
         TEST_TRUE(_TEST_FUNC("1.070328e-23", 1.070328e-23f));
         TEST_TRUE(_TEST_FUNC("340282346638528859811704183484516925440.0000e0", (std::numeric_limits<float>::max)()));
-        TEST_TRUE(_TEST_FUNC("340282346638528859811704183484516925440.0000e1", std::numeric_limits<float>::infinity()));
+        TEST_TRUE(tf_sf_sci_c(
+            "340282346638528859811704183484516925440.0000e1",
+            std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "0.0000000000000000000000000000000000000117549435082228750796873653722224567781866555677208752150875170627841725945472717285156250e0",
             (std::numeric_limits<float>::min)()));
@@ -1041,19 +1104,7 @@ TEST_CASE(FloatingConv_Float_Hex) {
 
     TEST_DEF("Float  -> String. (Hex, Nor)") {
         auto _TEST_FUNC = [](float val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_HEX);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_HEX));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC(18.0f, 2, "12.00"));
@@ -1101,62 +1152,13 @@ TEST_CASE(FloatingConv_Float_Hex) {
 
     TEST_DEF("Float  -> String. (Hex, Sci)") {
         auto _TEST_FUNC = [](float val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI | utl::UFF_HEX);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI | utl::UFF_HEX));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI | utl::UFF_HEX);
         };
         auto _TEST_FUNC2 = [](float val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            std::string result;
-            size_t buf_len = 1000;
-
-            utl::ftos(val, &result, precision, utl::UFF_HEX2);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_HEX2));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_HEX2);
         };
-
         auto _TEST_RAND = []() -> bool {
-            std::random_device rd;
-            std::default_random_engine eng(rd());
-            std::uniform_real_distribution<float> dist_f(
-                std::numeric_limits<float>::denorm_min(), (std::numeric_limits<float>::max)());
-            std::uniform_int_distribution<int> dist_i(0, 99);
-
-            for (size_t i = 0; i < RAND_LOOP; ++i) {
-                float val = dist_f(eng);
-                int precision = dist_i(eng);
-
-                std::string result;
-                utl::ftos(val, &result, precision, utl::UFF_HEX2);
-
-                char buf[200]{ 0 };
-                size_t buf_len = 200;
-                TEST_TRUE_BRK(utl::ftos(val, buf, &buf_len, precision, utl::UFF_HEX2));
-                TEST_E_BRK(std::string(buf, buf_len), result);
-
-#ifdef USING_CHARCONV
-                char buf2[200]{ 0 };
-                std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-                TEST_E_BRK(result, std::string(buf2));
-#endif
-            }
-            return true;
+            return tf_fs_rand<char, float>(utl::UFF_HEX2);
         };
 
         TEST_TRUE(_TEST_FUNC(8.1f, 2, "8.1as+00"));
@@ -1223,23 +1225,10 @@ TEST_CASE(FloatingConv_Float_Hex) {
 
     TEST_DEF("String -> Float.  (Hex, Nor)") {
         auto _TEST_FUNC = [](const std::string& text, float r) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_FIX | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_FIX | utl::UFF_HEX);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_FIX | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, float>(text, utl::UFF_FIX | utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC("8.1", 8.0625f));
@@ -1287,33 +1276,13 @@ TEST_CASE(FloatingConv_Float_Hex) {
 
     TEST_DEF("String -> Float.  (Hex, Sci)") {
         auto _TEST_FUNC = [](const std::string& text, float r) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_SCI | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_SCI | utl::UFF_HEX);
         };
         auto _TEST_FUNC2 = [](const std::string& text, float r) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_HEX2);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_HEX2);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            float result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            float result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, float>(text, utl::UFF_SCI | utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC("1.fffffffffffffffffffffff", 2.0f));
@@ -1322,6 +1291,7 @@ TEST_CASE(FloatingConv_Float_Hex) {
         TEST_TRUE(_TEST_FUNC2("8.1", 8.0625f));
         TEST_TRUE(_TEST_FUNC("0.0s0", 0.0f));
         TEST_TRUE(_TEST_FUNC2("0.0p0", 0.0f));
+        TEST_TRUE(_TEST_FUNC2("0.0p10", 0.0f));
         TEST_TRUE(_TEST_FUNC("1", 1.0f));
         TEST_TRUE(_TEST_FUNC2("1", 1.0f));
         TEST_TRUE(_TEST_FUNC("800s-1", 128.0f));
@@ -1341,18 +1311,22 @@ TEST_CASE(FloatingConv_Float_Hex) {
         TEST_TRUE(_TEST_FUNC("8945745684576845845.45764856784578456", 4.0515338532968418e+22f));
         TEST_TRUE(_TEST_FUNC("0.123456", 0.071111083030700684f));
         TEST_TRUE(_TEST_FUNC("0.000123456789s-2", 6.7816840268464240e-08f));
-        TEST_TRUE(_TEST_FUNC("1.600123456789s+308", std::numeric_limits<float>::infinity()));
-        TEST_TRUE(_TEST_FUNC("-1.600123456789s+308", -std::numeric_limits<float>::infinity()));
-        TEST_TRUE(_TEST_FUNC("2.470328s-324", 0.0));
+        TEST_TRUE(tf_sf_sci_hex_c("1.600123456789s+308", std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_sci_hex_c("-1.600123456789s+308", -std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_sci_hex_c("2.470328s-324", 0.0,
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "f.ffffF00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000s+31",
             (std::numeric_limits<float>::max)()));
         TEST_TRUE(_TEST_FUNC2(
             "1.ffFffe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000P+127",
             (std::numeric_limits<float>::max)()));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_sci_hex_c(
             "f.fffffc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000s+31",
-            std::numeric_limits<float>::infinity()));
+            std::numeric_limits<float>::infinity(),
+            ~0u, utl::UCR_OK, utl::UCR_OK));
         TEST_TRUE(_TEST_FUNC(
             "4.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000S-32",
             (std::numeric_limits<float>::min)()));
@@ -1391,19 +1365,7 @@ TEST_CASE(FloatingConv_Double_Dec) {
 
     TEST_DEF("Double -> String. (Dec, Nor)") {
         auto _TEST_FUNC = [](double val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC(0.0,         0, "0"));
@@ -1500,30 +1462,11 @@ TEST_CASE(FloatingConv_Double_Dec) {
 
     TEST_DEF("Double -> String. (Dec, Sci)") {
         auto _TEST_FUNC = [](double val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::scientific, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI);
         };
 
         auto _TEST_FUNC_MIX = [](double val, int precision, const std::string& r) -> bool {
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI | utl::UFF_FIX);
-#ifdef USING_CHARCONV
-            char buf[1000]{ 0 };
-            std::to_chars(std::begin(buf), std::end(buf), val, std::chars_format::general, precision);
-#endif
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI | utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC_MIX(0.0, 0, "0"));
@@ -1617,23 +1560,10 @@ TEST_CASE(FloatingConv_Double_Dec) {
 
     TEST_DEF("String -> Double. (Dec, Nor)") {
         auto _TEST_FUNC = [](const std::string& text, double r) -> bool {
-            double result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_FIX);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            double result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, double>(text, utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC("0", 0.0));
@@ -1652,18 +1582,19 @@ TEST_CASE(FloatingConv_Double_Dec) {
             "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             "0000000000000000000000000000000000000000000000000000000000000001",
             DENORM_VAL(0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001)));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_fix_c(
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "999999999999999999999999999999999999999999999999999999999999999999999",
-            std::numeric_limits<double>::infinity()));
+            std::numeric_limits<double>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "999999999999999999999999999999999999999999999",
             99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999.0));
         TEST_TRUE(_TEST_FUNC("0.123456", 0.123456));
-        TEST_TRUE(_TEST_FUNC("0.000123456789e-2", 0.000123456789));
+        TEST_TRUE(tf_sf_fix_c("0.000123456789e-2", 0.000123456789, 14, utl::UCR_FAILED));
         TEST_TRUE(_TEST_FUNC(
             "1700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
@@ -1729,23 +1660,10 @@ TEST_CASE(FloatingConv_Double_Dec) {
 
     TEST_DEF("String -> Double. (Dec, Sci)") {
         auto _TEST_FUNC = [](const std::string& text, double r) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::scientific);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_SCI);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::scientific);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, double>(text, utl::UFF_SCI);
         };
 
         TEST_TRUE(_TEST_FUNC("8.1", 8.1));
@@ -1767,11 +1685,12 @@ TEST_CASE(FloatingConv_Double_Dec) {
             "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             "0000000000000000000000000000000000000000000000000000000000000001",
             DENORM_VAL(0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001)));
-        TEST_TRUE(_TEST_FUNC(
+        TEST_TRUE(tf_sf_sci_c(
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "999999999999999999999999999999999999999999999999999999999999999999999",
-            std::numeric_limits<double>::infinity()));
+            std::numeric_limits<double>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
             "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"
@@ -1841,19 +1760,7 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
     TEST_DEF("Double -> String. (Hex, Nor)") {
         auto _TEST_FUNC = [](double val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_HEX);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_HEX));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC(18.0, 2, "12.00"));
@@ -1909,34 +1816,10 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
     TEST_DEF("Double -> String. (Hex, Sci)") {
         auto _TEST_FUNC = [](double val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            size_t buf_len = 1000;
-
-            std::string result;
-            utl::ftos(val, &result, precision, utl::UFF_SCI | utl::UFF_HEX);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_SCI | utl::UFF_HEX));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_SCI | utl::UFF_HEX);
         };
         auto _TEST_FUNC2 = [](double val, int precision, const std::string& r) -> bool {
-            char buf[1000]{ 0 };
-            std::string result;
-            size_t buf_len = 1000;
-
-            utl::ftos(val, &result, precision, utl::UFF_HEX2);
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision, utl::UFF_HEX2));
-#ifdef USING_CHARCONV
-            char buf2[1000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::hex, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char>(val, precision, r, utl::UFF_HEX2);
         };
 
         TEST_TRUE(_TEST_FUNC(8.1, 2, "8.1as+00"));
@@ -1996,23 +1879,10 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
     TEST_DEF("String -> Double. (Hex, Nor)") {
         auto _TEST_FUNC = [](const std::string& text, double r) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_FIX | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_FIX | utl::UFF_HEX);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_FIX | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, double>(text, utl::UFF_FIX | utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC("8.1", 8.0625));
@@ -2076,33 +1946,13 @@ TEST_CASE(FloatingConv_Double_Hex) {
 
     TEST_DEF("String -> Double. (Hex, Sci)") {
         auto _TEST_FUNC = [](const std::string& text, double r) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_SCI | utl::UFF_HEX);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_SCI | utl::UFF_HEX);
         };
         auto _TEST_FUNC2 = [](const std::string& text, double r) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_HEX2);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_HEX2);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            double result1;
-            utl::stof(text, &result1, utl::UFF_SCI);
-#ifdef USING_CHARCONV
-            double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::hex);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, double>(text, utl::UFF_SCI | utl::UFF_HEX);
         };
 
         TEST_TRUE(_TEST_FUNC("8.1", 8.0625));
@@ -2128,9 +1978,18 @@ TEST_CASE(FloatingConv_Double_Hex) {
         TEST_TRUE(_TEST_FUNC("8945745684576845845.45764856784578456", 4.0515338532968418e+22));
         TEST_TRUE(_TEST_FUNC("0.123456", 0.071111083030700684));
         TEST_TRUE(_TEST_FUNC("0.000123456789s-2", 6.7816840268464240e-08));
-        TEST_TRUE(_TEST_FUNC("1.600123456789s+308", std::numeric_limits<double>::infinity()));
-        TEST_TRUE(_TEST_FUNC("-1.600123456789s+308", -std::numeric_limits<double>::infinity()));
-        TEST_TRUE(_TEST_FUNC("2.470328s-324", 0.0));
+        TEST_TRUE(tf_sf_sci_hex_c(
+            "1.600123456789s+308",
+            std::numeric_limits<double>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_sci_hex_c(
+            "-1.600123456789s+308",
+            -std::numeric_limits<double>::infinity(),
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
+        TEST_TRUE(tf_sf_sci_hex_c(
+            "2.470328s-324",
+            0.0,
+            ~0u, utl::UCR_OVERFLOWED, utl::UCR_OVERFLOWED));
         TEST_TRUE(_TEST_FUNC(
             "FFFFFFFFFFFFF800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000s0",
@@ -2176,20 +2035,7 @@ TEST_CASE(FloatingConv_LongDouble_Dec) {
 
     TEST_DEF("LongDouble -> String.     (Dec, Nor)") {
         auto _TEST_FUNC = [](long double val, int precision, const std::string& r) -> bool {
-            char buf[17000]{ 0 };
-            size_t buf_len = 17000;
-
-            std::string result;
-            utl::ftos(val, &result, precision);
-
-            TEST_TRUE(utl::ftos(val, buf, &buf_len, precision));
-#ifdef USING_CHARCONV
-            char buf2[17000]{ 0 };
-            std::to_chars(std::begin(buf2), std::end(buf2), val, std::chars_format::fixed, precision);
-#endif
-            TEST_E(std::string(buf, buf_len), r);
-            TEST_E(result, r);
-            return true;
+            return tf_fs<char, long double, 17000>(val, precision, r, utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC(0.0l, 0, "0"));
@@ -2563,23 +2409,10 @@ TEST_CASE(FloatingConv_LongDouble_Dec) {
 
     TEST_DEF("String     -> LongDouble. (Dec, Nor)") {
         auto _TEST_FUNC = [](const std::string& text, long double r) -> bool {
-            long double result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            long double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-#endif
-            TEST_E(result1, r);
-            return true;
+            return tf_sf<char>(text, r, utl::UFF_FIX);
         };
         auto _TEST_FUNC_NAN = [](const std::string& text) -> bool {
-            long double result1;
-            utl::stof(text, &result1);
-#ifdef USING_CHARCONV
-            long double result2;
-            std::from_chars(text.data(), text.data() + text.size(), result2, std::chars_format::fixed);
-#endif
-            return std::isnan(result1);
+            return tf_sf_nan<char, long double>(text, utl::UFF_FIX);
         };
 
         TEST_TRUE(_TEST_FUNC("0", 0.0l));
@@ -2594,7 +2427,7 @@ TEST_CASE(FloatingConv_LongDouble_Dec) {
         TEST_TRUE(_TEST_FUNC("1234567978598848646898790.3", 1234567978598848646898790.3l));
         TEST_TRUE(_TEST_FUNC("8945745684576845845.45764856784578456", 8945745684576845845.45764856784578456l));
         TEST_TRUE(_TEST_FUNC("0.123456", 0.123456l));
-        TEST_TRUE(_TEST_FUNC("0.000123456789e-2", 0.000123456789l));
+        TEST_TRUE(tf_sf_fix_c("0.000123456789e-2", 0.000123456789l, 14, utl::UCR_FAILED));
         TEST_TRUE(_TEST_FUNC(
             "1700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
             "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
