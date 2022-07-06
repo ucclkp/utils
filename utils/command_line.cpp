@@ -54,7 +54,7 @@ namespace utl {
             } else {
                 // 如果遇到一个键有多个值的情况，就忽略除第一个以外的所有其他值
                 if (prev_name) {
-                    cmds_[name] = UTF8ToUTF16(part);
+                    cmds_[name] = u8to16(part);
                     prev_name = false;
                 }
             }
@@ -78,7 +78,7 @@ namespace utl {
                 if (prev_name) {
                     cmds_[name] = u"";
                 }
-                name = WideToUTF8(part.substr(np_length));
+                name = wtou8(part.substr(np_length));
                 prev_name = true;
             } else if (part.find(kShortNamePrefixW) == 0 &&
                 part.length() == snp_length + 1)
@@ -86,12 +86,12 @@ namespace utl {
                 if (prev_name) {
                     cmds_[name] = u"";
                 }
-                name = WideToUTF8(part.substr(snp_length));
+                name = wtou8(part.substr(snp_length));
                 prev_name = true;
             } else {
                 // 如果遇到一个键有多个值的情况，就忽略除第一个以外的所有其他值
                 if (prev_name) {
-                    cmds_[name] = WideToUTF16(part);
+                    cmds_[name] = wtou16(part);
                     prev_name = false;
                 }
             }
@@ -115,7 +115,7 @@ namespace utl {
                 if (prev_name) {
                     cmds_[name] = u"";
                 }
-                name = UTF16ToUTF8(part.substr(np_length));
+                name = u16to8(part.substr(np_length));
                 prev_name = true;
             } else if (part.find(kShortNamePrefix16) == 0 &&
                 part.length() == snp_length + 1)
@@ -123,7 +123,7 @@ namespace utl {
                 if (prev_name) {
                     cmds_[name] = u"";
                 }
-                name = UTF16ToUTF8(part.substr(snp_length));
+                name = u16to8(part.substr(snp_length));
                 prev_name = true;
             } else {
                 // 如果遇到一个键有多个值的情况，就忽略除第一个以外的所有其他值

@@ -336,7 +336,7 @@ namespace utl {
         return internal::replaceAllTokens(base, token, new_s);
     }
 
-    inline std::string UTF16ToUTF8(const std::u16string_view& str) {
+    inline std::string u16to8(const std::u16string_view& str) {
         std::string utf8_str;
         if (utf16_to_utf8(str, &utf8_str)) {
             return utf8_str;
@@ -345,7 +345,7 @@ namespace utl {
         return {};
     }
 
-    inline std::u16string UTF8ToUTF16(const std::string_view& str) {
+    inline std::u16string u8to16(const std::string_view& str) {
         std::u16string utf16_str;
         if (utf8_to_utf16(str, &utf16_str)) {
             return utf16_str;
@@ -354,7 +354,7 @@ namespace utl {
         return {};
     }
 
-    inline std::string WideToUTF8(const std::wstring_view& str) {
+    inline std::string wtou8(const std::wstring_view& str) {
         std::string out;
         if (!wchar_to_utf8(str, &out)) {
             out.clear();
@@ -362,9 +362,25 @@ namespace utl {
         return out;
     }
 
-    inline std::u16string WideToUTF16(const std::wstring_view& str) {
+    inline std::u16string wtou16(const std::wstring_view& str) {
         std::u16string out;
         if (!wchar_to_utf16(str, &out)) {
+            out.clear();
+        }
+        return out;
+    }
+
+    inline std::wstring u8tow(const std::string_view& sv) {
+        std::wstring out;
+        if (!utf8_to_wchar(sv, &out)) {
+            out.clear();
+        }
+        return out;
+    }
+
+    inline std::wstring u16tow(const std::u16string_view& sv) {
+        std::wstring out;
+        if (!utf16_to_wchar(sv, &out)) {
             out.clear();
         }
         return out;

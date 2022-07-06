@@ -10,11 +10,11 @@
 
 namespace utl {
 
-    enum ConvRetCode {
-        UCR_OK = 0,
-        UCR_BUFFER,
-        UCR_FAILED,
-        UCR_OVERFLOWED,
+    enum SConvRetCode {
+        SCR_OK = 0,
+        SCR_BUF,
+        SCR_FAIL,
+        SCR_OF,
     };
 
 }

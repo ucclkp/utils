@@ -281,7 +281,7 @@ TEST_CASE(StringUtilsUnitTest) {
         for (size_t i = 0; i < 19; ++i) {
             size_t _buf_len = i;
             int ret = usformatb(_buf, &_buf_len, u"This is a %d, %s", 233, fp);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(_buf_len, 19);
         }
 

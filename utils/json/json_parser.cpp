@@ -252,8 +252,8 @@ namespace utl {
 
         if (is_frac) {
             double result;
-            int ret = utl::stof(str, &result, UFF_SCI);
-            if (ret != UCR_OK) {
+            int ret = utl::stof(str, &result, FCF_SCI);
+            if (ret != SCR_OK) {
                 return false;
             }
             *v = new json::DoubleValue(result);
@@ -317,7 +317,7 @@ namespace utl {
                         if (u16_c) {
                             char u8_buf[8];
                             size_t u8_c = 8;
-                            if (utf16_to_utf8(u16_buf, 2, u8_buf, &u8_c) == UCR_OK) {
+                            if (utf16_to_utf8(u16_buf, 2, u8_buf, &u8_c) == SCR_OK) {
                                 str.append(u8_buf, u8_c);
                             }
                             u16_c = 0;

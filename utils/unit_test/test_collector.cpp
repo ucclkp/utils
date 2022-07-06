@@ -35,6 +35,7 @@ namespace test {
             child->run();
         }
 
+        UTLOG << "\n";
         UTLOG << "Total: " << getTotal()
             << ", Passed: " << (getTotal() - getError())
             << ", Error: " << getError() << "\n\n";

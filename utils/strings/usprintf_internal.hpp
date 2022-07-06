@@ -45,7 +45,7 @@ namespace internal {
             utf32_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len);
         } else if (modifier == MOD_l) {
             if (!utf16_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &_len)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         } else {
             buf[0] = char(va_arg(args->args, int));
@@ -58,9 +58,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_c(
@@ -78,7 +78,7 @@ namespace internal {
             if (!utf8_to_utf16(
                 char(va_arg(args->args, int)), buf))
             {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             _len = 1;
         }
@@ -89,9 +89,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_c(
@@ -105,13 +105,13 @@ namespace internal {
             if (!utf16_to_utf32(
                 va_arg(args->args, utl::upromote<char16_t>::type), &ch))
             {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         } else {
             if (!utf8_to_utf32(
                 char(va_arg(args->args, int)), &ch))
             {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         }
 
@@ -122,9 +122,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline bool extract_c(
@@ -213,10 +213,10 @@ namespace internal {
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
             int ret = utf16_to_utf8(u16_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -238,9 +238,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_s(
@@ -265,10 +265,10 @@ namespace internal {
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
             int ret = utf8_to_utf16(u8_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -284,9 +284,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_s(
@@ -304,10 +304,10 @@ namespace internal {
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
             int ret = utf16_to_utf32(u16_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -315,10 +315,10 @@ namespace internal {
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
             int ret = utf8_to_utf32(u8_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -334,9 +334,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline bool extract_s(
@@ -502,7 +502,7 @@ namespace internal {
             precision = 6;
         }
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
 
         if (modifier == MOD_L) {
@@ -530,7 +530,7 @@ namespace internal {
             precision = 6;
         }
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
 
         if (modifier == MOD_L) {
@@ -549,13 +549,13 @@ namespace internal {
         int flags, int precision, int modifier, int fmt,
         Cy* buf, size_t* len, bool* minus, vlw* args)
     {
-        fmt |= (UFF_HEX2 | UFF_ENZ);
+        fmt |= (FCF_HEX2 | FCF_ENZ);
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
         if (precision == -2) {
             precision = 0;
-            fmt |= UFF_EXA;
+            fmt |= FCF_EXA;
         }
 
         if (modifier == MOD_L) {
@@ -579,13 +579,13 @@ namespace internal {
         int flags, int precision, int modifier, int fmt,
         std::basic_string<Cy>* str, bool* minus, vlw* args)
     {
-        fmt |= (UFF_HEX2 | UFF_ENZ);
+        fmt |= (FCF_HEX2 | FCF_ENZ);
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
         if (precision == -2) {
             precision = 0;
-            fmt |= UFF_EXA;
+            fmt |= FCF_EXA;
         }
         if (modifier == MOD_L) {
             auto val = va_arg(args->args, long double);
@@ -764,7 +764,7 @@ namespace internal {
             {
                 bool minus;
                 std::basic_string<Cy> _str;
-                va_ftos_fFeEgG(flags, precision, modifier, UFF_UPP, &_str, &minus, vars);
+                va_ftos_fFeEgG(flags, precision, modifier, FCF_UPP, &_str, &minus, vars);
                 extract_fFeEgG(&result, flags, width, minus, _str);
                 break;
             }
@@ -773,7 +773,7 @@ namespace internal {
             {
                 bool minus;
                 std::basic_string<Cy> _str;
-                va_ftos_fFeEgG(flags, precision, modifier, UFF_SCI, &_str, &minus, vars);
+                va_ftos_fFeEgG(flags, precision, modifier, FCF_SCI, &_str, &minus, vars);
                 extract_fFeEgG(&result, flags, width, minus, _str);
                 break;
             }
@@ -782,7 +782,7 @@ namespace internal {
             {
                 bool minus;
                 std::basic_string<Cy> _str;
-                va_ftos_fFeEgG(flags, precision, modifier, UFF_SCI | UFF_UPP, &_str, &minus, vars);
+                va_ftos_fFeEgG(flags, precision, modifier, FCF_SCI | FCF_UPP, &_str, &minus, vars);
                 extract_fFeEgG(&result, flags, width, minus, _str);
                 break;
             }
@@ -800,7 +800,7 @@ namespace internal {
             {
                 bool minus;
                 std::basic_string<Cy> _str;
-                va_ftos_aA(flags, precision, modifier, UFF_UPP, &_str, &minus, vars);
+                va_ftos_aA(flags, precision, modifier, FCF_UPP, &_str, &minus, vars);
                 extract_aA(&result, flags, width, Cy('X'), minus, _str);
                 break;
             }
@@ -809,7 +809,7 @@ namespace internal {
             {
                 int fmt = 0;
                 if (!(flags & FLAG_ALTER)) {
-                    fmt |= UFF_NTZ;
+                    fmt |= FCF_NTZ;
                 }
 
                 bool minus;
@@ -820,9 +820,9 @@ namespace internal {
             }
             case Cy('G'):
             {
-                int fmt = UFF_UPP;
+                int fmt = FCF_UPP;
                 if (!(flags & FLAG_ALTER)) {
-                    fmt |= UFF_NTZ;
+                    fmt |= FCF_NTZ;
                 }
 
                 bool minus;
@@ -951,10 +951,10 @@ namespace internal {
             {
                 size_t _len = rs ? rse - rs : 0u;
                 int ret = extract_c(rs, &_len, flags, modifier, width, vars);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
                 act_len += _len;
@@ -966,10 +966,10 @@ namespace internal {
             {
                 size_t _len = rs ? rse - rs : 0u;
                 int ret = extract_s(rs, &_len, flags, precision, modifier, width, vars);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
                 act_len += _len;
@@ -1086,7 +1086,7 @@ namespace internal {
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 if (!va_ftos_fFeEgG(
-                    flags, precision, modifier, UFF_UPP, rs, &d_len, &minus, vars))
+                    flags, precision, modifier, FCF_UPP, rs, &d_len, &minus, vars))
                 {
                     rs = nullptr;
                 }
@@ -1107,7 +1107,7 @@ namespace internal {
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 if (!va_ftos_fFeEgG(
-                    flags, precision, modifier, UFF_SCI, rs, &d_len, &minus, vars))
+                    flags, precision, modifier, FCF_SCI, rs, &d_len, &minus, vars))
                 {
                     rs = nullptr;
                 }
@@ -1128,7 +1128,7 @@ namespace internal {
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 if (!va_ftos_fFeEgG(
-                    flags, precision, modifier, UFF_SCI | UFF_UPP, rs, &d_len, &minus, vars))
+                    flags, precision, modifier, FCF_SCI | FCF_UPP, rs, &d_len, &minus, vars))
                 {
                     rs = nullptr;
                 }
@@ -1170,7 +1170,7 @@ namespace internal {
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 if (!va_ftos_aA(
-                    flags, precision, modifier, UFF_UPP, rs, &d_len, &minus, vars))
+                    flags, precision, modifier, FCF_UPP, rs, &d_len, &minus, vars))
                 {
                     rs = nullptr;
                 }
@@ -1190,7 +1190,7 @@ namespace internal {
             {
                 int fmt = 0;
                 if (!(flags & FLAG_ALTER)) {
-                    fmt |= UFF_NTZ;
+                    fmt |= FCF_NTZ;
                 }
 
                 bool minus;
@@ -1213,9 +1213,9 @@ namespace internal {
             }
             case Cy('G'):
             {
-                int fmt = UFF_UPP;
+                int fmt = FCF_UPP;
                 if (!(flags & FLAG_ALTER)) {
-                    fmt |= UFF_NTZ;
+                    fmt |= FCF_NTZ;
                 }
 
                 bool minus;
@@ -1236,7 +1236,7 @@ namespace internal {
                 if (rs) rs += _len;
                 break;
             }
-            case Cy('n'): return UCR_FAILED;
+            case Cy('n'): return SCR_FAIL;
             case Cy('p'):
             {
                 size_t _len = rs ? rse - rs : 0u;
@@ -1264,7 +1264,7 @@ namespace internal {
         act_len += se - prev_pos;
 
         *buf_len = act_len;
-        return rs && rs - buf == act_len ? UCR_OK : UCR_BUFFER;
+        return rs && rs - buf == act_len ? SCR_OK : SCR_BUF;
     }
 
 }

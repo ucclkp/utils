@@ -211,8 +211,6 @@
     <ClInclude Include="command_line.h" />
     <ClInclude Include="define_utils.hpp" />
     <ClInclude Include="endian.hpp" />
-    <ClInclude Include="endian_internal.hpp" />
-    <ClInclude Include="endian_ml.hpp" />
     <ClInclude Include="event_handler.hpp" />
     <ClInclude Include="executable.h" />
     <ClInclude Include="files\file_utils.h" />
@@ -223,7 +221,7 @@
     <ClInclude Include="memory\aligments.hpp" />
     <ClInclude Include="memory\win\com_pptr.hpp" />
     <ClInclude Include="memory\win\com_ptr.hpp" />
-    <ClInclude Include="strings\conv_ret_code.hpp" />
+    <ClInclude Include="strings\sc_ret_code.h" />
     <ClInclude Include="strings\float_conv.h" />
     <ClInclude Include="strings\float_conv_big_num.hpp" />
     <ClInclude Include="strings\float_conv_internal.hpp" />

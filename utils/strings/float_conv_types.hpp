@@ -7,7 +7,7 @@
 #ifndef UTILS_STRINGS_FLOAT_CONV_TYPES_H_
 #define UTILS_STRINGS_FLOAT_CONV_TYPES_H_
 
-#include "utils/strings/conv_ret_code.hpp"
+#include "utils/strings/sc_ret_code.h"
 
 /**
  * 测试用。
@@ -18,23 +18,23 @@
 
 namespace utl {
 
-    enum UFFormat : unsigned int {
-        UFF_FIX  = 1u << 0u,
-        UFF_SCI  = 1u << 1u,
-        UFF_HEX  = 1u << 2u,
-        UFF_HEX2 = 1u << 3u,
-        UFF_UPP  = 1u << 4u,
-        UFF_DIG  = 1u << 5u,
-        UFF_EXA  = 1u << 6u,
-        UFF_NTZ  = 1u << 7u,
-        UFF_ENZ  = 1u << 8u,
+    enum FCFormat {
+        FCF_FIX  = 1 << 0,
+        FCF_SCI  = 1 << 1,
+        FCF_HEX  = 1 << 2,
+        FCF_HEX2 = 1 << 3,
+        FCF_UPP  = 1 << 4,
+        FCF_DIG  = 1 << 5,
+        FCF_EXA  = 1 << 6,
+        FCF_NTZ  = 1 << 7,
+        FCF_ENZ  = 1 << 8,
     };
 
-    enum UFRound {
-        UFR_NEAR = 0,
-        UFR_CEIL,
-        UFR_FLOOR,
-        UFR_ZERO,
+    enum FCRound {
+        FCR_NEAR = 0,
+        FCR_CEIL,
+        FCR_FLOOR,
+        FCR_ZERO,
     };
 
 }

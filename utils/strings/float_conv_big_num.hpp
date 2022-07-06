@@ -338,21 +338,21 @@ namespace internal {
             if (i >= effect)
                 return;
 
-            if (frm == UFR_CEIL) {
+            if (frm == FCR_CEIL) {
                 if (sign) {
                     return;
                 }
                 if (isZeroAfter(d_pos)) {
                     return;
                 }
-            } else if (frm == UFR_FLOOR) {
+            } else if (frm == FCR_FLOOR) {
                 if (!sign) {
                     return;
                 }
                 if (isZeroAfter(d_pos)) {
                     return;
                 }
-            } else if (frm == UFR_ZERO) {
+            } else if (frm == FCR_ZERO) {
                 return;
             } else {
                 auto d_1 = getDigit(d_pos + 1);
@@ -474,9 +474,9 @@ namespace internal {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
                                 effect = i + 1;
-                                return UCR_OK;
+                                return SCR_OK;
                             }
-                            return UCR_FAILED;
+                            return SCR_FAIL;
                         }
                         result = result * bN + c;
                         ++_s;
@@ -491,9 +491,9 @@ namespace internal {
             assert(_s == _se);
             if (_s != s) {
                 *n = _s;
-                return UCR_OK;
+                return SCR_OK;
             }
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         template <typename Cy>
@@ -530,9 +530,9 @@ namespace internal {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
                                 effect = i + 1;
-                                return UCR_OK;
+                                return SCR_OK;
                             }
-                            return UCR_FAILED;
+                            return SCR_FAIL;
                         }
                         result = result * bN + c;
                         ++_s;
@@ -549,9 +549,9 @@ namespace internal {
             assert(_s == _se);
             if (_s != s) {
                 *n = _s;
-                return UCR_OK;
+                return SCR_OK;
             }
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         template <bool Upp, typename Cy>
@@ -847,21 +847,21 @@ namespace internal {
                 return;
             i = uic - i - 1;
 
-            if (frm == UFR_CEIL) {
+            if (frm == FCR_CEIL) {
                 if (sign) {
                     return;
                 }
                 if (isZeroBefore(d_pos)) {
                     return;
                 }
-            } else if (frm == UFR_FLOOR) {
+            } else if (frm == FCR_FLOOR) {
                 if (!sign) {
                     return;
                 }
                 if (isZeroBefore(d_pos)) {
                     return;
                 }
-            } else if (frm == UFR_ZERO) {
+            } else if (frm == FCR_ZERO) {
                 return;
             } else {
                 auto d_1 = getDigit(d_pos - 1);
@@ -1035,7 +1035,7 @@ namespace internal {
         template <typename Cy>
         int fromChars(const Cy* s, size_t len, const Cy** n) {
             if (!len) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
 
             auto su = (len + dig - 1) / dig;
@@ -1060,9 +1060,9 @@ namespace internal {
                             *n = _s;
                             raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
                             movdr(len - (_s - s));
-                            return UCR_OK;
+                            return SCR_OK;
                         }
-                        return UCR_FAILED;
+                        return SCR_FAIL;
                     }
                     result = result * bN + c;
                     ++_s;
@@ -1070,7 +1070,7 @@ namespace internal {
                     // 此时必定溢出
                     if (_s - s > FTraits::oful) {
                         *n = s;
-                        return UCR_OVERFLOWED;
+                        return SCR_OF;
                     }
                 }
                 raw[i] = result;
@@ -1080,9 +1080,9 @@ namespace internal {
             assert(_s == _se);
             if (_s != s) {
                 *n = _s;
-                return UCR_OK;
+                return SCR_OK;
             }
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         template <typename Cy>
@@ -1092,7 +1092,7 @@ namespace internal {
         {
             auto actual_len = len + d_pos - (has_dp ? 1 : 0);
             if (!actual_len) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
 
             auto su = (actual_len + dig - 1) / dig;
@@ -1133,9 +1133,9 @@ namespace internal {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(sd - j));
                                 movdr(actual_len - cd);
-                                return UCR_OK;
+                                return SCR_OK;
                             }
-                            return UCR_FAILED;
+                            return SCR_FAIL;
                         }
                         result = result * bN + c;
                         ++_s;
@@ -1147,7 +1147,7 @@ namespace internal {
 
                     // 此时必定溢出
                     if (cd > FTraits::oful) {
-                        return UCR_OVERFLOWED;
+                        return SCR_OF;
                     }
                 }
                 raw[i] = result * UCTraits::bpow(uint_fast8_t(sd - tdig));
@@ -1161,9 +1161,9 @@ namespace internal {
             assert(_s == _se);
             if (_s != s) {
                 *n = _s;
-                return UCR_OK;
+                return SCR_OK;
             }
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         template <bool Upp, typename Cy>

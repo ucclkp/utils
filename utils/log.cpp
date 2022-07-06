@@ -64,7 +64,7 @@ namespace utl {
         const wchar_t* file_name, int line_number, Severity level)
         : level_(level),
           line_number_(line_number),
-          file_name_(WideToUTF16(file_name)),
+          file_name_(wtou16(file_name)),
           is_str_(false),
           need_new_line_(true) {}
 
@@ -73,7 +73,7 @@ namespace utl {
         const std::string_view& msg, bool new_line)
         : level_(level),
           line_number_(line_number),
-          file_name_(WideToUTF16(file_name)),
+          file_name_(wtou16(file_name)),
           is_str_(true),
           need_new_line_(new_line),
           str_(msg) {}
@@ -99,7 +99,7 @@ namespace utl {
                     ca.hour, ca.minute, ca.second, ca.milliseconds))
             .append(u8p("] "));
 
-        msg.append(UTF16ToUTF8(file_name_))
+        msg.append(u16to8(file_name_))
             .append(u8p("("))
             .append(std::to_string(line_number_))
             .append(u8p("): "))

@@ -7,16 +7,58 @@
 #ifndef UTILS_ENDIAN_HPP_
 #define UTILS_ENDIAN_HPP_
 
-#include "utils/endian_internal.hpp"
+#include <climits>
+#include <type_traits>
+
 #include "utils/platform_utils.h"
-#include "utils/type_utils.hpp"
+
+#define _utl_ff_at(bpos) (Ty(static_cast<unsigned char>(~0u)) << CHAR_BIT * (bpos))
 
 
 namespace utl {
+namespace internal {
+
+    template <typename Ty>
+    Ty swap_ui2b(Ty v) {
+        return (v << CHAR_BIT) | (v >> CHAR_BIT);
+    }
+
+    template <typename Ty>
+    Ty swap_ui4b(Ty v) {
+        return (v << (CHAR_BIT * 3)) |
+            ((v << CHAR_BIT) & _utl_ff_at(2)) |
+            (v >> (CHAR_BIT * 3)) |
+            ((v >> CHAR_BIT) & _utl_ff_at(1));
+    }
+
+    template <typename Ty>
+    Ty swap_ui8b(Ty v) {
+        return (v << (CHAR_BIT * 7)) |
+            ((v << (CHAR_BIT * 5)) & _utl_ff_at(6)) |
+            ((v << (CHAR_BIT * 3)) & _utl_ff_at(5)) |
+            ((v << CHAR_BIT) & _utl_ff_at(4)) |
+            (v >> (CHAR_BIT * 7)) |
+            ((v >> (CHAR_BIT * 5)) & _utl_ff_at(1)) |
+            ((v >> (CHAR_BIT * 3)) & _utl_ff_at(2)) |
+            ((v >> CHAR_BIT) & _utl_ff_at(3));
+    }
+
+    template <typename Ty>
+    Ty swap_f(Ty v) {
+        Ty out;
+        auto src = reinterpret_cast<unsigned char*>(&v) + (sizeof(Ty) - 1);
+        auto dst = reinterpret_cast<unsigned char*>(&out);
+        for (size_t i = 0; i < sizeof(Ty); ++i) {
+            *dst++ = *src--;
+        }
+        return out;
+    }
+
+}
 
     template <typename Ty>
     Ty swapBytes(Ty val) {
-        static_assert(sizeof(Ty) != 1, "unavailable type!");
+        static_assert(sizeof(Ty) > 1, "unavailable type!");
         static_assert(
             std::is_floating_point<Ty>::value || std::is_integral<Ty>::value,
             "unavailable type!");

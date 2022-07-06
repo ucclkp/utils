@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "utils/strings/conv_ret_code.hpp"
+#include "utils/strings/sc_ret_code.h"
 
 #define IS_HIGH_SURROGATES(c16)  ((c16) >= 0xD800 && (c16) <= 0xDBFF)
 #define IS_LOW_SURROGATES(c16)   ((c16) >= 0xDC00 && (c16) <= 0xDFFF)
@@ -83,6 +83,24 @@ namespace utl {
     int wchar_to_utf32(const std::wstring_view& sv, char32_t* buf, size_t* buf_len);
     bool wchar_to_utf32(const wchar_t* src, size_t len, std::u32string* dst);
     bool wchar_to_utf32(const std::wstring_view& sv, std::u32string* dst);
+
+    bool utf8_to_wchar(char ch, wchar_t* out);
+    int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len);
+    int utf8_to_wchar(const std::string_view& sv, wchar_t* buf, size_t* buf_len);
+    bool utf8_to_wchar(const char* src, size_t len, std::wstring* dst);
+    bool utf8_to_wchar(const std::string_view& sv, std::wstring* dst);
+
+    bool utf16_to_wchar(char16_t ch, wchar_t* out);
+    int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_len);
+    int utf16_to_wchar(const std::u16string_view& sv, wchar_t* buf, size_t* buf_len);
+    bool utf16_to_wchar(const char16_t* src, size_t len, std::wstring* dst);
+    bool utf16_to_wchar(const std::u16string_view& sv, std::wstring* dst);
+
+    int utf32_to_wchar(char32_t ch, wchar_t* dst, size_t* len);
+    int utf32_to_wchar(const char32_t* src, size_t len, wchar_t* buf, size_t* buf_len);
+    int utf32_to_wchar(const std::u32string_view& sv, wchar_t* buf, size_t* buf_len);
+    bool utf32_to_wchar(const char32_t* src, size_t len, std::wstring* dst);
+    bool utf32_to_wchar(const std::u32string_view& sv, std::wstring* dst);
 
 }
 

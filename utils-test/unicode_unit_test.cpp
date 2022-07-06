@@ -50,11 +50,11 @@ TEST_CASE(UnicodeUnitTest) {
             char16_t buf[10];
             size_t buf_len = 7;
             int ret = utf8_to_utf16(test, std::char_traits<char>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = utf8_to_utf16(test, std::char_traits<char>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -98,11 +98,11 @@ TEST_CASE(UnicodeUnitTest) {
             char32_t buf[10];
             size_t buf_len = 7;
             int ret = utf8_to_utf32(test, std::char_traits<char>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = utf8_to_utf32(test, std::char_traits<char>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -163,11 +163,11 @@ TEST_CASE(UnicodeUnitTest) {
             char buf[10];
             size_t buf_len = 7;
             int ret = utf16_to_utf8(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = utf16_to_utf8(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -211,11 +211,11 @@ TEST_CASE(UnicodeUnitTest) {
             char32_t buf[10];
             size_t buf_len = 7;
             int ret = utf16_to_utf32(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = utf16_to_utf32(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -348,23 +348,23 @@ TEST_CASE(UnicodeUnitTest) {
         char c8[4];
         size_t count = 4;
         int ret = wchar_to_utf8(L'a', c8, &count);
-        TEST_E(ret, UCR_OK);
+        TEST_E(ret, SCR_OK);
         TEST_E(count, 1);
         TEST_E(c8[0], 'a');
 
         count = 0;
         ret = wchar_to_utf8(L'a', c8, &count);
-        TEST_E(ret, UCR_BUFFER);
+        TEST_E(ret, SCR_BUF);
         TEST_E(count, 1);
 
         count = 4;
         ret = wchar_to_utf8(L'a', nullptr, &count);
-        TEST_E(ret, UCR_BUFFER);
+        TEST_E(ret, SCR_BUF);
         TEST_E(count, 1);
 
         count = 3;
         ret = wchar_to_utf8(L'可', c8, &count);
-        TEST_E(ret, UCR_OK);
+        TEST_E(ret, SCR_OK);
         TEST_E(count, 3);
         TEST_E(c8[0], char(0xe5));
         TEST_E(c8[1], char(0x8f));
@@ -402,11 +402,11 @@ TEST_CASE(UnicodeUnitTest) {
             char buf[10];
             size_t buf_len = 7;
             ret = wchar_to_utf8(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = wchar_to_utf8(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -417,23 +417,23 @@ TEST_CASE(UnicodeUnitTest) {
         char16_t c16[2];
         size_t count = 2;
         int ret = wchar_to_utf16(L'a', c16, &count);
-        TEST_E(ret, UCR_OK);
+        TEST_E(ret, SCR_OK);
         TEST_E(count, 1u);
         TEST_E(c16[0], 'a');
 
         count = 0;
         ret = wchar_to_utf16(L'a', c16, &count);
-        TEST_E(ret, UCR_BUFFER);
+        TEST_E(ret, SCR_BUF);
         TEST_E(count, 1u);
 
         count = 2;
         ret = wchar_to_utf16(L'a', nullptr, &count);
-        TEST_E(ret, UCR_BUFFER);
+        TEST_E(ret, SCR_BUF);
         TEST_E(count, 1u);
 
         count = 1;
         ret = wchar_to_utf16(L'可', c16, &count);
-        TEST_E(ret, UCR_OK);
+        TEST_E(ret, SCR_OK);
         TEST_E(count, 1u);
         TEST_E(c16[0], char16_t(0x53ef));
 
@@ -468,12 +468,12 @@ TEST_CASE(UnicodeUnitTest) {
             char16_t buf[10];
             size_t buf_len = 7;
             ret = wchar_to_utf16(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
             TEST_E(buf_len, 7);
 
             buf_len = 6;
             ret = wchar_to_utf16(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
             TEST_E(buf_len, 7);
         }
 
@@ -517,11 +517,160 @@ TEST_CASE(UnicodeUnitTest) {
             char32_t buf[10];
             size_t buf_len = 7;
             int ret = wchar_to_utf32(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_OK);
+            TEST_E(ret, SCR_OK);
 
             buf_len = 6;
             ret = wchar_to_utf32(test, std::char_traits<wchar_t>::length(test), buf, &buf_len);
-            TEST_E(ret, UCR_BUFFER);
+            TEST_E(ret, SCR_BUF);
+            TEST_E(buf_len, 7);
+        }
+
+        return true;
+    };
+
+    TEST_DEF("UTF-8  -> WCHAR") {
+        wchar_t w;
+        TEST_TRUE(utf8_to_wchar('a', &w));
+        TEST_E(w, 'a');
+
+        std::wstring result;
+        TEST_TRUE(utf8_to_wchar(u8p(""), &result));
+        TEST_TRUE(result.empty());
+
+        TEST_TRUE(utf8_to_wchar(u8p("a"), &result));
+        TEST_E(result, L"a");
+
+        TEST_TRUE(utf8_to_wchar(u8p("ab"), &result));
+        TEST_E(result, L"ab");
+
+        TEST_TRUE(utf8_to_wchar(u8p(" "), &result));
+        TEST_E(result, L" ");
+
+        TEST_TRUE(utf8_to_wchar(u8p(" a "), &result));
+        TEST_E(result, L" a ");
+
+        TEST_TRUE(utf8_to_wchar(u8p("这是 一行文本。"), &result));
+        TEST_E(result, L"这是 一行文本。");
+
+        TEST_TRUE(utf8_to_wchar(u8p("a鷗🦊"), &result));
+        TEST_E(result, L"a鷗🦊");
+
+        TEST_TRUE(
+            utf8_to_wchar(
+                u8p("😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹"), &result));
+        TEST_E(result, L"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹");
+
+        {
+            const char* test = "abcdefg";
+            char16_t buf[10];
+            size_t buf_len = 7;
+            int ret = utf8_to_utf16(test, std::char_traits<char>::length(test), buf, &buf_len);
+            TEST_E(ret, SCR_OK);
+
+            buf_len = 6;
+            ret = utf8_to_utf16(test, std::char_traits<char>::length(test), buf, &buf_len);
+            TEST_E(ret, SCR_BUF);
+            TEST_E(buf_len, 7);
+        }
+
+        return true;
+    };
+
+    TEST_DEF("UTF-16 -> WCHAR") {
+        wchar_t w;
+        TEST_TRUE(utf16_to_wchar(u'可', &w));
+        TEST_E(w, L'可');
+
+        std::wstring result;
+        TEST_TRUE(utf16_to_wchar(u"", &result));
+        TEST_TRUE(result.empty());
+
+        TEST_TRUE(utf16_to_wchar(u"a", &result));
+        TEST_E(result, L"a");
+
+        TEST_TRUE(utf16_to_wchar(u"ab", &result));
+        TEST_E(result, L"ab");
+
+        TEST_TRUE(utf16_to_wchar(u" ", &result));
+        TEST_E(result, L" ");
+
+        TEST_TRUE(utf16_to_wchar(u" a ", &result));
+        TEST_E(result, L" a ");
+
+        TEST_TRUE(utf16_to_wchar(u"这是 一行文本。", &result));
+        TEST_E(result, L"这是 一行文本。");
+
+        TEST_TRUE(utf16_to_wchar(u"a鷗🦊", &result));
+        TEST_E(result, L"a鷗🦊");
+
+        TEST_TRUE(
+            utf16_to_wchar(
+                u"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹", &result));
+        TEST_E(result, L"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹");
+
+        {
+            const char16_t* test = u"abcdefg";
+            char32_t buf[10];
+            size_t buf_len = 7;
+            int ret = utf16_to_utf32(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
+            TEST_E(ret, SCR_OK);
+
+            buf_len = 6;
+            ret = utf16_to_utf32(test, std::char_traits<char16_t>::length(test), buf, &buf_len);
+            TEST_E(ret, SCR_BUF);
+            TEST_E(buf_len, 7);
+        }
+
+        return true;
+    };
+
+    TEST_DEF("UTF-32 -> WCHAR") {
+        wchar_t w[2];
+        size_t count = 2;
+        TEST_E(utf32_to_wchar(U'a', w, &count), SCR_OK);
+        TEST_E(w[0], L'a');
+
+        count = 0;
+        TEST_E(utf32_to_wchar(U'a', w, &count), SCR_BUF);
+        TEST_E(count, 1u);
+
+        count = 2;
+        TEST_E(utf32_to_wchar(U'a', nullptr, &count), SCR_BUF);
+
+        std::wstring result;
+        TEST_TRUE(utf32_to_wchar(U"", &result));
+        TEST_TRUE(result.empty());
+
+        TEST_TRUE(utf32_to_wchar(U"a", &result));
+        TEST_E(result, L"a");
+
+        TEST_TRUE(utf32_to_wchar(U"ab", &result));
+        TEST_E(result, L"ab");
+
+        TEST_TRUE(utf32_to_wchar(U" ", &result));
+        TEST_E(result, L" ");
+
+        TEST_TRUE(utf32_to_wchar(U" a ", &result));
+        TEST_E(result, L" a ");
+
+        TEST_TRUE(utf32_to_wchar(U"这是 一行文本。", &result));
+        TEST_E(result, L"这是 一行文本。");
+
+        TEST_TRUE(utf32_to_wchar(U"a鷗🦊", &result));
+        TEST_E(result, L"a鷗🦊");
+
+        TEST_TRUE(utf32_to_wchar(
+            U"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹", &result));
+        TEST_E(result, L"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹");
+
+        {
+            const char32_t* test = U"abcdefg";
+            wchar_t buf[10];
+            size_t buf_len = 7;
+            TEST_E(utf32_to_wchar(test, std::char_traits<char32_t>::length(test), buf, &buf_len), SCR_OK);
+
+            buf_len = 6;
+            TEST_E(utf32_to_wchar(test, std::char_traits<char32_t>::length(test), buf, &buf_len), SCR_BUF);
             TEST_E(buf_len, 7);
         }
 

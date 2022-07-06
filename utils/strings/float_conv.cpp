@@ -18,15 +18,15 @@ namespace internal {
     template <typename FTy, typename Cy>
     bool ftos(
         FTy val, Cy* buf, size_t* len,
-        int precision, int fmt = UFF_FIX, int round = UFR_NEAR)
+        int precision, int fmt = FCF_FIX, int round = FCR_NEAR)
     {
         static_assert(
             std::is_floating_point<FTy>::value, "FTy must be a floating type!");
 
-        if (fmt & UFF_HEX2) {
-            fmt |= UFF_SCI;
+        if (fmt & FCF_HEX2) {
+            fmt |= FCF_SCI;
             return ftos_hex2_base(val, fmt, round, precision, buf, len);
-        } else if (fmt & UFF_HEX) {
+        } else if (fmt & FCF_HEX) {
             return ftos_base<FTy, uint_fast64_t, Cy, 16>(val, fmt, round, precision, buf, len);
         } else {
             return ftos_base<FTy, uint_fast64_t, Cy, 10>(val, fmt, round, precision, buf, len);
@@ -36,7 +36,7 @@ namespace internal {
     template <typename FTy, typename Cy>
     void ftos(
         FTy val, std::basic_string<Cy>* out,
-        int precision, int fmt = UFF_FIX, int round = UFR_NEAR)
+        int precision, int fmt = FCF_FIX, int round = FCR_NEAR)
     {
         static_assert(
             std::is_floating_point<FTy>::value, "FTy must be a floating type!");
@@ -46,10 +46,10 @@ namespace internal {
         }
 
         std::basic_string<Cy> result;
-        if (fmt & UFF_HEX2) {
-            fmt |= UFF_SCI;
+        if (fmt & FCF_HEX2) {
+            fmt |= FCF_SCI;
             ftos_hex2_base(val, fmt, round, precision, &result);
-        } else if (fmt & UFF_HEX) {
+        } else if (fmt & FCF_HEX) {
             ftos_base<FTy, uint_fast64_t, Cy, 16>(val, fmt, round, precision, &result);
         } else {
             ftos_base<FTy, uint_fast64_t, Cy, 10>(val, fmt, round, precision, &result);
@@ -61,30 +61,30 @@ namespace internal {
     template <typename FTy, typename Cy>
     int stof(
         const Cy* str, size_t len, FTy* out,
-        int fmt = UFF_FIX, int round = UFR_NEAR, const Cy** n = nullptr)
+        int fmt = FCF_FIX, int round = FCR_NEAR, const Cy** n = nullptr)
     {
         static_assert(
             std::is_floating_point<FTy>::value, "FTy must be a floating type!");
 
         if (!len || !str) {
             if (n) *n = str;
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         int ret;
         const Cy* _p;
-        if (fmt & UFF_HEX2) {
-            fmt |= UFF_SCI;
+        if (fmt & FCF_HEX2) {
+            fmt |= FCF_SCI;
             ret = stof_hex2_base(str, len, fmt, round, out, &_p);
-        } else if (fmt & UFF_HEX) {
+        } else if (fmt & FCF_HEX) {
             ret = stof_base<FTy, uint_fast64_t, Cy, 16>(str, len, fmt, round, out, &_p);
         } else {
             ret = stof_base<FTy, uint_fast64_t, Cy, 10>(str, len, fmt, round, out, &_p);
         }
 
-        if (ret != UCR_OK) {
+        if (ret != SCR_OK) {
             if (n) {
-                if (ret == UCR_OVERFLOWED) {
+                if (ret == SCR_OF) {
                     *n = str + len;
                 } else {
                     *n = str;
@@ -93,11 +93,11 @@ namespace internal {
             return ret;
         }
         if (!n && _p != str + len) {
-            return UCR_FAILED;
+            return SCR_FAIL;
         }
 
         if (n) *n = _p;
-        return UCR_OK;
+        return SCR_OK;
     }
 
 }

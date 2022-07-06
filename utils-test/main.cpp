@@ -23,11 +23,11 @@ int main() {
 
     utl::CommandLine::initialize();
 
-    LOG(Log::INFO) << "utils-test start.";
+    //LOG(Log::INFO) << "utils-test start.";
 
     RUN_TESTS;
 
-    LOG(Log::INFO) << "utils-test exit.\n";
+    //LOG(Log::INFO) << "utils-test exit.\n";
 
     utl::UninitLogging();
 

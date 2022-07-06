@@ -43,6 +43,16 @@ namespace internal {
 
 }
 
+    enum ICFormat {
+        ICF_UPP = 1 << 0,
+        ICF_PUP = 1 << 1,
+        ICF_PLO = 1 << 2,
+
+        ICF_PFX_OCT = 1 << 6,
+        ICF_PFX_HEX = 1 << 7,
+        ICF_PFX_ALL = ICF_PFX_OCT | ICF_PFX_HEX,
+    };
+
     template <typename Cy>
     Cy itocu(uint_fast8_t val) {
         assert(val < 36);
@@ -91,33 +101,32 @@ namespace internal {
 
 
     template <typename Ty, typename Cy>
-    bool itos(Ty val, Cy* buf, size_t* len, int radix = 10, bool upper = false) {
+    bool itos(Ty val, Cy* buf, size_t* len, int radix = 10, int fmt = 0) {
         static_assert(
             std::is_integral<Ty>::value, "Ty must be a integral type!");
 
         typedef typename std::make_unsigned<Ty>::type UTy;
-        const auto bc = sizeof(Ty) * CHAR_BIT;
+        const size_t bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
 
         Cy t_buf[bc];
         auto _t_buf = t_buf + bc;
 
+        auto s = buf;
+        auto se = s + *len;
+
         UTy value;
-        auto _buf = buf;
-        size_t sign_len = 0;
-        if constexpr (std::is_signed<Ty>::value) {
+        size_t pre_len = 0;
+        if (std::is_signed<Ty>::value) {
             if (val < 0) {
                 // 防止溢出
                 if (val == (std::numeric_limits<Ty>::min)()) {
                     value = UTy((std::numeric_limits<Ty>::max)()) + 1u;
                 } else {
-                    value = -val;
+                    value = (val * -1);
                 }
-                if (*len > 0 && buf) {
-                    *_buf = Cy('-');
-                    ++_buf;
-                }
-                sign_len = 1u;
+                if (s && s < se) *s++ = Cy('-');
+                pre_len += 1;
             } else {
                 value = val;
             }
@@ -125,7 +134,27 @@ namespace internal {
             value = val;
         }
 
-        const char* lut = upper ? internal::kDigitCharUpper : internal::kDigitCharLower;
+        if (fmt & ICF_PFX_ALL) {
+            // 根据基数加前缀
+            if ((fmt & ICF_PFX_OCT) && radix == 8) {
+                if (s && s < se) *s++ = Cy('0');
+                ++pre_len;
+            } else if ((fmt & ICF_PFX_HEX) && radix == 16) {
+                if (s) {
+                    int pup = (fmt & ICF_PUP) ?
+                        1 : ((fmt & ICF_PLO) ?
+                            0 : ((fmt & ICF_UPP) ?
+                                1 : 0));
+
+                    if (s < se) *s++ = Cy('0');
+                    if (s < se) *s++ = Cy(pup ? 'X' : 'x');
+                }
+                pre_len += 2;
+            }
+        }
+
+        const char* lut = (fmt & ICF_UPP) ?
+            internal::kDigitCharUpper : internal::kDigitCharLower;
 
         do {
             --_t_buf;
@@ -134,31 +163,31 @@ namespace internal {
         } while (value);
 
         auto act_size = size_t(t_buf + bc - _t_buf);
-        if (act_size + sign_len > *len) {
-            *len = act_size + sign_len;
+        if (act_size + pre_len > *len) {
+            *len = act_size + pre_len;
             return false;
         }
-        if (_buf) {
-            std::memcpy(_buf, _t_buf, act_size * sizeof(Cy));
+        if (s) {
+            std::memcpy(s, _t_buf, act_size * sizeof(Cy));
         }
-        *len = act_size + sign_len;
+        *len = act_size + pre_len;
         return true;
     }
 
     template <typename Ty, typename Cy>
-    void itos(Ty val, std::basic_string<Cy>* out, int radix = 10, bool upper = false) {
+    void itos(Ty val, std::basic_string<Cy>* out, int radix = 10, int fmt = 0) {
         static_assert(
             std::is_integral<Ty>::value, "Ty must be a integral type!");
 
         typedef typename std::make_unsigned<Ty>::type UTy;
-        const auto bc = sizeof(Ty) * CHAR_BIT;
+        const size_t bc = sizeof(Ty) * CHAR_BIT;
         assert(radix >= 2 && radix <= 36);
 
         Cy t_buf[bc];
         auto _t_buf = t_buf + bc;
 
         std::basic_string<Cy> result;
-        result.reserve(bc + 1);
+        result.reserve(bc + 3);
 
         UTy value;
         if constexpr (std::is_signed<Ty>::value) {
@@ -177,7 +206,23 @@ namespace internal {
             value = val;
         }
 
-        const char* lut = upper ? internal::kDigitCharUpper : internal::kDigitCharLower;
+        if (fmt & ICF_PFX_ALL) {
+            // 根据基数加前缀
+            if ((fmt & ICF_PFX_OCT) && radix == 8) {
+                result.push_back(Cy('0'));
+            } else if ((fmt & ICF_PFX_HEX) && radix == 16) {
+                int pup = (fmt & ICF_PUP) ?
+                    1 : ((fmt & ICF_PLO) ?
+                        0 : ((fmt & ICF_UPP) ?
+                            1 : 0));
+
+                result.push_back(Cy('0'));
+                result.push_back(Cy(pup ? 'X' : 'x'));
+            }
+        }
+
+        const char* lut = (fmt & ICF_UPP) ?
+            internal::kDigitCharUpper : internal::kDigitCharLower;
 
         do {
             --_t_buf;
@@ -191,61 +236,82 @@ namespace internal {
     }
 
     template <typename Cy, typename Ty>
-    std::basic_string<Cy> itos(Ty val, int radix = 10, bool upper = false) {
+    std::basic_string<Cy> itos(Ty val, int radix = 10, int fmt = 0) {
         std::basic_string<Cy> result;
-        itos(val, &result, radix, upper);
+        itos(val, &result, radix, fmt);
         return result;
     }
 
     template <typename Ty>
-    std::string itos8(Ty val, int radix = 10, bool upper = false) {
-        return itos<char>(val, radix, upper);
+    std::string itos8(Ty val, int radix = 10, int fmt = 0) {
+        return itos<char>(val, radix, fmt);
     }
 
     template <typename Ty>
-    std::u16string itos16(Ty val, int radix = 10, bool upper = false) {
-        return itos<char16_t>(val, radix, upper);
+    std::u16string itos16(Ty val, int radix = 10, int fmt = 0) {
+        return itos<char16_t>(val, radix, fmt);
     }
 
     template <typename Ty>
-    std::u32string itos32(Ty val, int radix = 10, bool upper = false) {
-        return itos<char32_t>(val, radix, upper);
+    std::u32string itos32(Ty val, int radix = 10, int fmt = 0) {
+        return itos<char32_t>(val, radix, fmt);
     }
 
     template <typename Ty>
-    std::wstring itosw(Ty val, int radix = 10, bool upper = false) {
-        return itos<wchar_t>(val, radix, upper);
+    std::wstring itosw(Ty val, int radix = 10, int fmt = 0) {
+        return itos<wchar_t>(val, radix, fmt);
     }
 
 
     template <typename Ty, typename Cy>
-    bool stoi(const Cy* buf, size_t len, Ty* out, int radix = 10, const Cy** p = nullptr) {
+    bool stoi_base(
+        const Cy* buf, size_t len,
+        Ty* out, int radix = 10, int fmt = 0, const Cy** p = nullptr)
+    {
         static_assert(
             std::is_integral<Ty>::value, "Ty must be a integral type!");
-
         typedef typename std::make_unsigned<Ty>::type UTy;
-        assert(radix >= 2 && radix <= 36);
+        assert((fmt & ICF_PFX_ALL) || (radix >= 2 && radix <= 36));
 
-        if (len == 0 || !buf) {
+        if (!len || !buf) {
             if (p) *p = buf;
             return false;
         }
 
-        size_t i = 0;
         bool sign = true;
-        auto _buf = buf;
-        if (*_buf == Cy('-')) {
-            if constexpr (std::is_unsigned<Ty>::value) {
+        auto s = buf;
+        auto se = buf + len;
+        if (*s == Cy('-')) {
+            if (std::is_unsigned<Ty>::value) {
                 if (p) *p = buf;
                 return false;
             }
             sign = false;
-            ++_buf;
-            ++i;
+            ++s;
+        }
+
+        if (fmt & ICF_PFX_ALL) {
+            if (s < se && *s == Cy('0')) {
+                ++s;
+                if (s < se) {
+                    if ((fmt & ICF_PFX_HEX) && (*s == Cy('x') || *s == Cy('X'))) {
+                        radix = 16;
+                        ++s;
+                    } else if ((fmt & ICF_PFX_OCT) && isdigit(*s, 8)) {
+                        radix = 8;
+                    } else {
+                        radix = 10;
+                    }
+                } else {
+                    radix = 10;
+                }
+            } else {
+                radix = 10;
+            }
         }
 
         UTy M;
-        if constexpr (std::is_unsigned<Ty>::value) {
+        if (std::is_unsigned<Ty>::value) {
             M = (std::numeric_limits<Ty>::max)();
         } else {
             M = UTy((std::numeric_limits<Ty>::max)()) + (sign ? 0 : 1);
@@ -255,8 +321,8 @@ namespace internal {
         auto M_rem = M % radix;
 
         UTy result = 0;
-        for (; i < len; ++i) {
-            auto c = ctoi(*_buf);
+        for (; s < se; ++s) {
+            auto c = ctoi(*s);
             if (c == uint8_t(-1) || c >= radix) {
                 break;
             }
@@ -276,15 +342,14 @@ namespace internal {
             }
 
             result = result * radix + c;
-            ++_buf;
         }
 
-        if (_buf == buf || (!sign && buf + 1 == _buf)) {
+        if (s == buf || (!sign && buf + 1 == s)) {
             if (p) *p = buf;
             return false;
         }
 
-        if (!p && _buf != buf + len) {
+        if (!p && s != buf + len) {
             return false;
         }
 
@@ -308,18 +373,76 @@ namespace internal {
             }
         }
 
-        if (p) *p = _buf;
+        if (p) *p = s;
         return true;
     }
 
     template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string<Cy>& str, Ty* out, int radix = 10) {
-        return stoi(str.data(), str.size(), out, radix);
+    bool stoi(
+        const Cy* buf, size_t len,
+        Ty* out, int radix = 10, const Cy** p = nullptr)
+    {
+        return stoi_base(buf, len, out, radix, 0, p);
+    }
+
+    template <typename Ty>
+    bool stoi(
+        const std::string_view& str,
+        Ty* out, int radix = 10) {
+        return stoi_base(str.data(), str.size(), out, radix, 0);
+    }
+
+    template <typename Ty>
+    bool stoi(
+        const std::u16string_view& str,
+        Ty* out, int radix = 10) {
+        return stoi_base(str.data(), str.size(), out, radix, 0);
+    }
+
+    template <typename Ty>
+    bool stoi(
+        const std::u32string_view& str,
+        Ty* out, int radix = 10) {
+        return stoi_base(str.data(), str.size(), out, radix, 0);
+    }
+
+    template <typename Ty>
+    bool stoi(
+        const std::wstring_view& str,
+        Ty* out, int radix = 10) {
+        return stoi_base(str.data(), str.size(), out, radix, 0);
     }
 
     template <typename Ty, typename Cy>
-    bool stoi(const std::basic_string_view<Cy>& str, Ty* out, int radix = 10) {
-        return stoi(str.data(), str.size(), out, radix);
+    bool stoi_ar(
+        const Cy* buf, size_t len,
+        Ty* out, const Cy** p = nullptr)
+    {
+        return stoi_base(buf, len, out, 0, ICF_PFX_ALL, p);
+    }
+
+    template <typename Ty>
+    bool stoi_ar(
+        const std::string_view& str, Ty* out) {
+        return stoi_base(str.data(), str.size(), out, 0, ICF_PFX_ALL);
+    }
+
+    template <typename Ty>
+    bool stoi_ar(
+        const std::u16string_view& str, Ty* out) {
+        return stoi_base(str.data(), str.size(), out, 0, ICF_PFX_ALL);
+    }
+
+    template <typename Ty>
+    bool stoi_ar(
+        const std::u32string_view& str, Ty* out) {
+        return stoi_base(str.data(), str.size(), out, 0, ICF_PFX_ALL);
+    }
+
+    template <typename Ty>
+    bool stoi_ar(
+        const std::wstring_view& str, Ty* out) {
+        return stoi_base(str.data(), str.size(), out, 0, ICF_PFX_ALL);
     }
 
 }

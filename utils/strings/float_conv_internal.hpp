@@ -119,15 +119,15 @@ namespace internal {
                 bf->round(precision - 1, sign, round);
                 bu->add(bf->getTop());
             } else {
-                if (round == UFR_CEIL) {
+                if (round == FCR_CEIL) {
                     if (!sign && !bf->isZero()) {
                         bu->add(1);
                     }
-                } else if (round == UFR_FLOOR) {
+                } else if (round == FCR_FLOOR) {
                     if (sign && !bf->isZero()) {
                         bu->add(1);
                     }
-                } else if (round == UFR_ZERO) {
+                } else if (round == FCR_ZERO) {
                 } else {
                     auto d_1 = bf->getDigit(0);
                     if (d_1 > bN / 2) {
@@ -160,15 +160,15 @@ namespace internal {
             if (uint_fast32_t(precision) < exp) {
                 bu->round(exp - precision, sign, bf->isZero(), round);
             } else if (precision == exp) {
-                if (round == UFR_CEIL) {
+                if (round == FCR_CEIL) {
                     if (!sign && !bf->isZero()) {
                         bu->add(1);
                     }
-                } else if (round == UFR_FLOOR) {
+                } else if (round == FCR_FLOOR) {
                     if (sign && !bf->isZero()) {
                         bu->add(1);
                     }
-                } else if (round == UFR_ZERO) {
+                } else if (round == FCR_ZERO) {
                 } else {
                     auto d_1 = bf->getDigit(0);
                     if (d_1 > bN / 2) {
@@ -202,8 +202,8 @@ namespace internal {
         using FT = FloatTraits_base<FTy>;
 
         if (exp_shf != 0) {
-            if (fmt & UFF_SCI) {
-                if (fmt & UFF_FIX) {
+            if (fmt & FCF_SCI) {
+                if (fmt & FCF_FIX) {
                     int P = precision;
                     if (P == 0) P = 1;
 
@@ -226,11 +226,11 @@ namespace internal {
                     }
 
                     if (nor) {
-                        fmt &= ~UFF_SCI;
+                        fmt &= ~FCF_SCI;
                         precision = P - 1 - X;
                         bn_nor_round(&bi, &bf, sign, round, precision);
                     } else {
-                        fmt &= ~UFF_FIX;
+                        fmt &= ~FCF_FIX;
                         precision = P - 1;
                         bn_sci_round(&bi, &bf, sign, round, precision);
                     }
@@ -241,8 +241,8 @@ namespace internal {
                 bn_nor_round(&bi, &bf, sign, round, precision);
             }
         } else {
-            if (fmt & UFF_SCI) {
-                if (fmt & UFF_FIX) {
+            if (fmt & FCF_SCI) {
+                if (fmt & FCF_FIX) {
                     int P = precision;
                     if (P == 0) P = 1;
 
@@ -252,12 +252,12 @@ namespace internal {
 
                     int X = -(int(bf2.getSignDigitPos()) + 1);
                     if (X >= -4) {
-                        fmt &= ~UFF_SCI;
+                        fmt &= ~FCF_SCI;
                         precision = P - 1 - X;
                         bn_nor_round<FTy, UTy, bN, UUnit, FUnit>(
                             nullptr, &bf, sign, round, precision);
                     } else {
-                        fmt &= ~UFF_FIX;
+                        fmt &= ~FCF_FIX;
                         precision = P - 1;
                         bn_sci_round<FTy, UTy, bN, UUnit, FUnit>(
                             nullptr, &bf, sign, round, precision);
@@ -330,11 +330,11 @@ namespace internal {
         using BigUInt = BigUInt_bN<FTy, UTy, bN, UUnit>;
         using BigFloat = BigFloat_bN<FTy, UTy, bN, FUnit>;
 
-        if (fmt & UFF_SCI) {
+        if (fmt & FCF_SCI) {
             if (bi_available && !bi.isZero()) {
                 auto exp = bi.getSignDigitPos();
                 size_t len = *u_len;
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bi.template toChars<true>(ubuf, &len, exp);
                 } else {
                     bi.template toChars<false>(ubuf, &len, exp);
@@ -343,7 +343,7 @@ namespace internal {
 
                 size_t i = 0;
                 size_t _len;
-                if (fmt & UFF_EXA) {
+                if (fmt & FCF_EXA) {
                     _len = exp;
                 } else {
                     _len = exp >= size_t(precision) ? size_t(precision) : exp;
@@ -351,7 +351,7 @@ namespace internal {
 
                 len = _len >= *f_len ? *f_len : _len;
                 if (len) {
-                    if (fmt & UFF_UPP) {
+                    if (fmt & FCF_UPP) {
                         bi.template toChars<true>(fbuf, &len, exp - len);
                     } else {
                         bi.template toChars<false>(fbuf, &len, exp - len);
@@ -360,7 +360,7 @@ namespace internal {
                 }
 
                 size_t buf_rem = *f_len - len;
-                if (fmt & UFF_EXA) {
+                if (fmt & FCF_EXA) {
                     len = buf_rem;
                 } else {
                     size_t target_rem = size_t(precision) - len;
@@ -368,7 +368,7 @@ namespace internal {
                 }
 
                 if (len) {
-                    if (fmt & UFF_UPP) {
+                    if (fmt & FCF_UPP) {
                         bf.template toChars<true>(fbuf + i, &len, 0);
                     } else {
                         bf.template toChars<false>(fbuf + i, &len, 0);
@@ -380,7 +380,7 @@ namespace internal {
             } else {
                 auto exp = bf.getSignDigitPos();
                 size_t len = *u_len;
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bf.template toChars<true>(ubuf, &len, exp);
                 } else {
                     bf.template toChars<false>(ubuf, &len, exp);
@@ -388,13 +388,13 @@ namespace internal {
                 *u_len = len;
 
                 size_t i = 0;
-                if (fmt & UFF_EXA) {
+                if (fmt & FCF_EXA) {
                     len = *f_len;
                 } else {
                     len = size_t(precision) > *f_len ? *f_len : size_t(precision);
                 }
 
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bf.template toChars<true>(fbuf, &len, exp + 1);
                 } else {
                     bf.template toChars<false>(fbuf, &len, exp + 1);
@@ -406,7 +406,7 @@ namespace internal {
         } else {
             if (bi_available) {
                 size_t i_cs_len = *u_len;
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bi.template toChars<true>(ubuf, &i_cs_len, 0);
                 } else {
                     bi.template toChars<false>(ubuf, &i_cs_len, 0);
@@ -414,20 +414,20 @@ namespace internal {
                 *u_len = i_cs_len;
 
                 size_t f_cs_len;
-                if (fmt & UFF_EXA) {
+                if (fmt & FCF_EXA) {
                     f_cs_len = *f_len;
                 } else {
                     f_cs_len = size_t(precision) > *f_len ? *f_len : size_t(precision);
                 }
 
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bf.template toChars<true>(fbuf, &f_cs_len, 0);
                 } else {
                     bf.template toChars<false>(fbuf, &f_cs_len, 0);
                 }
                 *f_len = f_cs_len;
             } else {
-                if (!(fmt & UFF_EXA) && precision == 0) {
+                if (!(fmt & FCF_EXA) && precision == 0) {
                     if (*u_len > 0) {
                         *ubuf = Cy('0');
                         *u_len = 1;
@@ -439,13 +439,13 @@ namespace internal {
                 *u_len = 0;
 
                 size_t f_cs_len;
-                if (fmt & UFF_EXA) {
+                if (fmt & FCF_EXA) {
                     f_cs_len = *f_len;
                 } else {
                     f_cs_len = size_t(precision) > *f_len ? *f_len : size_t(precision);
                 }
 
-                if (fmt & UFF_UPP) {
+                if (fmt & FCF_UPP) {
                     bf.template toChars<true>(fbuf, &f_cs_len, 0);
                 } else {
                     bf.template toChars<false>(fbuf, &f_cs_len, 0);
@@ -475,8 +475,8 @@ namespace internal {
             out->append(_su, su_len - (_su - su));
         }
 
-        if (!(fmt & UFF_EXA) && precision == 0) {
-            if (fmt & UFF_DIG) {
+        if (!(fmt & FCF_EXA) && precision == 0) {
+            if (fmt & FCF_DIG) {
                 out->push_back(Cy('.'));
             }
             return;
@@ -484,7 +484,7 @@ namespace internal {
 
         out->push_back(Cy('.'));
 
-        if ((fmt & UFF_EXA) || (fmt & UFF_NTZ)) {
+        if ((fmt & FCF_EXA) || (fmt & FCF_NTZ)) {
             if (!sf_len) {
                 out->push_back(Cy('0'));
             } else {
@@ -546,8 +546,8 @@ namespace internal {
             act_len += _len;
         }
 
-        if (!(fmt & UFF_EXA) && precision == 0) {
-            if (fmt & UFF_DIG) {
+        if (!(fmt & FCF_EXA) && precision == 0) {
+            if (fmt & FCF_DIG) {
                 if (s && s < se) {
                     *s++ = Cy('.');
                 }
@@ -562,7 +562,7 @@ namespace internal {
         }
         ++act_len;
 
-        if ((fmt & UFF_EXA) || (fmt & UFF_NTZ)) {
+        if ((fmt & FCF_EXA) || (fmt & FCF_NTZ)) {
             if (!sf_len) {
                 if (s && se - s >= 1) {
                     *s++ = Cy('0');
@@ -636,20 +636,20 @@ namespace internal {
         // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
         const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        bool upp = !!(fmt & UFF_UPP);
+        bool upp = !!(fmt & FCF_UPP);
         if (fra == 0 && exp_shf == 0) {
             cpnos<Cy>(sign, nullptr, 0, nullptr, 0, precision, fmt, out);
 
-            if ((fmt & UFF_SCI) && !(fmt & UFF_FIX)) {
-                if (fmt & UFF_HEX2) {
+            if ((fmt & FCF_SCI) && !(fmt & FCF_FIX)) {
+                if (fmt & FCF_HEX2) {
                     out->push_back(upp ? 'P' : 'p');
-                } else if (fmt & UFF_HEX) {
+                } else if (fmt & FCF_HEX) {
                     out->push_back(upp ? 'S' : 's');
                 } else {
                     out->push_back(upp ? 'E' : 'e');
                 }
                 out->push_back(Cy('+'));
-                if (!(fmt & UFF_ENZ)) {
+                if (!(fmt & FCF_ENZ)) {
                     out->push_back(Cy('0'));
                 }
                 out->push_back(Cy('0'));
@@ -711,12 +711,12 @@ namespace internal {
         // 根据 [expr.const]/2，移位运算符不能出现在 constexpr 表达式中
         const auto exp_mask = (uint_fast32_t(1u) << bexp) - 1u;
 
-        bool upp = !!(fmt & UFF_UPP);
+        bool upp = !!(fmt & FCF_UPP);
         if (fra == 0 && exp_shf == 0) {
             size_t _len = *len;
             bool ret = cpnos<Cy>(sign, nullptr, 0, nullptr, 0, precision, fmt, buf, &_len);
 
-            if (fmt & UFF_SCI && !(fmt & UFF_FIX)) {
+            if (fmt & FCF_SCI && !(fmt & FCF_FIX)) {
                 Cy* s, * se;
                 if (buf) {
                     se = buf + *len;
@@ -735,15 +735,15 @@ namespace internal {
                     return true;
                 }
 
-                if (fmt & UFF_HEX2) {
+                if (fmt & FCF_HEX2) {
                     *s++ = (upp ? 'P' : 'p');
-                } else if (fmt & UFF_HEX) {
+                } else if (fmt & FCF_HEX) {
                     *s++ = (upp ? 'S' : 's');
                 } else {
                     *s++ = (upp ? 'E' : 'e');
                 }
                 *s++ = (Cy('+'));
-                if (!(fmt & UFF_ENZ)) {
+                if (!(fmt & FCF_ENZ)) {
                     *s++ = (Cy('0'));
                 }
                 *s = (Cy('0'));
@@ -831,7 +831,7 @@ namespace internal {
             if (s >= se || *s != Cy('(')) {
                 *p = s;
                 nand<FTy>(sign, 0, out);
-                *ret_val = UCR_OK;
+                *ret_val = SCR_OK;
                 return true;
             }
 
@@ -848,7 +848,7 @@ namespace internal {
                 {
                     *p = s + 4;
                     nand<FTy>(sign, 1, out);
-                    *ret_val = UCR_OK;
+                    *ret_val = SCR_OK;
                     return true;
                 }
 
@@ -861,7 +861,7 @@ namespace internal {
                 {
                     *p = s + 5;
                     nand<FTy>(sign, 2, out);
-                    *ret_val = UCR_OK;
+                    *ret_val = SCR_OK;
                     return true;
                 }
 
@@ -874,14 +874,14 @@ namespace internal {
                 if (s < se) {
                     *p = s + 1;
                     nand<FTy>(sign, 0, out);
-                    *ret_val = UCR_OK;
+                    *ret_val = SCR_OK;
                     return true;
                 }
             }
 
             *p = ss;
             nand<FTy>(sign, 0, out);
-            *ret_val = UCR_OK;
+            *ret_val = SCR_OK;
             return true;
         }
 
@@ -893,7 +893,7 @@ namespace internal {
         if (s == se) {
             zerd(sign, out);
             *p = s;
-            *ret_val = UCR_OK;
+            *ret_val = SCR_OK;
             return true;
         }
 
@@ -916,14 +916,14 @@ namespace internal {
             fra, exp_shf,
             bi, bf, &bi_available);
 
-        if (!(fmt & UFF_EXA)) {
+        if (!(fmt & FCF_EXA)) {
             bn_round(
                 exp_shf, sign,
                 fmt, round, precision,
                 bi, bf);
         }
 
-        if (fmt & UFF_SCI) {
+        if (fmt & FCF_SCI) {
             Cy ubuf[1];
             size_t u_len = 1u;
 
@@ -935,8 +935,8 @@ namespace internal {
             bntocp(fmt, precision, bi_available, bi, bf, ubuf, &u_len, fbuf, &f_len, &exp);
             cpnos(sign, ubuf, u_len, fbuf, f_len, precision, fmt, out);
 
-            bool upp = !!(fmt & UFF_UPP);
-            if (fmt & UFF_HEX) {
+            bool upp = !!(fmt & FCF_UPP);
+            if (fmt & FCF_HEX) {
                 out->push_back(Cy(upp ? 'S' : 's'));
             } else {
                 out->push_back(Cy(upp ? 'E' : 'e'));
@@ -950,7 +950,7 @@ namespace internal {
 
             std::basic_string<Cy> _str;
             itos(exp, &_str);
-            if (!(fmt & UFF_ENZ) && exp < 10) {
+            if (!(fmt & FCF_ENZ) && exp < 10) {
                 out->push_back(Cy('0'));
             }
 
@@ -985,14 +985,14 @@ namespace internal {
             fra, exp_shf,
             bi, bf, &bi_available);
 
-        if (!(fmt & UFF_EXA)) {
+        if (!(fmt & FCF_EXA)) {
             bn_round(
                 exp_shf, sign,
                 fmt, round, precision,
                 bi, bf);
         }
 
-        if (fmt & UFF_SCI) {
+        if (fmt & FCF_SCI) {
             Cy ubuf[1];
             size_t u_len = 1u;
 
@@ -1017,8 +1017,8 @@ namespace internal {
             act_len += _len;
 
             if (s && se - s >= 2) {
-                bool upp = !!(fmt & UFF_UPP);
-                if (fmt & UFF_HEX) {
+                bool upp = !!(fmt & FCF_UPP);
+                if (fmt & FCF_HEX) {
                     *s++ = Cy(upp ? 'S' : 's');
                 } else {
                     *s++ = Cy(upp ? 'E' : 'e');
@@ -1034,7 +1034,7 @@ namespace internal {
             }
             act_len += 2;
 
-            if (!(fmt & UFF_ENZ) && exp < 10) {
+            if (!(fmt & FCF_ENZ) && exp < 10) {
                 if (s && s < se) {
                     *s++ = Cy('0');
                 }
@@ -1160,19 +1160,19 @@ namespace internal {
             exp = -int_fast32_t(maxe_1);
         }
 
-        if (round == UFR_CEIL) {
+        if (round == FCR_CEIL) {
             if (!sign) {
                 if (fra & (uint_e::bitAt(kSpace) - 1u)) {
                     fra += uint_e::bitAt(kSpace);
                 }
             }
-        } else if (round == UFR_FLOOR) {
+        } else if (round == FCR_FLOOR) {
             if (sign) {
                 if (fra & (uint_e::bitAt(kSpace) - 1u)) {
                     fra += uint_e::bitAt(kSpace);
                 }
             }
-        } else if (round == UFR_ZERO) {
+        } else if (round == FCR_ZERO) {
         } else {
             if (fra.getBit(kSpace - 1)) {
                 fra += uint_e::bitAt(kSpace);
@@ -1209,26 +1209,26 @@ namespace internal {
         int ret;
         if (!di) {
             ret = bu.fromChars(s, len, &_p);
-            if (ret != UCR_OK) {
-                if (ret == UCR_OVERFLOWED) {
+            if (ret != SCR_OK) {
+                if (ret == SCR_OF) {
                     infd(sign, out);
                 }
                 return ret;
             }
         } else if (di == s) {
             ret = bf.fromChars(s + 1, len - 1, &_p);
-            if (ret != UCR_OK) {
+            if (ret != SCR_OK) {
                 return ret;
             }
 
             if (bf.getSignDigitPos() > FT::mine_adc()) {
                 zerd(sign, out);
-                return UCR_OVERFLOWED;
+                return SCR_OF;
             }
         } else {
             ret = bu.fromChars(s, di - s, &_p);
-            if (ret != UCR_OK) {
-                if (ret == UCR_OVERFLOWED) {
+            if (ret != SCR_OK) {
+                if (ret == SCR_OF) {
                     infd(sign, out);
                 }
                 return ret;
@@ -1245,11 +1245,11 @@ namespace internal {
 
         if (!btof(bu, bf, sign, round, out)) {
             infd(sign, out);
-            return UCR_OVERFLOWED;
+            return SCR_OF;
         }
 
         *p = _p;
-        return UCR_OK;
+        return SCR_OK;
     }
 
     template <typename FTy, typename UTy, typename Cy, size_t bN, size_t UUnit, size_t FUnit>
@@ -1273,8 +1273,8 @@ namespace internal {
 
             if (exp >= fl) {
                 ret = bu.fromChars(str, de - str, exp - fl, true, &_p);
-                if (ret != UCR_OK) {
-                    if (ret == UCR_OVERFLOWED) {
+                if (ret != SCR_OK) {
+                    if (ret == SCR_OF) {
                         infd(sign, out);
                     }
                     return ret;
@@ -1282,8 +1282,8 @@ namespace internal {
             } else if (-exp < ul) {
                 auto s = di + 1 + exp;
                 ret = bu.fromChars(str, s - str, 0, s > di, &_p);
-                if (ret != UCR_OK) {
-                    if (ret == UCR_OVERFLOWED) {
+                if (ret != SCR_OK) {
+                    if (ret == SCR_OF) {
                         infd(sign, out);
                     }
                     return ret;
@@ -1293,13 +1293,13 @@ namespace internal {
                 }
             } else {
                 ret = bf.fromChars(str, de - str, -(exp + ul), true, &_p);
-                if (ret != UCR_OK) {
+                if (ret != SCR_OK) {
                     return ret;
                 }
 
                 if (bf.getSignDigitPos() > FT::mine_adc()) {
                     zerd(sign, out);
-                    return UCR_OVERFLOWED;
+                    return SCR_OF;
                 }
             }
         } else {
@@ -1308,8 +1308,8 @@ namespace internal {
 
             if (exp >= fl) {
                 ret = bu.fromChars(str, de - str, exp - fl, false, &_p);
-                if (ret != UCR_OK) {
-                    if (ret == UCR_OVERFLOWED) {
+                if (ret != SCR_OK) {
+                    if (ret == SCR_OF) {
                         infd(sign, out);
                     }
                     return ret;
@@ -1317,8 +1317,8 @@ namespace internal {
             } else if (-exp < ul) {
                 auto s = de + exp;
                 ret = bu.fromChars(str, s - str, 0, false, &_p);
-                if (ret != UCR_OK) {
-                    if (ret == UCR_OVERFLOWED) {
+                if (ret != SCR_OK) {
+                    if (ret == SCR_OF) {
                         infd(sign, out);
                     }
                     return ret;
@@ -1328,23 +1328,23 @@ namespace internal {
                 }
             } else {
                 ret = bf.fromChars(str, de - str, -(exp + ul), false, &_p);
-                if (ret != UCR_OK) {
+                if (ret != SCR_OK) {
                     return ret;
                 }
 
                 if (bf.getSignDigitPos() > FT::mine_adc()) {
                     zerd(sign, out);
-                    return UCR_OVERFLOWED;
+                    return SCR_OF;
                 }
             }
         }
 
         if (!btof(bu, bf, sign, round, out)) {
             infd(sign, out);
-            return UCR_OVERFLOWED;
+            return SCR_OF;
         }
 
-        return UCR_OK;
+        return SCR_OK;
     }
 
     template <typename FTy, typename UTy, typename Cy, size_t bN>
@@ -1414,7 +1414,7 @@ namespace internal {
                     break;
                 }
             } else {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
 
             if (*s == Cy('.')) {
@@ -1439,17 +1439,17 @@ namespace internal {
         if (dp) {
             s = dp + 1;
             if (s >= se) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             if (*s == Cy('+')) {
                 ++s;
                 if (s >= se) {
-                    return UCR_FAILED;
+                    return SCR_FAIL;
                 }
             }
 
             if (!stoi(s, se - s, &exp, 10, &s)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             de = dp;
         }
@@ -1502,7 +1502,7 @@ namespace internal {
         using FT = FloatTraits_base<FTy>;
         constexpr auto maxe_1 = FT::maxe - 1u;
 
-        if (fmt & UFF_EXA) {
+        if (fmt & FCF_EXA) {
             precision = int(FT::maxe + FT::mant);
         }
 
@@ -1592,7 +1592,7 @@ namespace internal {
         if (*s == Cy('-')) {
             ++s;
             if (s >= se) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             sign = 1;
         } else {
@@ -1604,7 +1604,7 @@ namespace internal {
             return ret_val;
         }
 
-        if (fmt & UFF_SCI) {
+        if (fmt & FCF_SCI) {
             return scistof<FTy, UTy, Cy, bN>(s, se - s, sign, fmt, round, out, p);
         }
         return norstof<FTy, UTy, Cy, bN>(s, se - s, sign, round, out, p);
@@ -1620,17 +1620,17 @@ namespace internal {
         uint_fast8_t u1 = exp_shift == 0 ? 0 : 1;
         if (FT::mant > precision * 4) {
             if (precision > 0) {
-                if (round == UFR_CEIL) {
+                if (round == FCR_CEIL) {
                     if (!sign && !fra.isZeroAfter(FT::mant - precision * 4)) {
                         fra.incAt(FT::mant - precision * 4);
                         u1 += fra.getBit(FT::mant);
                     }
-                } else if (round == UFR_FLOOR) {
+                } else if (round == FCR_FLOOR) {
                     if (sign && !fra.isZeroAfter(FT::mant - precision * 4)) {
                         fra.incAt(FT::mant - precision * 4);
                         u1 += fra.getBit(FT::mant);
                     }
-                } else if (round == UFR_ZERO) {
+                } else if (round == FCR_ZERO) {
                 } else {
                     uint_fast8_t d_1;
                     bool has_next = FT::mant >= (precision + 1) * 4;
@@ -1651,15 +1651,15 @@ namespace internal {
                     }
                 }
             } else {
-                if (round == UFR_CEIL) {
+                if (round == FCR_CEIL) {
                     if (!sign && fra) {
                         ++u1;
                     }
-                } else if (round == UFR_FLOOR) {
+                } else if (round == FCR_FLOOR) {
                     if (sign && fra) {
                         ++u1;
                     }
-                } else if (round == UFR_ZERO) {
+                } else if (round == FCR_ZERO) {
                 } else {
                     uint_fast8_t d_1;
                     bool has_next = FT::mant >= 4;
@@ -1705,14 +1705,14 @@ namespace internal {
         uint_fast8_t u1;
         fra_round(fra, exp_shift, sign, precision, round, &u1);
 
-        bool upp = !!(fmt & UFF_UPP);
+        bool upp = !!(fmt & FCF_UPP);
         const char* lut = upp ? kDigitCharUpper : kDigitCharLower;
 
         Cy ubuf[1] = { Cy(lut[u1]) };
         Cy fbuf[(FT::mant + bbit - 1u) / bbit];
         size_t bit_count = FT::mant;
 
-        if (fmt & UFF_EXA) {
+        if (fmt & FCF_EXA) {
             precision = (std::numeric_limits<int>::max)();
         }
 
@@ -1749,7 +1749,7 @@ namespace internal {
             exp = -exp;
         }
 
-        if (!(fmt & UFF_ENZ) && exp < 10) {
+        if (!(fmt & FCF_ENZ) && exp < 10) {
             out->push_back(Cy('0'));
         }
 
@@ -1781,14 +1781,14 @@ namespace internal {
         uint_fast8_t u1;
         fra_round(fra, exp_shift, sign, precision, round, &u1);
 
-        bool upp = !!(fmt & UFF_UPP);
+        bool upp = !!(fmt & FCF_UPP);
         const char* lut = upp ? kDigitCharUpper : kDigitCharLower;
 
         Cy ubuf[1] = { Cy(lut[u1]) };
         Cy fbuf[(FT::mant + bbit - 1u) / bbit];
         size_t bit_count = FT::mant;
 
-        if (fmt & UFF_EXA) {
+        if (fmt & FCF_EXA) {
             precision = (std::numeric_limits<int>::max)();
         }
 
@@ -1845,7 +1845,7 @@ namespace internal {
         }
         act_len += 2;
 
-        if (!(fmt & UFF_ENZ) && exp < 10) {
+        if (!(fmt & FCF_ENZ) && exp < 10) {
             if (s && s < se) {
                 *s++ = Cy('0');
             }
@@ -1881,7 +1881,7 @@ namespace internal {
         if (*s == Cy('-')) {
             ++s;
             if (s >= se) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             sign = 1;
         } else {
@@ -1966,18 +1966,18 @@ namespace internal {
             if (*s == Cy('p') || *s == Cy('P')) {
                 ++s;
                 if (s >= se) {
-                    return UCR_FAILED;
+                    return SCR_FAIL;
                 }
                 if (*s == Cy('+')) {
                     ++s;
                     if (s >= se) {
-                        return UCR_FAILED;
+                        return SCR_FAIL;
                     }
                 }
 
                 int_fast32_t _exp = 0;
                 if (!stoi(s, se - s, &_exp, 10, &s)) {
-                    return UCR_FAILED;
+                    return SCR_FAIL;
                 }
                 if (sd) {
                     exp += _exp;
@@ -1985,19 +1985,19 @@ namespace internal {
             }
         }
 
-        if (round == UFR_CEIL) {
+        if (round == FCR_CEIL) {
             if (!sign) {
                 if (!fra.isZeroAfter(kSpace)) {
                     fra.incAt(kSpace);
                 }
             }
-        } else if (round == UFR_FLOOR) {
+        } else if (round == FCR_FLOOR) {
             if (sign) {
                 if (!fra.isZeroAfter(kSpace)) {
                     fra.incAt(kSpace);
                 }
             }
-        } else if (round == UFR_ZERO) {
+        } else if (round == FCR_ZERO) {
         } else {
             if (fra.getBit(kSpace - 1)) {
                 fra.incAt(kSpace);
@@ -2018,16 +2018,16 @@ namespace internal {
                     exp = -int_fast32_t(maxe_1);
                 } else {
                     zerd(sign, out);
-                    return UCR_OVERFLOWED;
+                    return SCR_OF;
                 }
             } else {
                 zerd(sign, out);
-                return UCR_OVERFLOWED;
+                return SCR_OF;
             }
         } else if (exp > int(maxe_1)) {
             // 上溢
             infd(sign, out);
-            return UCR_OVERFLOWED;
+            return SCR_OF;
         }
 
         fra.clearBit(FT::mant);
@@ -2039,7 +2039,7 @@ namespace internal {
 
         dftof(sign, exp_shift, fra, exp_shift != 0 ? 1 : 0, out);
         *p = s;
-        return UCR_OK;
+        return SCR_OK;
     }
 
 }

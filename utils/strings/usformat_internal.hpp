@@ -20,12 +20,12 @@
 #define USFA_ITOSB(type)  \
     {auto val = std::get<type>(arg);  \
     *zero = val == 0; *minus = val < 0;    \
-    return itos(val, buf, len, radix, upper) ? UCR_OK : UCR_BUFFER;}
+    return itos(val, buf, len, radix, upper) ? SCR_OK : SCR_BUF;}
 
 #define USFA_ITOSB_X(type, cty)  \
     {auto val = std::get<type>(arg);  \
     *zero = val == 0; *minus = val < 0;    \
-    return itos(static_cast<cty>(val), buf, len, radix, upper) ? UCR_OK : UCR_BUFFER;}
+    return itos(static_cast<cty>(val), buf, len, radix, upper) ? SCR_OK : SCR_BUF;}
 
 #define USFA_ITOSS(type)  \
     {auto val = std::get<type>(arg);  \
@@ -40,23 +40,23 @@
 #define USFA_FTOSB(type)  \
     {auto val = std::get<type>(arg); \
     *minus = std::signbit(val);  \
-    return ftos(val, buf, len, precision, fmt) ? UCR_OK : UCR_BUFFER;}
+    return ftos(val, buf, len, precision, fmt) ? SCR_OK : SCR_BUF;}
 
 #define USFA_FTOSB_INT(type)  \
     {auto val = std::get<type>(arg);  \
     if (utl::can_num_cast<float>(val)) {  \
         auto val1 = static_cast<float>(val);  \
         *minus = std::signbit(val1);  \
-        return ftos(val1, buf, len, precision, fmt) ? UCR_OK : UCR_BUFFER;  \
+        return ftos(val1, buf, len, precision, fmt) ? SCR_OK : SCR_BUF;  \
     }  \
     if (utl::can_num_cast<double>(val)) {  \
         auto val1 = static_cast<double>(val);  \
         *minus = std::signbit(val1);  \
-        return ftos(val1, buf, len, precision, fmt) ? UCR_OK : UCR_BUFFER;  \
+        return ftos(val1, buf, len, precision, fmt) ? SCR_OK : SCR_BUF;  \
     }  \
     auto val1 = static_cast<long double>(val);  \
     *minus = std::signbit(val1);  \
-    return ftos(val1, buf, len, precision, fmt) ? UCR_OK : UCR_BUFFER;}
+    return ftos(val1, buf, len, precision, fmt) ? SCR_OK : SCR_BUF;}
 
 #define USFA_FTOSS(type)  \
     {auto val = std::get<type>(arg); \
@@ -128,20 +128,20 @@ namespace internal {
             *len = p.size();
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
             int ret = utf8_to_utf16(p, r, len);
-            if (ret == UCR_FAILED) {
+            if (ret == SCR_FAIL) {
                 return false;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
             int ret = utf8_to_utf32(p, r, len);
-            if (ret == UCR_FAILED) {
+            if (ret == SCR_FAIL) {
                 return false;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 *dig = r;
             } else {
                 *dig = nullptr;
@@ -156,30 +156,30 @@ namespace internal {
     bool path_to_ub(const std::wstring& p, const Cy** dig, size_t* len, Cy* r) {
         if constexpr (std::is_same<Cy, char>::value) {
             int ret = wchar_to_utf8(p, r, len);
-            if (ret == UCR_FAILED) {
+            if (ret == SCR_FAIL) {
                 return false;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
             int ret = wchar_to_utf16(p, r, len);
-            if (ret == UCR_FAILED) {
+            if (ret == SCR_FAIL) {
                 return false;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
             int ret = wchar_to_utf32(p, r, len);
-            if (ret == UCR_FAILED) {
+            if (ret == SCR_FAIL) {
                 return false;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 *dig = r;
             } else {
                 *dig = nullptr;
@@ -260,21 +260,21 @@ namespace internal {
         if (modifier == MOD_ll) {
             char32_t val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             utf32_to_utf8(val, buf, &_len);
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             if (!utf16_to_utf8(val, buf, &_len)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         } else {
             char val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             buf[0] = val;
             _len = 1;
@@ -286,9 +286,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_t_c(
@@ -300,23 +300,23 @@ namespace internal {
         if (modifier == MOD_ll) {
             char32_t val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             utf32_to_utf16(val, buf, &_len);
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             buf[0] = val;
             _len = 1;
         } else {
             char val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             if (!utf8_to_utf16(val, buf)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             _len = 1;
         }
@@ -327,9 +327,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_t_c(
@@ -339,23 +339,23 @@ namespace internal {
         char32_t ch;
         if (modifier == MOD_ll) {
             if (!get_usfa_ci(arg, &ch)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             if (!utf16_to_utf32(val, &ch)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         } else {
             char val;
             if (!get_usfa_ci(arg, &val)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
             if (!utf8_to_utf32(val, &ch)) {
-                return UCR_FAILED;
+                return SCR_FAIL;
             }
         }
 
@@ -366,9 +366,9 @@ namespace internal {
 
         *len = _len;
         if (!s || s - r != _len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline bool extract_t_c(
@@ -498,10 +498,10 @@ namespace internal {
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
             int ret = utf16_to_utf8(u16_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -528,10 +528,10 @@ namespace internal {
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
             int ret = wchar_to_utf8(w_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -548,7 +548,7 @@ namespace internal {
             break;
         }
 
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
 
         if (precision != -2 && _len > size_t(precision)) {
@@ -560,9 +560,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_t_s(
@@ -606,10 +606,10 @@ namespace internal {
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
             int ret = utf8_to_utf16(u8_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -624,10 +624,10 @@ namespace internal {
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
             int ret = wchar_to_utf16(w_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -644,7 +644,7 @@ namespace internal {
             break;
         }
 
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
 
         if (precision != -2 && _len > size_t(precision)) {
@@ -656,9 +656,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline int extract_t_s(
@@ -688,10 +688,10 @@ namespace internal {
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
             int ret = utf16_to_utf32(u16_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -706,10 +706,10 @@ namespace internal {
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
             int ret = utf8_to_utf32(u8_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -724,10 +724,10 @@ namespace internal {
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
             int ret = wchar_to_utf32(w_s, r, &_len);
-            if (ret == UCR_FAILED) {
-                return UCR_FAILED;
+            if (ret == SCR_FAIL) {
+                return SCR_FAIL;
             }
-            if (ret == UCR_OK) {
+            if (ret == SCR_OK) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -744,7 +744,7 @@ namespace internal {
             break;
         }
 
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
 
         if (precision != -2 && _len > size_t(precision)) {
@@ -756,9 +756,9 @@ namespace internal {
 
         fill_s(s, se, dig, _len, *len, flags, width);
         if (!s || s - r != *len) {
-            return UCR_BUFFER;
+            return SCR_BUF;
         }
-        return UCR_OK;
+        return SCR_OK;
     }
 
     inline bool extract_t_s(
@@ -999,7 +999,7 @@ namespace internal {
         case USFA_LDOUBLE:   USFA_ITOSB_X(USFA_LDOUBLE, intmax_t);
         case USFA_CHAR16:    USFA_ITOSB(USFA_CHAR16);
         case USFA_CHAR32:    USFA_ITOSB(USFA_CHAR32);
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
     }
 
@@ -1033,7 +1033,7 @@ namespace internal {
             precision = 6;
         }
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
 
         switch (arg.index()) {
@@ -1048,7 +1048,7 @@ namespace internal {
         case USFA_ULONGLONG: USFA_FTOSB_INT(USFA_ULONGLONG);
         case USFA_CHAR16:    USFA_FTOSB_INT(USFA_CHAR16);
         case USFA_CHAR32:    USFA_FTOSB_INT(USFA_CHAR32);
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
     }
 
@@ -1061,7 +1061,7 @@ namespace internal {
             precision = 6;
         }
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
 
         switch (arg.index()) {
@@ -1085,13 +1085,13 @@ namespace internal {
         int flags, int precision, int fmt,
         Cy* buf, size_t* len, bool* minus, const usformat_any& arg)
     {
-        fmt |= (UFF_HEX2 | UFF_ENZ);
+        fmt |= (FCF_HEX2 | FCF_ENZ);
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
         if (precision == -2) {
             precision = 0;
-            fmt |= UFF_EXA;
+            fmt |= FCF_EXA;
         }
 
         switch (arg.index()) {
@@ -1106,7 +1106,7 @@ namespace internal {
         case USFA_ULONGLONG: USFA_FTOSB_INT(USFA_ULONGLONG);
         case USFA_CHAR16:    USFA_FTOSB_INT(USFA_CHAR16);
         case USFA_CHAR32:    USFA_FTOSB_INT(USFA_CHAR32);
-        default: return UCR_FAILED;
+        default: return SCR_FAIL;
         }
     }
 
@@ -1115,13 +1115,13 @@ namespace internal {
         int flags, int precision, int fmt,
         std::basic_string<Cy>* str, bool* minus, const usformat_any& arg)
     {
-        fmt |= (UFF_HEX2 | UFF_ENZ);
+        fmt |= (FCF_HEX2 | FCF_ENZ);
         if (flags & FLAG_ALTER) {
-            fmt |= UFF_DIG;
+            fmt |= FCF_DIG;
         }
         if (precision == -2) {
             precision = 0;
-            fmt |= UFF_EXA;
+            fmt |= FCF_EXA;
         }
 
         switch (arg.index()) {
@@ -1346,7 +1346,7 @@ namespace internal {
 
                 bool minus;
                 std::basic_string<Cy> _str;
-                if (!usfa_ftos_fFeEgG(flags, precision, UFF_UPP, &_str, &minus, *v)) {
+                if (!usfa_ftos_fFeEgG(flags, precision, FCF_UPP, &_str, &minus, *v)) {
                     return false;
                 }
                 extract_fFeEgG(&result, flags, width, minus, _str);
@@ -1360,7 +1360,7 @@ namespace internal {
 
                 bool minus;
                 std::basic_string<Cy> _str;
-                if (!usfa_ftos_fFeEgG(flags, precision, UFF_SCI, &_str, &minus, *v)) {
+                if (!usfa_ftos_fFeEgG(flags, precision, FCF_SCI, &_str, &minus, *v)) {
                     return false;
                 }
                 extract_fFeEgG(&result, flags, width, minus, _str);
@@ -1374,7 +1374,7 @@ namespace internal {
 
                 bool minus;
                 std::basic_string<Cy> _str;
-                if (!usfa_ftos_fFeEgG(flags, precision, UFF_SCI | UFF_UPP, &_str, &minus, *v)) {
+                if (!usfa_ftos_fFeEgG(flags, precision, FCF_SCI | FCF_UPP, &_str, &minus, *v)) {
                     return false;
                 }
                 extract_fFeEgG(&result, flags, width, minus, _str);
@@ -1402,7 +1402,7 @@ namespace internal {
 
                 bool minus;
                 std::basic_string<Cy> _str;
-                if (!usfa_ftos_aA(flags, precision, UFF_UPP, &_str, &minus, *v)) {
+                if (!usfa_ftos_aA(flags, precision, FCF_UPP, &_str, &minus, *v)) {
                     return false;
                 }
                 extract_aA(&result, flags, width, Cy('X'), minus, _str);
@@ -1415,7 +1415,7 @@ namespace internal {
                 if (!v || v >= ve) { return false; }
 
                 int fmt = 0;
-                if (!(flags & FLAG_ALTER)) { fmt |= UFF_NTZ; }
+                if (!(flags & FLAG_ALTER)) { fmt |= FCF_NTZ; }
 
                 bool minus;
                 std::basic_string<Cy> _str;
@@ -1430,8 +1430,8 @@ namespace internal {
             {
                 if (!v || v >= ve) { return false; }
 
-                int fmt = UFF_UPP;
-                if (!(flags & FLAG_ALTER)) { fmt |= UFF_NTZ; }
+                int fmt = FCF_UPP;
+                if (!(flags & FLAG_ALTER)) { fmt |= FCF_NTZ; }
 
                 bool minus;
                 std::basic_string<Cy> _str;
@@ -1576,13 +1576,13 @@ namespace internal {
 
             case Cy('c'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
                 size_t _len = rs ? rse - rs : 0u;
                 int ret = extract_t_c(rs, &_len, flags, modifier, width, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
                 act_len += _len;
@@ -1593,13 +1593,13 @@ namespace internal {
 
             case Cy('s'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
                 size_t _len = rs ? rse - rs : 0u;
                 int ret = extract_t_s(rs, &_len, flags, precision, width, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
                 act_len += _len;
@@ -1611,15 +1611,15 @@ namespace internal {
             case Cy('d'):
             case Cy('i'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool zero, minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_itos(10, false, rs, &d_len, &minus, &zero, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1635,15 +1635,15 @@ namespace internal {
 
             case Cy('o'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool zero, minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_itos(8, false, rs, &d_len, &minus, &zero, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1659,15 +1659,15 @@ namespace internal {
 
             case Cy('x'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool zero, minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_itos(16, false, rs, &d_len, &minus, &zero, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1683,15 +1683,15 @@ namespace internal {
 
             case Cy('X'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool zero, minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_itos(16, true, rs, &d_len, &minus, &zero, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1707,15 +1707,15 @@ namespace internal {
 
             case Cy('u'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool zero, minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_itos(10, false, rs, &d_len, &minus, &zero, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1731,15 +1731,15 @@ namespace internal {
 
             case Cy('f'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_ftos_fFeEgG(flags, precision, 0, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1755,15 +1755,15 @@ namespace internal {
 
             case Cy('F'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
-                int ret = usfa_ftos_fFeEgG(flags, precision, UFF_UPP, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                int ret = usfa_ftos_fFeEgG(flags, precision, FCF_UPP, rs, &d_len, &minus, *v);
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1779,15 +1779,15 @@ namespace internal {
 
             case Cy('e'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
-                int ret = usfa_ftos_fFeEgG(flags, precision, UFF_SCI, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                int ret = usfa_ftos_fFeEgG(flags, precision, FCF_SCI, rs, &d_len, &minus, *v);
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1803,15 +1803,15 @@ namespace internal {
 
             case Cy('E'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
-                int ret = usfa_ftos_fFeEgG(flags, precision, UFF_SCI | UFF_UPP, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                int ret = usfa_ftos_fFeEgG(flags, precision, FCF_SCI | FCF_UPP, rs, &d_len, &minus, *v);
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1827,15 +1827,15 @@ namespace internal {
 
             case Cy('a'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_ftos_aA(flags, precision, 0, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1851,15 +1851,15 @@ namespace internal {
 
             case Cy('A'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
-                int ret = usfa_ftos_aA(flags, precision, UFF_UPP, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                int ret = usfa_ftos_aA(flags, precision, FCF_UPP, rs, &d_len, &minus, *v);
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1875,18 +1875,18 @@ namespace internal {
 
             case Cy('g'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 int fmt = 0;
-                if (!(flags & FLAG_ALTER)) { fmt |= UFF_NTZ; }
+                if (!(flags & FLAG_ALTER)) { fmt |= FCF_NTZ; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_ftos_fFeEgG(flags, precision, fmt, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1901,18 +1901,18 @@ namespace internal {
             }
             case Cy('G'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
-                int fmt = UFF_UPP;
-                if (!(flags & FLAG_ALTER)) { fmt |= UFF_NTZ; }
+                int fmt = FCF_UPP;
+                if (!(flags & FLAG_ALTER)) { fmt |= FCF_NTZ; }
 
                 bool minus;
                 size_t d_len = rs ? rse - rs : 0u;
                 int ret = usfa_ftos_fFeEgG(flags, precision, fmt, rs, &d_len, &minus, *v);
-                if (ret == UCR_FAILED) {
+                if (ret == SCR_FAIL) {
                     return ret;
                 }
-                if (ret == UCR_BUFFER) {
+                if (ret == SCR_BUF) {
                     rs = nullptr;
                 }
 
@@ -1925,14 +1925,14 @@ namespace internal {
                 ++v;
                 break;
             }
-            case Cy('n'): return UCR_FAILED;
+            case Cy('n'): return SCR_FAIL;
             case Cy('p'):
             {
-                if (!v || v >= ve) { return UCR_FAILED; }
+                if (!v || v >= ve) { return SCR_FAIL; }
 
                 std::basic_string<Cy> _str;
                 if (v->index() != USFA_VOIDP) {
-                    return UCR_FAILED;
+                    return SCR_FAIL;
                 }
 
                 size_t _len = rs ? rse - rs : 0u;
@@ -1960,7 +1960,7 @@ namespace internal {
         act_len += se - prev_pos;
 
         *buf_len = act_len;
-        return rs && rs - buf == act_len ? UCR_OK : UCR_BUFFER;
+        return rs && rs - buf == act_len ? SCR_OK : SCR_BUF;
     }
 
 }
