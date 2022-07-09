@@ -186,6 +186,7 @@
     <ClCompile Include="stream_unit_test.cpp" />
     <ClCompile Include="string_utils_unit_test.cpp" />
     <ClCompile Include="unicode_unit_test.cpp" />
+    <ClCompile Include="var_unit_test.cpp" />
     <ClCompile Include="xml_unit_test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

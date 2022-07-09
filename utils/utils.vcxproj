@@ -276,6 +276,7 @@
     <ClInclude Include="unit_test\test_collector.h" />
     <ClInclude Include="unit_test\test_log.hpp" />
     <ClInclude Include="unit_test\test_suite.h" />
+    <ClInclude Include="var.hpp" />
     <ClInclude Include="weak_bind.hpp" />
     <ClInclude Include="weak_ref_nest.hpp" />
     <ClInclude Include="xml\xml_parser.h" />

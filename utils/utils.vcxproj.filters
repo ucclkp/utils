@@ -283,6 +283,7 @@
     <ClInclude Include="math\algebra\matrix_internal.hpp">
       <Filter>math\algebra</Filter>
     </ClInclude>
+    <ClInclude Include="var.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">
