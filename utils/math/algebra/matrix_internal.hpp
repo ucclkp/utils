@@ -9,6 +9,23 @@
 
 #include "utils/numbers.hpp"
 
+#define Decl_MatrixT_vec_num_methods(N, n) \
+    template<typename Ty, typename Mat, size_t Max> \
+    class MatrixT_vec_num_methods0<Ty, Mat, Max, N> \
+        : public MatrixT_vec_num_methods0<Ty, Mat, Max, N - 1> \
+    { \
+        using MatrixT = Mat; \
+        MatrixT* derived() { return static_cast<MatrixT*>(this); } \
+        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); } \
+    public: \
+        Ty n() const { return derived()->data[N - 1]; } \
+        Ty& n() { return derived()->data[N - 1]; } \
+        MatrixT& n(Ty val) { \
+            derived()->data[N - 1] = val; \
+            return *derived(); \
+        } \
+    };
+
 
 namespace utl {
 namespace math {
@@ -382,6 +399,14 @@ namespace internal {
 
         Ty data[Count];
     };
+
+    template<typename Ty, typename Mat, size_t Max, size_t Cur>
+    class MatrixT_vec_num_methods0 {};
+
+    Decl_MatrixT_vec_num_methods(1, x);
+    Decl_MatrixT_vec_num_methods(2, y);
+    Decl_MatrixT_vec_num_methods(3, z);
+    Decl_MatrixT_vec_num_methods(4, w);
 
     template <typename Ty, typename Mat, size_t Row, size_t Col>
     class MatrixT_row_col_methods {
@@ -946,83 +971,21 @@ namespace internal {
         }
     };
 
-    template <typename Ty, typename Mat>
-    class MatrixT_x_methods {
-        using MatrixT = Mat;
-        MatrixT* derived() { return static_cast<MatrixT*>(this); }
-        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
-    public:
-        Ty x() const { return derived()->data[0]; }
-        Ty& x() { return derived()->data[0]; }
-        MatrixT& x(Ty x) {
-            derived()->data[0] = x;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Mat>
-    class MatrixT_y_methods {
-        using MatrixT = Mat;
-        MatrixT* derived() { return static_cast<MatrixT*>(this); }
-        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
-    public:
-        Ty y() const { return derived()->data[1]; }
-        Ty& y() { return derived()->data[1]; }
-        MatrixT& y(Ty y) {
-            derived()->data[1] = y;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Mat>
-    class MatrixT_z_methods {
-        using MatrixT = Mat;
-        MatrixT* derived() { return static_cast<MatrixT*>(this); }
-        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
-    public:
-        Ty z() const { return derived()->data[2]; }
-        Ty& z() { return derived()->data[2]; }
-        MatrixT& z(Ty z) {
-            derived()->data[2] = z;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Mat>
-    class MatrixT_w_methods {
-        using MatrixT = Mat;
-        MatrixT* derived() { return static_cast<MatrixT*>(this); }
-        const MatrixT* derived() const { return static_cast<const MatrixT*>(this); }
-    public:
-        Ty w() const { return derived()->data[3]; }
-        Ty& w() { return derived()->data[3]; }
-        MatrixT& w(Ty w) {
-            derived()->data[3] = w;
-            return *derived();
-        }
-    };
-
     template <typename Ty, typename Mat, size_t Num>
     class MatrixT_vec_num_methods :
-        public MatrixT_x_methods<Ty, Mat>,
-        public MatrixT_y_methods<Ty, Mat>,
-        public MatrixT_z_methods<Ty, Mat>,
-        public MatrixT_w_methods<Ty, Mat> {};
+        public MatrixT_vec_num_methods0<Ty, Mat, Num, Num> {};
 
     template <typename Ty, typename Mat>
     class MatrixT_vec_num_methods<Ty, Mat, 1> :
-        public MatrixT_x_methods<Ty, Mat> {};
+        public MatrixT_vec_num_methods0<Ty, Mat, 1, 1> {};
 
     template <typename Ty, typename Mat>
     class MatrixT_vec_num_methods<Ty, Mat, 2> :
-        public MatrixT_x_methods<Ty, Mat>,
-        public MatrixT_y_methods<Ty, Mat> {};
+        public MatrixT_vec_num_methods0<Ty, Mat, 2, 2> {};
 
     template <typename Ty, typename Mat>
     class MatrixT_vec_num_methods<Ty, Mat, 3> :
-        public MatrixT_x_methods<Ty, Mat>,
-        public MatrixT_y_methods<Ty, Mat>,
-        public MatrixT_z_methods<Ty, Mat>
+        public MatrixT_vec_num_methods0<Ty, Mat, 3, 3>
     {
         using MatrixT = Mat;
         MatrixT* derived() { return static_cast<MatrixT*>(this); }

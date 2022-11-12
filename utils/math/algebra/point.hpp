@@ -12,6 +12,22 @@
 #include "utils/numbers.hpp"
 #include "utils/math/algebra/matrix.hpp"
 
+#define Decl_PointT_num_methods(N, n) \
+    template<typename Ty, typename Pt, size_t Max> \
+    class PointT_num_methods<Ty, Pt, Max, N> \
+        : public PointT_num_methods<Ty, Pt, Max, N - 1> \
+    { \
+        using PointT = Pt; \
+        PointT* derived() { return static_cast<PointT*>(this); } \
+        const PointT* derived() const { return static_cast<const PointT*>(this); } \
+    public: \
+        Ty n() const { return derived()->data[N - 1]; } \
+        Ty& n() { return derived()->data[N - 1]; } \
+        PointT& n(Ty val) { \
+            derived()->data[N - 1] = val; \
+            return *derived(); \
+        } \
+    };
 
 namespace utl {
 namespace math {
@@ -37,97 +53,19 @@ namespace internal {
         Ty data[Num];
     };
 
-    template <typename Ty, typename Pt>
-    class PointT_x_methods {
-        using PointT = Pt;
-        PointT* derived() { return static_cast<PointT*>(this); }
-        const PointT* derived() const { return static_cast<const PointT*>(this); }
-    public:
-        Ty x() const { return derived()->data[0]; }
-        Ty& x() { return derived()->data[0]; }
-        PointT& x(Ty x) {
-            derived()->data[0] = x;
-            return *derived();
-        }
-    };
+    template<typename Ty, typename Pt, size_t Max, size_t Cur>
+    class PointT_num_methods : public PointT_base<Ty, Pt, Max> {};
 
-    template <typename Ty, typename Pt>
-    class PointT_y_methods {
-        using PointT = Pt;
-        PointT* derived() { return static_cast<PointT*>(this); }
-        const PointT* derived() const { return static_cast<const PointT*>(this); }
-    public:
-        Ty y() const { return derived()->data[1]; }
-        Ty& y() { return derived()->data[1]; }
-        PointT& y(Ty y) {
-            derived()->data[1] = y;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Pt>
-    class PointT_z_methods {
-        using PointT = Pt;
-        PointT* derived() { return static_cast<PointT*>(this); }
-        const PointT* derived() const { return static_cast<const PointT*>(this); }
-    public:
-        Ty z() const { return derived()->data[2]; }
-        Ty& z() { return derived()->data[2]; }
-        PointT& z(Ty z) {
-            derived()->data[2] = z;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Pt>
-    class PointT_w_methods {
-        using PointT = Pt;
-        PointT* derived() { return static_cast<PointT*>(this); }
-        const PointT* derived() const { return static_cast<const PointT*>(this); }
-    public:
-        Ty w() const { return derived()->data[3]; }
-        Ty& w() { return derived()->data[3]; }
-        PointT& w(Ty w) {
-            derived()->data[3] = w;
-            return *derived();
-        }
-    };
-
-    template <typename Ty, typename Pt, size_t Num>
-    class PointT_num_methods :
-        public PointT_x_methods<Ty, Pt>,
-        public PointT_y_methods<Ty, Pt>,
-        public PointT_z_methods<Ty, Pt>,
-        public PointT_w_methods<Ty, Pt> {};
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 1> :
-        public PointT_x_methods<Ty, Pt> {};
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 2> :
-        public PointT_x_methods<Ty, Pt>,
-        public PointT_y_methods<Ty, Pt> {};
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 3> :
-        public PointT_x_methods<Ty, Pt>,
-        public PointT_y_methods<Ty, Pt>,
-        public PointT_z_methods<Ty, Pt> {};
-
-    template <typename Ty, typename Pt>
-    class PointT_num_methods<Ty, Pt, 4> :
-        public PointT_x_methods<Ty, Pt>,
-        public PointT_y_methods<Ty, Pt>,
-        public PointT_z_methods<Ty, Pt>,
-        public PointT_w_methods<Ty, Pt> {};
+    Decl_PointT_num_methods(1, x);
+    Decl_PointT_num_methods(2, y);
+    Decl_PointT_num_methods(3, z);
+    Decl_PointT_num_methods(4, w);
 
 }
 
     template <typename Ty, size_t Num>
     class PointT :
-        public internal::PointT_base<Ty, PointT<Ty, Num>, Num>,
-        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num>
+        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num, Num>
     {
     public:
         static_assert(Num != 0, "Num must be greater than 0!");
@@ -436,8 +374,7 @@ namespace internal {
 
     template <typename Ty>
     class PointT<Ty, 1> :
-        public internal::PointT_base<Ty, PointT<Ty, 1>, 1>,
-        public internal::PointT_num_methods<Ty, PointT<Ty, 1>, 1>
+        public internal::PointT_num_methods<Ty, PointT<Ty, 1>, 1, 1>
     {
     public:
         PointT operator+(const VectorT<Ty, 1>& rhs) const {
