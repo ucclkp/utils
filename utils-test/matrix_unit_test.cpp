@@ -49,6 +49,13 @@ TEST_CASE(MatrixUnitTest) {
         m.mul(2);
         TEST_E(m.get(), 10);
 
+        TEST_E(m.mul(Matrix1x3({ 1, 2, 3 })), Matrix1x3({ 10, 20, 30 }));
+        m.mul_s({ 2 });
+        TEST_E(m.get(), 20);
+
+        m *= Matrix1x1{0.5};
+        TEST_E(m.get(), 10);
+
         TEST_E((m * m2)(), 50);
         TEST_E((m * m1x3), Matrix1x3({10, 20, 30}));
 
@@ -147,6 +154,7 @@ TEST_CASE(MatrixUnitTest) {
     };
 
     TEST_DEF("Matrix 1x3 tests.") {
+        using Matrix1x1 = MatrixT<double, 1, 1>;
         using Matrix1x3 = MatrixT<double, 1, 3>;
         using Matrix3x1 = MatrixT<double, 3, 1>;
 
@@ -198,6 +206,22 @@ TEST_CASE(MatrixUnitTest) {
 
         m.mul(2);
         TEST_E(m, Matrix1x3({ 2, 4, 6 }));
+
+        TEST_E(m.mul(Matrix3x1({ 1, 2, 3 })), Matrix1x1({ 28 }));
+        m.mul_s({
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9
+            });
+        TEST_E(m, Matrix1x3({ 60, 72, 84 }));
+
+        m *= MatrixT<double, 3, 3>{
+            0.1, 0.2, 0.3,
+                0.4, 0.5, 0.6,
+                0.7, 0.8, 0.9
+        };
+        TEST_E(m, Matrix1x3({ 93.6, 115.2, 136.8 }));
+        m = Matrix1x3({ 2, 4, 6 });
 
         m.div(2);
         TEST_E(m, Matrix1x3({ 1, 2, 3 }));
@@ -350,6 +374,7 @@ TEST_CASE(MatrixUnitTest) {
     TEST_DEF("Matrix 3x1 tests.") {
         using Matrix3x1 = MatrixT<double, 3, 1>;
         using Matrix1x3 = MatrixT<double, 1, 3>;
+        using Matrix3x3 = MatrixT<double, 3, 3>;
 
         Matrix3x1 m{ 1, 2, 3 };
         Matrix3x1 m2{ 4, 5, 6 };
@@ -391,6 +416,20 @@ TEST_CASE(MatrixUnitTest) {
 
         m.mul(2);
         TEST_E(m, Matrix3x1({ 2, 4, 6 }));
+
+        TEST_E(m.mul(
+            Matrix1x3({ 1, 2, 3 })),
+            Matrix3x3({
+                2, 4, 6,
+                4, 8, 12,
+                6, 12, 18
+                }));
+        m.mul_s({ 2 });
+        TEST_E(m, Matrix3x1({ 4, 8, 12 }));
+
+        m *= MatrixT<double, 1, 1>{ 0.1 };
+        TEST_E(m, Matrix3x1({ 0.4, 0.8, 1.2 }));
+        m = Matrix3x1({ 2, 4, 6 });
 
         m.div(2);
         TEST_E(m, Matrix3x1({ 1, 2, 3 }));
@@ -543,7 +582,29 @@ TEST_CASE(MatrixUnitTest) {
         TEST_E(m, Matrix2x2({ 5, 1, 9, 7 }));
 
         m.mul(2);
-        TEST_E(m, Matrix2x2({ 10, 2, 18, 14 }));
+        TEST_E(m, Matrix2x2({
+            10, 2,
+            18, 14 }));
+
+        TEST_E(m.mul(Matrix2x2({
+            1, 2,
+            3, 4 })),
+            Matrix2x2({ 16, 28, 60, 92 }));
+        m.mul_s({
+            1, 2,
+            3, 4 });
+        TEST_E(m, Matrix2x2({
+            16, 28,
+            60, 92 }));
+
+        m *= MatrixT<double, 2, 2>{
+            0.1, 0.2,
+                0.3, 0.4
+        };
+        TEST_E(m, Matrix2x2({ 10, 14.4, 33.6, 48.8 }));
+        m = Matrix2x2({
+            10, 2,
+            18, 14 });
 
         m.div(2);
         TEST_E(m, Matrix2x2({ 5, 1, 9, 7 }));
@@ -816,6 +877,7 @@ TEST_CASE(MatrixUnitTest) {
         using Matrix3x1 = MatrixT<double, 3, 1>;
         using Matrix3x3 = MatrixT<double, 3, 3>;
         using Matrix3x5 = MatrixT<double, 3, 5>;
+        using Matrix5x1 = MatrixT<double, 5, 1>;
 
         Matrix3x5 m{
             2, 1, 3,  4, 5,
@@ -903,6 +965,41 @@ TEST_CASE(MatrixUnitTest) {
             2, 2, 2, 20, 14,
             8, 16, 18, 10, 2,
         }));
+
+        TEST_E(
+            m.mul(Matrix5x1({ 1, 2, 3, 4, 5 })),
+            Matrix3x1({ 108, 162, 144 }));
+        m.mul_s({
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5
+            });
+        TEST_E(m, Matrix3x5({
+            30, 60, 90, 120, 150,
+            40, 80, 120, 160, 200,
+            54, 108, 162, 216, 270
+            }));
+
+        m *= MatrixT<double, 5, 5>{
+            0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5
+        };
+        TEST_E(m, Matrix3x5({
+            45, 90, 135, 180, 225,
+            60, 120, 180, 240, 300,
+            81, 162, 243, 324, 405
+            }));
+        m = Matrix3x5({
+            4, 2, 6,  8, 10,
+            2, 2, 2, 20, 14,
+            8, 16, 18, 10, 2,
+            });
+
         m.div(2);
         TEST_E(m, Matrix3x5({
             2, 1, 3,  4, 5,
@@ -1369,6 +1466,15 @@ TEST_CASE(MatrixUnitTest) {
         TEST_TRUE((std::is_standard_layout<VectorT<double, 3>>::value));
         TEST_TRUE((std::is_trivial<VectorT<double, 3>>::value));
         TEST_TRUE((std::is_pod<VectorT<double, 3>>::value));
+
+        TEST_E(sizeof(MatrixT<float, 1, 1>), sizeof(float) * 1);
+        TEST_E(sizeof(MatrixT<float, 1, 3>), sizeof(float) * 3);
+        TEST_E(sizeof(MatrixT<float, 1, 4>), sizeof(float) * 4);
+        TEST_E(sizeof(MatrixT<float, 2, 3>), sizeof(float) * 6);
+        TEST_E(sizeof(MatrixT<double, 1, 1>), sizeof(double) * 1);
+        TEST_E(sizeof(MatrixT<double, 1, 3>), sizeof(double) * 3);
+        TEST_E(sizeof(MatrixT<double, 1, 4>), sizeof(double) * 4);
+        TEST_E(sizeof(MatrixT<double, 2, 3>), sizeof(double) * 6);
 
         VectorT<float, 3> arr[]{
             {1, 2, 3},

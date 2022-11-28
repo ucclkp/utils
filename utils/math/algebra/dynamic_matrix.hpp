@@ -182,6 +182,9 @@ namespace internal {
         DMatrixT& operator-=(const DMatrixT& rhs) {
             return sub(rhs);
         }
+        DMatrixT& operator*=(const DMatrixT& rhs) {
+            return mul_s(rhs);
+        }
         DMatrixT& operator*=(Ty val) {
             return mul(val);
         }
@@ -509,6 +512,22 @@ namespace internal {
                 }
             }
             return result;
+        }
+
+        DMatrixT& mul_s(const DMatrixT& rhs) {
+            if (rhs.row_sz != col_sz) {
+                throw std::runtime_error("Row must be equal to Col!");
+            }
+
+            DMatrixT result(row_sz, rhs.col_sz);
+            for (size_t r = 0; r < row_sz; ++r) {
+                for (size_t c = 0; c < rhs.col_sz; ++c) {
+                    result.data[r * rhs.col_sz + c] = rowMulCol(*this, r, rhs, c);
+                }
+            }
+
+            *this = std::move(result);
+            return *this;
         }
 
         DMatrixT& add_row(size_t index, Ty val) {

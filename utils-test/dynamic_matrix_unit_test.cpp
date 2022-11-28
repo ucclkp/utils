@@ -44,6 +44,13 @@ TEST_CASE(DMatrixUnitTest) {
         m.mul(2);
         TEST_E(m.get(0), 10);
 
+        TEST_E(m.mul(DMatrix(1, 3, { 1, 2, 3 })), DMatrix(1, 3, { 10, 20, 30 }));
+        m.mul_s(DMatrix(1, 1, { 2 }));
+        TEST_E(m.get(0), 20);
+
+        m *= DMatrix(1, 1, { 0.5 });
+        TEST_E(m.get(0), 10);
+
         TEST_E((m * m2)(0), 50);
         TEST_E((m * m1x3), DMatrix(1, 3, { 10, 20, 30 }));
 
@@ -153,6 +160,22 @@ TEST_CASE(DMatrixUnitTest) {
 
         m.mul(2);
         TEST_E(m, DMatrix(1, 3, { 2, 4, 6 }));
+
+        TEST_E(m.mul(DMatrix(3, 1, { 1, 2, 3 })), DMatrix(1, 1, { 28 }));
+        m.mul_s(DMatrix(3, 3, {
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9
+            }));
+        TEST_E(m, DMatrix(1, 3, { 60, 72, 84 }));
+
+        m *= DMatrixT(3, 3, {
+            0.1, 0.2, 0.3,
+                0.4, 0.5, 0.6,
+                0.7, 0.8, 0.9
+            });
+        TEST_E(m, DMatrix(1, 3, { 93.6, 115.2, 136.8 }));
+        m = DMatrix(1, 3, { 2, 4, 6 });
 
         m.div(2);
         TEST_E(m, DMatrix(1, 3, { 1, 2, 3 }));
@@ -271,6 +294,20 @@ TEST_CASE(DMatrixUnitTest) {
         m.mul(2);
         TEST_E(m, DMatrix(3, 1, { 2, 4, 6 }));
 
+        TEST_E(m.mul(
+            DMatrix(1, 3, { 1, 2, 3 })),
+            DMatrix(3, 3, {
+                2, 4, 6,
+                4, 8, 12,
+                6, 12, 18
+                }));
+        m.mul_s(DMatrix(1, 1, { 2 }));
+        TEST_E(m, DMatrix(3, 1, { 4, 8, 12 }));
+
+        m *= DMatrixT(1, 1, { 0.1 });
+        TEST_E(m, DMatrix(3, 1, { 0.4, 0.8, 1.2 }));
+        m = DMatrix(3, 1, { 2, 4, 6 });
+
         m.div(2);
         TEST_E(m, DMatrix(3, 1, { 1, 2, 3 }));
 
@@ -384,6 +421,26 @@ TEST_CASE(DMatrixUnitTest) {
 
         m.mul(2);
         TEST_E(m, DMatrix(2, 2, { 10, 2, 18, 14 }));
+
+        TEST_E(m.mul(DMatrix(2, 2, {
+            1, 2,
+            3, 4 })),
+            DMatrix(2, 2, { 16, 28, 60, 92 }));
+        m.mul_s(DMatrix(2, 2, {
+            1, 2,
+            3, 4 }));
+        TEST_E(m, DMatrix(2, 2, {
+            16, 28,
+            60, 92 }));
+
+        m *= DMatrix(2, 2, {
+            0.1, 0.2,
+                0.3, 0.4
+        });
+        TEST_E(m, DMatrix(2, 2, { 10, 14.4, 33.6, 48.8 }));
+        m = DMatrix(2, 2, {
+            10, 2,
+            18, 14 });
 
         m.div(2);
         TEST_E(m, DMatrix(2, 2, { 5, 1, 9, 7 }));
@@ -699,6 +756,41 @@ TEST_CASE(DMatrixUnitTest) {
             2, 2, 2, 20, 14,
             8, 16, 18, 10, 2,
             }));
+
+        TEST_E(
+            m.mul(DMatrix(5, 1, { 1, 2, 3, 4, 5 })),
+            DMatrix(3, 1, { 108, 162, 144 }));
+        m.mul_s(DMatrix(5, 5, {
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5,
+            1, 2, 3, 4, 5
+            }));
+        TEST_E(m, DMatrix(3, 5, {
+            30, 60, 90, 120, 150,
+            40, 80, 120, 160, 200,
+            54, 108, 162, 216, 270
+            }));
+
+        m *= DMatrix(5, 5, {
+            0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5,
+                0.1, 0.2, 0.3, 0.4, 0.5
+        });
+        TEST_E(m, DMatrix(3, 5, {
+            45, 90, 135, 180, 225,
+            60, 120, 180, 240, 300,
+            81, 162, 243, 324, 405
+            }));
+        m = DMatrix(3, 5, {
+            4, 2, 6,  8, 10,
+            2, 2, 2, 20, 14,
+            8, 16, 18, 10, 2,
+            });
+
         m.div(2);
         TEST_E(m, DMatrix(3, 5, {
             2, 1, 3,  4, 5,

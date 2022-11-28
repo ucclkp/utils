@@ -323,6 +323,13 @@ TEST_CASE(PointUnitTest) {
         TEST_TRUE((std::is_trivial<PointT<float, 5>>::value));
         TEST_TRUE((std::is_pod<PointT<float, 5>>::value));
 
+        TEST_E(sizeof(PointT<float, 1>), sizeof(float) * 1);
+        TEST_E(sizeof(PointT<float, 3>), sizeof(float) * 3);
+        TEST_E(sizeof(PointT<float, 4>), sizeof(float) * 4);
+        TEST_E(sizeof(PointT<double, 1>), sizeof(double) * 1);
+        TEST_E(sizeof(PointT<double, 3>), sizeof(double) * 3);
+        TEST_E(sizeof(PointT<double, 4>), sizeof(double) * 4);
+
         PointT<float, 3> arr[]{
             {1, 2, 3},
             {4, 5, 6},

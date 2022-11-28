@@ -29,10 +29,14 @@ namespace math {
 
     public:
         using super::operator*;
+        using super::operator*=;
 
         template <size_t RCol>
         MatrixT<Ty, Row, RCol> operator*(const MatrixT<Ty, Col, RCol>& rhs) const {
             return this->mul(rhs);
+        }
+        MatrixT& operator*=(const MatrixT<Ty, Col, Col>& rhs) {
+            return this->mul_s(rhs);
         }
 
         using super::mul;
@@ -46,6 +50,16 @@ namespace math {
                 }
             }
             return out;
+        }
+        MatrixT& mul_s(const MatrixT<Ty, Col, Col>& rhs) {
+            MatrixT<Ty, Row, Col> out;
+            for (size_t r = 0; r < Row; ++r) {
+                for (size_t c = 0; c < Col; ++c) {
+                    out.data[r * Col + c] = rowMulCol(*this, r, rhs, c);
+                }
+            }
+            *this = out;
+            return *this;
         }
 
     private:
@@ -78,10 +92,14 @@ namespace math {
         }
 
         using super::operator*;
+        using super::operator*=;
 
         template <size_t RCol>
         MatrixT<Ty, Num, RCol> operator*(const MatrixT<Ty, Num, RCol>& rhs) const {
             return this->mul(rhs);
+        }
+        MatrixT& operator*=(const MatrixT<Ty, Num, Num>& rhs) {
+            return this->mul_s(rhs);
         }
 
         using super::mul;
@@ -95,6 +113,16 @@ namespace math {
                 }
             }
             return out;
+        }
+        MatrixT& mul_s(const MatrixT<Ty, Num, Num>& rhs) {
+            MatrixT<Ty, Num, Num> out;
+            for (size_t r = 0; r < Num; ++r) {
+                for (size_t c = 0; c < Num; ++c) {
+                    out.data[r * Num + c] = rowMulCol(*this, r, rhs, c);
+                }
+            }
+            *this = out;
+            return *this;
         }
 
         MatrixT& identity() {
@@ -202,11 +230,15 @@ namespace math {
 
     public:
         using super::operator*;
+        using super::operator*=;
         using vec_super::operator*;
 
         template <size_t RCol>
         MatrixT<Ty, Row, RCol> operator*(const MatrixT<Ty, 1, RCol>& rhs) const {
             return this->mul(rhs);
+        }
+        MatrixT& operator*=(const MatrixT<Ty, 1, 1>& rhs) {
+            return this->mul_s(rhs);
         }
 
         template <size_t Re>
@@ -252,6 +284,14 @@ namespace math {
                 }
             }
             return out;
+        }
+        MatrixT& mul_s(const MatrixT<Ty, 1, 1>& rhs) {
+            MatrixT<Ty, Row, 1> out;
+            for (size_t r = 0; r < Row; ++r) {
+                out.data[r] = rowMulCol(*this, r, rhs, 0);
+            }
+            *this = out;
+            return *this;
         }
 
         MatrixT& add_col(Ty val) {
@@ -405,11 +445,15 @@ namespace math {
 
     public:
         using super::operator*;
+        using super::operator*=;
         using vec_super::operator*;
 
         template <size_t RCol>
         MatrixT<Ty, 1, RCol> operator*(const MatrixT<Ty, Col, RCol>& rhs) const {
             return this->mul(rhs);
+        }
+        MatrixT& operator*=(const MatrixT<Ty, Col, Col>& rhs) {
+            return this->mul_s(rhs);
         }
 
         template <size_t Re>
@@ -453,6 +497,14 @@ namespace math {
                 out.data[c] = rowMulCol(*this, 0, rhs, c);
             }
             return out;
+        }
+        MatrixT& mul_s(const MatrixT<Ty, Col, Col>& rhs) {
+            MatrixT<Ty, 1, Col> out;
+            for (size_t c = 0; c < Col; ++c) {
+                out.data[c] = rowMulCol(*this, 0, rhs, c);
+            }
+            *this = out;
+            return *this;
         }
 
         MatrixT& add_row(Ty val) {
@@ -583,10 +635,14 @@ namespace math {
         }
 
         using super::operator*;
+        using super::operator*=;
 
         template <size_t RCol>
         MatrixT<Ty, 1, RCol> operator*(const MatrixT<Ty, 1, RCol>& rhs) const {
             return this->mul(rhs);
+        }
+        MatrixT& operator*=(const MatrixT<Ty, 1, 1>& rhs) {
+            return this->mul_s(rhs);
         }
 
         Ty operator()() const {
@@ -609,6 +665,10 @@ namespace math {
                 out.data[c] = rowMulCol(*this, 0, rhs, c);
             }
             return out;
+        }
+        MatrixT& mul_s(const MatrixT<Ty, 1, 1>& rhs) {
+            this->data[0] = rowMulCol(*this, 0, rhs, 0);
+            return *this;
         }
 
         MatrixT& set(Ty val) {
@@ -688,9 +748,7 @@ namespace math {
             const MatrixT& ml, size_t row_index,
             const MatrixT<Ty, 1, RCol>& mr, size_t col_index)
         {
-            Ty result = 0;
-            result += ml.data[row_index] * mr.data[col_index];
-            return result;
+            return ml.data[row_index] * mr.data[col_index];
         }
     };
 
