@@ -96,6 +96,8 @@
 		67B95E1324AA3C77005DD0AD /* message_queue.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B95E0924AA3C76005DD0AD /* message_queue.h */; };
 		67B95E1724AA3CF9005DD0AD /* message_pump_mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 67B95E1524AA3CF9005DD0AD /* message_pump_mac.mm */; };
 		67B95E1824AA3CF9005DD0AD /* message_pump_mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B95E1624AA3CF9005DD0AD /* message_pump_mac.h */; };
+		67D3ECA4294A3F2A0092D72C /* abnf.h in Headers */ = {isa = PBXBuildFile; fileRef = 67D3ECA2294A3F2A0092D72C /* abnf.h */; };
+		67D3ECA5294A3F2A0092D72C /* uri.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67D3ECA3294A3F2A0092D72C /* uri.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -191,6 +193,8 @@
 		67B95E0924AA3C76005DD0AD /* message_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_queue.h; sourceTree = "<group>"; };
 		67B95E1524AA3CF9005DD0AD /* message_pump_mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = message_pump_mac.mm; sourceTree = "<group>"; };
 		67B95E1624AA3CF9005DD0AD /* message_pump_mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_pump_mac.h; sourceTree = "<group>"; };
+		67D3ECA2294A3F2A0092D72C /* abnf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = abnf.h; sourceTree = "<group>"; };
+		67D3ECA3294A3F2A0092D72C /* uri.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = uri.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -349,6 +353,7 @@
 				671A1DBE27B7E88C007E823D /* memory */,
 				67B95DFE24AA3C76005DD0AD /* message */,
 				6796F0F42711B2A2009D0E59 /* multi_callbacks.hpp */,
+				67D3ECA1294A3F2A0092D72C /* net */,
 				671A1DBC27B7E86F007E823D /* numbers.hpp */,
 				67B85BD124A609B8005C89A9 /* platform_utils.cpp */,
 				67B85BE224A609B8005C89A9 /* platform_utils.h */,
@@ -406,6 +411,15 @@
 			path = mac;
 			sourceTree = "<group>";
 		};
+		67D3ECA1294A3F2A0092D72C /* net */ = {
+			isa = PBXGroup;
+			children = (
+				67D3ECA2294A3F2A0092D72C /* abnf.h */,
+				67D3ECA3294A3F2A0092D72C /* uri.hpp */,
+			);
+			path = net;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -440,8 +454,10 @@
 				67B85BFE24A609B9005C89A9 /* event_handler.hpp in Headers */,
 				6707D0942766361C00B19D0C /* type_utils.hpp in Headers */,
 				671A1DEA27B7E88C007E823D /* uint_exp.hpp in Headers */,
+				67D3ECA4294A3F2A0092D72C /* abnf.h in Headers */,
 				6724E70224A8F2EB003FA2B2 /* matrix.hpp in Headers */,
 				67B85BEF24A609B9005C89A9 /* stream_utils.h in Headers */,
+				67D3ECA5294A3F2A0092D72C /* uri.hpp in Headers */,
 				671A1DE627B7E88C007E823D /* int_conv.hpp in Headers */,
 				67B95E0F24AA3C77005DD0AD /* cycler.h in Headers */,
 				6707D0A52766366C00B19D0C /* test_case.h in Headers */,

@@ -18,5 +18,6 @@
     <ClCompile Include="stream_unit_test.cpp" />
     <ClCompile Include="xml_unit_test.cpp" />
     <ClCompile Include="var_unit_test.cpp" />
+    <ClCompile Include="uri_unit_test.cpp" />
   </ItemGroup>
 </Project>

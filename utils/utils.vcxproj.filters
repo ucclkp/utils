@@ -46,6 +46,9 @@
     <Filter Include="sync\win">
       <UniqueIdentifier>{8c28877e-0ea9-4f31-a035-1045259908ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{abbef8e9-c3b5-4763-8f41-918736b8bf8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="log.cpp" />
@@ -284,6 +287,12 @@
       <Filter>math\algebra</Filter>
     </ClInclude>
     <ClInclude Include="var.hpp" />
+    <ClInclude Include="net\abnf.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\uri.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

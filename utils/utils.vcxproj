@@ -221,6 +221,8 @@
     <ClInclude Include="memory\aligments.hpp" />
     <ClInclude Include="memory\win\com_pptr.hpp" />
     <ClInclude Include="memory\win\com_ptr.hpp" />
+    <ClInclude Include="net\abnf.h" />
+    <ClInclude Include="net\uri.hpp" />
     <ClInclude Include="strings\sc_ret_code.h" />
     <ClInclude Include="strings\float_conv.h" />
     <ClInclude Include="strings\float_conv_big_num.hpp" />
