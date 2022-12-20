@@ -212,7 +212,6 @@
     <ClInclude Include="define_utils.hpp" />
     <ClInclude Include="endian.hpp" />
     <ClInclude Include="event_handler.hpp" />
-    <ClInclude Include="executable.h" />
     <ClInclude Include="files\file_utils.h" />
     <ClInclude Include="math\algebra\geocal.hpp" />
     <ClInclude Include="math\algebra\matrix_internal.hpp" />
@@ -221,6 +220,7 @@
     <ClInclude Include="memory\aligments.hpp" />
     <ClInclude Include="memory\win\com_pptr.hpp" />
     <ClInclude Include="memory\win\com_ptr.hpp" />
+    <ClInclude Include="message\executable.h" />
     <ClInclude Include="net\abnf.h" />
     <ClInclude Include="net\uri.hpp" />
     <ClInclude Include="strings\sc_ret_code.h" />

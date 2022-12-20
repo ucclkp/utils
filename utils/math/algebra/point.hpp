@@ -13,9 +13,9 @@
 #include "utils/math/algebra/matrix.hpp"
 
 #define Decl_PointT_num_methods(N, n) \
-    template<typename Ty, typename Pt, size_t Max> \
-    class PointT_num_methods<Ty, Pt, Max, N> \
-        : public PointT_num_methods<Ty, Pt, Max, N - 1> \
+    template<typename Ty, typename Pt> \
+    class PointT_num_methods<Ty, Pt, N> \
+        : public PointT_num_methods<Ty, Pt, N - 1> \
     { \
         using PointT = Pt; \
         PointT* derived() { return static_cast<PointT*>(this); } \
@@ -53,8 +53,8 @@ namespace internal {
         Ty data[Num];
     };
 
-    template<typename Ty, typename Pt, size_t Max, size_t Cur>
-    class PointT_num_methods : public PointT_base<Ty, Pt, Max> {};
+    template<typename Ty, typename Pt, size_t Cur>
+    class PointT_num_methods {};
 
     Decl_PointT_num_methods(1, x);
     Decl_PointT_num_methods(2, y);
@@ -65,7 +65,8 @@ namespace internal {
 
     template <typename Ty, size_t Num>
     class PointT :
-        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num, Num>
+        public internal::PointT_base<Ty, PointT<Ty, Num>, Num>,
+        public internal::PointT_num_methods<Ty, PointT<Ty, Num>, Num>
     {
     public:
         static_assert(Num != 0, "Num must be greater than 0!");
@@ -374,7 +375,8 @@ namespace internal {
 
     template <typename Ty>
     class PointT<Ty, 1> :
-        public internal::PointT_num_methods<Ty, PointT<Ty, 1>, 1, 1>
+        public internal::PointT_base<Ty, PointT<Ty, 1>, 1>,
+        public internal::PointT_num_methods<Ty, PointT<Ty, 1>, 1>
     {
     public:
         PointT operator+(const VectorT<Ty, 1>& rhs) const {

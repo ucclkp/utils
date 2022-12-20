@@ -78,7 +78,6 @@
 		67B85BEE24A609B9005C89A9 /* stream_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67B85BD424A609B8005C89A9 /* stream_utils.cpp */; };
 		67B85BEF24A609B9005C89A9 /* stream_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B85BD524A609B8005C89A9 /* stream_utils.h */; };
 		67B85BF024A609B9005C89A9 /* command_line.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B85BD724A609B8005C89A9 /* command_line.h */; };
-		67B85BF124A609B9005C89A9 /* executable.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B85BD824A609B8005C89A9 /* executable.h */; };
 		67B85BF324A609B9005C89A9 /* weak_bind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67B85BDC24A609B8005C89A9 /* weak_bind.hpp */; };
 		67B85BF424A609B9005C89A9 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67B85BDD24A609B8005C89A9 /* log.cpp */; };
 		67B85BF724A609B9005C89A9 /* stl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B85BE024A609B8005C89A9 /* stl_utils.h */; };
@@ -96,6 +95,7 @@
 		67B95E1324AA3C77005DD0AD /* message_queue.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B95E0924AA3C76005DD0AD /* message_queue.h */; };
 		67B95E1724AA3CF9005DD0AD /* message_pump_mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 67B95E1524AA3CF9005DD0AD /* message_pump_mac.mm */; };
 		67B95E1824AA3CF9005DD0AD /* message_pump_mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 67B95E1624AA3CF9005DD0AD /* message_pump_mac.h */; };
+		67C06E352951EF9300661108 /* executable.h in Headers */ = {isa = PBXBuildFile; fileRef = 67C06E342951EF9300661108 /* executable.h */; };
 		67D3ECA4294A3F2A0092D72C /* abnf.h in Headers */ = {isa = PBXBuildFile; fileRef = 67D3ECA2294A3F2A0092D72C /* abnf.h */; };
 		67D3ECA5294A3F2A0092D72C /* uri.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 67D3ECA3294A3F2A0092D72C /* uri.hpp */; };
 /* End PBXBuildFile section */
@@ -175,7 +175,6 @@
 		67B85BD424A609B8005C89A9 /* stream_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream_utils.cpp; sourceTree = "<group>"; };
 		67B85BD524A609B8005C89A9 /* stream_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stream_utils.h; sourceTree = "<group>"; };
 		67B85BD724A609B8005C89A9 /* command_line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = command_line.h; sourceTree = "<group>"; };
-		67B85BD824A609B8005C89A9 /* executable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = executable.h; sourceTree = "<group>"; };
 		67B85BDC24A609B8005C89A9 /* weak_bind.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = weak_bind.hpp; sourceTree = "<group>"; };
 		67B85BDD24A609B8005C89A9 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
 		67B85BE024A609B8005C89A9 /* stl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stl_utils.h; sourceTree = "<group>"; };
@@ -193,6 +192,7 @@
 		67B95E0924AA3C76005DD0AD /* message_queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_queue.h; sourceTree = "<group>"; };
 		67B95E1524AA3CF9005DD0AD /* message_pump_mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = message_pump_mac.mm; sourceTree = "<group>"; };
 		67B95E1624AA3CF9005DD0AD /* message_pump_mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = message_pump_mac.h; sourceTree = "<group>"; };
+		67C06E342951EF9300661108 /* executable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = executable.h; sourceTree = "<group>"; };
 		67D3ECA2294A3F2A0092D72C /* abnf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = abnf.h; sourceTree = "<group>"; };
 		67D3ECA3294A3F2A0092D72C /* uri.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = uri.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -343,7 +343,6 @@
 				6707D0922766361B00B19D0C /* define_utils.hpp */,
 				67B85BE424A609B8005C89A9 /* endian.hpp */,
 				67B85BE824A609B9005C89A9 /* event_handler.hpp */,
-				67B85BD824A609B8005C89A9 /* executable.h */,
 				6724E70324A8F318003FA2B2 /* files */,
 				6724E6DF24A8F200003FA2B2 /* json */,
 				67B85BDD24A609B8005C89A9 /* log.cpp */,
@@ -388,6 +387,7 @@
 			children = (
 				67B95E0724AA3C76005DD0AD /* cycler.cpp */,
 				67B95E0524AA3C76005DD0AD /* cycler.h */,
+				67C06E342951EF9300661108 /* executable.h */,
 				67B95E1424AA3CF9005DD0AD /* mac */,
 				677392632607575E00D03228 /* message_pump.cpp */,
 				677392642607575E00D03228 /* message_pump.h */,
@@ -449,7 +449,6 @@
 				6724E70024A8F2EB003FA2B2 /* optimization.hpp in Headers */,
 				6724E6FF24A8F2EB003FA2B2 /* dynamic_matrix.hpp in Headers */,
 				6707D0A72766366C00B19D0C /* test_collector.h in Headers */,
-				67B85BF124A609B9005C89A9 /* executable.h in Headers */,
 				671A1DDF27B7E88C007E823D /* string_utils.hpp in Headers */,
 				67B85BFE24A609B9005C89A9 /* event_handler.hpp in Headers */,
 				6707D0942766361C00B19D0C /* type_utils.hpp in Headers */,
@@ -486,6 +485,7 @@
 				671A1DD927B7E88C007E823D /* usformat_internal.hpp in Headers */,
 				6707D0A22766366C00B19D0C /* test_suite.h in Headers */,
 				67B85BF924A609B9005C89A9 /* platform_utils.h in Headers */,
+				67C06E352951EF9300661108 /* executable.h in Headers */,
 				67B85BFB24A609B9005C89A9 /* endian.hpp in Headers */,
 				6724E6F724A8F225003FA2B2 /* xml_structs.h in Headers */,
 				671A1DBD27B7E86F007E823D /* numbers.hpp in Headers */,

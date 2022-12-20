@@ -7,7 +7,7 @@
 #include "utils/message/message_pump.h"
 
 #include "utils/log.h"
-#include "utils/executable.h"
+#include "utils/message/executable.h"
 #include "utils/message/cycler.h"
 #include "utils/message/message.h"
 #include "utils/message/message_queue.h"
@@ -154,7 +154,7 @@ namespace utl {
             }
 
             if (msg->callback) {
-                msg->callback->run();
+                msg->callback->onExecTask(*msg);
             } else if (msg->func) {
                 msg->func();
             } else if (msg->target) {
@@ -176,7 +176,7 @@ namespace utl {
             }
 
             if (msg->callback) {
-                msg->callback->run();
+                msg->callback->onExecTask(*msg);
             } else if (msg->func) {
                 msg->func();
             } else if (msg->target) {

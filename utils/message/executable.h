@@ -4,19 +4,21 @@
 // This program is licensed under GPLv3 license that can be
 // found in the LICENSE file.
 
-#ifndef UTILS_EXECUTABLE_H_
-#define UTILS_EXECUTABLE_H_
+#ifndef UTILS_MESSAGE_EXECUTABLE_H_
+#define UTILS_MESSAGE_EXECUTABLE_H_
 
 
 namespace utl {
+
+    class Message;
 
     class Executable {
     public:
         virtual ~Executable() = default;
 
-        virtual void run() = 0;
+        virtual void onExecTask(const Message& msg) = 0;
     };
 
 }
 
-#endif  // UTILS_EXECUTABLE_H_
+#endif  // UTILS_MESSAGE_EXECUTABLE_H_

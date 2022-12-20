@@ -129,7 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="event_handler.hpp" />
-    <ClInclude Include="executable.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="platform_utils.h" />
     <ClInclude Include="stl_utils.h" />
@@ -292,6 +291,9 @@
     </ClInclude>
     <ClInclude Include="net\uri.hpp">
       <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="message\executable.h">
+      <Filter>message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
