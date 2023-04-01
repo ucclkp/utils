@@ -26,10 +26,23 @@ namespace internal {
     /**
      * 利用包展开生成重载函数列表。
      */
-    template <typename... Tys>
-    struct _var_func_overloads : _var_func<Tys>... {
-        using _var_func<Tys>::dummy...;
+#if (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)
+     template <typename... Tys>
+     struct _var_func_overloads : _var_func<Tys>... {
+         using _var_func<Tys>::dummy...;
+     };
+#else
+    template <typename Tys0, typename... Tys>
+    struct _var_func_overloads : _var_func<Tys0>, _var_func_overloads<Tys...> {
+        using _var_func<Tys0>::dummy;
+        using _var_func_overloads<Tys...>::dummy;
     };
+
+    template <typename Tys0>
+    struct _var_func_overloads<Tys0> : _var_func<Tys0> {
+        using _var_func<Tys0>::dummy;
+    };
+#endif
 
     template <typename Ta, typename... Tys>
     struct _var_find_type {

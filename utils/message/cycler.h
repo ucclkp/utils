@@ -8,6 +8,7 @@
 #define UTILS_MESSAGE_CYCLER_H_
 
 #include <functional>
+#include <memory>
 
 #include "utils/time_utils.h"
 
