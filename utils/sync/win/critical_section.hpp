@@ -7,6 +7,8 @@
 #ifndef UTILS_SYNC_WIN_CRITICAL_SECTION_HPP_
 #define UTILS_SYNC_WIN_CRITICAL_SECTION_HPP_
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 
 
