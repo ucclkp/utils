@@ -1074,7 +1074,7 @@ namespace internal {
             }
 
             auto num = ctoi(next);
-            if (num != uint_fast8_t(-1) && num >= 0 && num <= 9) {
+            if (num >= 0 && num <= 9) {
                 *width_mode = *width_mode * 10 + num;
             } else {
                 break;

@@ -1428,7 +1428,7 @@ namespace internal {
             }
 
             auto c = ctoi(*s);
-            if (c == uint_fast8_t(-1) || c >= bN) {
+            if (c >= bN) {
                 de = s;
                 break;
             }
@@ -1908,7 +1908,7 @@ namespace internal {
                 dig = s;
             } else {
                 auto c = ctoi(*s);
-                if (c == uint_fast8_t(-1) || c >= bN) {
+                if (c >= bN) {
                     break;
                 }
                 if (c != 0 && !sd) sd = s;
@@ -1944,7 +1944,7 @@ namespace internal {
         if (!bit_count) {
             for (; s < se; ++s) {
                 auto c = ctoi(*s);
-                if (c == uint_fast8_t(-1) || c >= bN) {
+                if (c >= bN) {
                     break;
                 }
             }

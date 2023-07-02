@@ -89,14 +89,13 @@ namespace internal {
         case Cy('W'): case Cy('w'): return 32; case Cy('X'): case Cy('x'): return 33;
         case Cy('Y'): case Cy('y'): return 34; case Cy('Z'): case Cy('z'): return 35;
 
-        default: return uint_fast8_t(-1);
+        default: return 255u;
         }
     }
 
     template <typename Cy>
     bool isdigit(Cy c, int radix) {
-        auto i = int(ctoi(c));
-        return i >= 0 && i < radix;
+        return ctoi(c) < radix;
     }
 
 
@@ -323,7 +322,7 @@ namespace internal {
         UTy result = 0;
         for (; s < se; ++s) {
             auto c = ctoi(*s);
-            if (c == uint8_t(-1) || c >= radix) {
+            if (c >= radix) {
                 break;
             }
 

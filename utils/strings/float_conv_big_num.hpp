@@ -469,7 +469,7 @@ namespace internal {
                 for (size_t j = 0; j < dig; ++j) {
                     if (_s < _se) {
                         auto c = ctoi(*_s);
-                        if (c == uint_fast8_t(-1) || c >= bN) {
+                        if (c >= bN) {
                             if (_s != s) {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
@@ -525,7 +525,7 @@ namespace internal {
                         }
 
                         auto c = ctoi(*_s);
-                        if (c == uint_fast8_t(-1) || c >= bN) {
+                        if (c >= bN) {
                             if (_s != s) {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
@@ -1055,7 +1055,7 @@ namespace internal {
                 UTy result = 0;
                 for (size_t j = sd; j < dig; ++j) {
                     auto c = ctoi(*_s);
-                    if (c == uint_fast8_t(-1) || c >= bN) {
+                    if (c >= bN) {
                         if (_s != s) {
                             *n = _s;
                             raw[i] = result * UCTraits::bpow(uint_fast8_t(dig - j));
@@ -1128,7 +1128,7 @@ namespace internal {
                         }
 
                         auto c = ctoi(*_s);
-                        if (c == uint_fast8_t(-1) || c >= bN) {
+                        if (c >= bN) {
                             if (_s != s) {
                                 *n = _s;
                                 raw[i] = result * UCTraits::bpow(uint_fast8_t(sd - j));
