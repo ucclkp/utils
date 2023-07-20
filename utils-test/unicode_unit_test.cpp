@@ -677,4 +677,88 @@ TEST_CASE(UnicodeUnitTest) {
         return true;
     };
 
+    TEST_DEF("UTF-8 substr") {
+        size_t sl = 1;
+        TEST_TRUE(utf8_substr(u8p("abc"), &sl));
+        TEST_E(sl, 1);
+
+        sl = 3;
+        TEST_TRUE(utf8_substr(u8p("abc"), &sl));
+        TEST_E(sl, 3);
+
+        sl = 4;
+        TEST_TRUE(utf8_substr(u8p("abc"), &sl));
+        TEST_E(sl, 3);
+
+        sl = 1;
+        TEST_TRUE(utf8_substr(u8p("我是谁"), &sl));
+        TEST_E(sl, 3);
+
+        sl = 2;
+        TEST_TRUE(utf8_substr(u8p("我是谁"), &sl));
+        TEST_E(sl, 6);
+
+        sl = 4;
+        TEST_TRUE(utf8_substr(u8p("我a是b谁"), &sl));
+        TEST_E(sl, 8);
+
+        return true;
+    };
+
+    TEST_DEF("UTF-16 substr") {
+        size_t sl = 1;
+        TEST_TRUE(utf16_substr(u"abc", &sl));
+        TEST_E(sl, 1);
+
+        sl = 3;
+        TEST_TRUE(utf16_substr(u"abc", &sl));
+        TEST_E(sl, 3);
+
+        sl = 4;
+        TEST_TRUE(utf16_substr(u"abc", &sl));
+        TEST_E(sl, 3);
+
+        sl = 1;
+        TEST_TRUE(utf16_substr(u"我是谁", &sl));
+        TEST_E(sl, 1);
+
+        sl = 2;
+        TEST_TRUE(utf16_substr(u"我是谁", &sl));
+        TEST_E(sl, 2);
+
+        sl = 4;
+        TEST_TRUE(utf16_substr(u"我a是b谁", &sl));
+        TEST_E(sl, 4);
+
+        return true;
+    };
+
+    TEST_DEF("UTF-32 substr") {
+        size_t sl = 1;
+        utf32_substr(U"abc", &sl);
+        TEST_E(sl, 1);
+
+        sl = 3;
+        utf32_substr(U"abc", &sl);
+        TEST_E(sl, 3);
+
+        sl = 4;
+        utf32_substr(U"abc", &sl);
+        TEST_E(sl, 3);
+
+        sl = 1;
+        utf32_substr(U"我是谁", &sl);
+        TEST_E(sl, 1);
+
+        sl = 2;
+        utf32_substr(U"我是谁", &sl);
+        TEST_E(sl, 2);
+
+        sl = 4;
+        utf32_substr(U"我a是b谁", &sl);
+        TEST_E(sl, 4);
+
+        return true;
+    };
+
 }

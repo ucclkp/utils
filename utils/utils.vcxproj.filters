@@ -126,6 +126,9 @@
     <ClCompile Include="strings\float_conv.cpp">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="strings\utfcc.c">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="event_handler.hpp" />
@@ -294,6 +297,9 @@
     </ClInclude>
     <ClInclude Include="message\executable.h">
       <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\utfcc.h">
+      <Filter>strings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

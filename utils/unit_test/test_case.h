@@ -35,16 +35,16 @@
 #define TEST_DEF(description)  \
     *this + TestFunction(description) + [this]() -> bool
 
-#define TEST_TRUE(a)   if (!(a)) return false;
-#define TEST_FALSE(a)  if ((a))  return false;
-#define TEST_E(a, b)   if ((a) != (b)) return false;
-#define TEST_G(a, b)   if ((a) <= (b)) return false;
-#define TEST_L(a, b)   if ((a) >= (b)) return false;
-#define TEST_GE(a, b)  if ((a) < (b))  return false;
-#define TEST_LE(a, b)  if ((a) > (b))  return false;
-#define TEST_NE(a, b)  if ((a) == (b)) return false;
-#define TEST_NUM_E(a, b)   if (!utl::is_num_equal(a, b)) return false;
-#define TEST_NUM_NE(a, b)  if (utl::is_num_equal(a, b))  return false;
+#define TEST_TRUE(a)   if (!(a)) return false
+#define TEST_FALSE(a)  if ((a))  return false
+#define TEST_E(a, b)   if ((a) != (b)) return false
+#define TEST_G(a, b)   if ((a) <= (b)) return false
+#define TEST_L(a, b)   if ((a) >= (b)) return false
+#define TEST_GE(a, b)  if ((a) < (b))  return false
+#define TEST_LE(a, b)  if ((a) > (b))  return false
+#define TEST_NE(a, b)  if ((a) == (b)) return false
+#define TEST_NUM_E(a, b)   if (!utl::is_num_equal(a, b)) return false
+#define TEST_NUM_NE(a, b)  if (utl::is_num_equal(a, b))  return false
 
 #define TEST_TRUE_BRK(a)   if (!(a)) {ubassert(false); return false;}
 #define TEST_FALSE_BRK(a)  if ((a))  {ubassert(false); return false;}

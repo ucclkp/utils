@@ -12,39 +12,11 @@
 #define IN_RANGE(var, min, max)  \
     (var) >= (min) && (var) <= (max)
 
-#define IF_IN_RANGE(var, min, max)  \
-    if (IN_RANGE(var, min, max)) {
-
-#define ELIF_IN_RANGE(var, min, max)  \
-    } else if (IN_RANGE(var, min, max)) {
-
-#define EQUAL(var, v)  \
-    (var) == (v)
-
-#define IF_EQUAL(var, v)  \
-    if (EQUAL(var, v)) {
-
-#define ELIF_EQUAL(var, v)  \
-    } else if (EQUAL(var, v)) {
-
-#define ELSE  \
-    } else {
-
-#define END_IF  \
-    }
-
-#define ELSE_RET_FALSE  \
-    ELSE return false; END_IF
-
 #define CHECK_LENGTH(l)  \
-    if (se - s < (l)) {  \
-        return false;  \
-    END_IF
+    if (se - s < (l)) { return false; }
 
 #define CHECK_IN_RANGE(var, min, max)  \
-    if (!(IN_RANGE(var, min, max))) {  \
-        return false;  \
-    END_IF
+    if (!(IN_RANGE(var, min, max))) { return false; }
 
 #define GET_BYTE(no)  \
     auto byte##no = static_cast<uint_fast8_t>(*(s + (no) - 1))
@@ -63,11 +35,46 @@
 
 namespace {
 
-    bool sv_to_utf8(uint_fast32_t sv, char buf[4], size_t* len) {
+    bool sv16_to_utf8(uint_fast16_t sv, char buf[4], size_t* len) {
+        if ((sv & 0xFF80) == 0) {
+            // 1 byte
+            if (buf && *len >= 1) {
+                buf[0] = (char)(sv & 0x7F);
+                *len = 1;
+            } else {
+                *len = 1;
+                return false;
+            }
+        } else if ((sv & 0xF800) == 0) {
+            // 2 byte
+            if (buf && *len >= 2) {
+                buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
+                buf[1] = (char)((sv & 0x3F) + 0x80);
+                *len = 2;
+            } else {
+                *len = 2;
+                return false;
+            }
+        } else {
+            // 3 byte
+            if (buf && *len >= 3) {
+                buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
+                buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+                buf[2] = (char)((sv & 0x3F) + 0x80);
+                *len = 3;
+            } else {
+                *len = 3;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool sv32_to_utf8(uint_fast32_t sv, char buf[4], size_t* len) {
         if ((sv & 0xFFFFFF80) == 0) {
             // 1 byte
             if (buf && *len >= 1) {
-                buf[0] = char(sv & 0x7F);
+                buf[0] = (char)(sv & 0x7F);
                 *len = 1;
             } else {
                 *len = 1;
@@ -76,8 +83,8 @@ namespace {
         } else if ((sv & 0xFFFFF800) == 0) {
             // 2 byte
             if (buf && *len >= 2) {
-                buf[0] = char(((sv & 0x7C0) >> 6) + 0xC0);
-                buf[1] = char((sv & 0x3F) + 0x80);
+                buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
+                buf[1] = (char)((sv & 0x3F) + 0x80);
                 *len = 2;
             } else {
                 *len = 2;
@@ -86,9 +93,9 @@ namespace {
         } else if ((sv & 0xFFFF0000) == 0) {
             // 3 byte
             if (buf && *len >= 3) {
-                buf[0] = char(((sv & 0xF000) >> 12) + 0xE0);
-                buf[1] = char(((sv & 0xFC0) >> 6) + 0x80);
-                buf[2] = char((sv & 0x3F) + 0x80);
+                buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
+                buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+                buf[2] = (char)((sv & 0x3F) + 0x80);
                 *len = 3;
             } else {
                 *len = 3;
@@ -97,10 +104,10 @@ namespace {
         } else {
             // 4 byte
             if (buf && *len >= 4) {
-                buf[0] = char(((sv & 0x1C0000) >> 18) + 0xF0);
-                buf[1] = char(((sv & 0x3F000) >> 12) + 0x80);
-                buf[2] = char(((sv & 0xFC0) >> 6) + 0x80);
-                buf[3] = char((sv & 0x3F) + 0x80);
+                buf[0] = (char)(((sv & 0x1C0000) >> 18) + 0xF0);
+                buf[1] = (char)(((sv & 0x3F000) >> 12) + 0x80);
+                buf[2] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+                buf[3] = (char)((sv & 0x3F) + 0x80);
                 *len = 4;
             } else {
                 *len = 4;
@@ -110,11 +117,85 @@ namespace {
         return true;
     }
 
-    bool sv_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t* len) {
+    inline size_t sv16_to_utf8_len(uint_fast16_t sv) {
+        if ((sv & 0xFF80) == 0) {
+            // 1 byte
+            return 1;
+        } else if ((sv & 0xF800) == 0) {
+            // 2 byte
+            return 2;
+        } else {
+            // 3 byte
+            return 3;
+        }
+    }
+
+    inline size_t sv16_to_utf8_ava(uint_fast16_t sv, char buf[3]) {
+        if ((sv & 0xFF80) == 0) {
+            // 1 byte
+            buf[0] = (char)(sv & 0x7F);
+            return 1;
+        } else if ((sv & 0xF800) == 0) {
+            // 2 byte
+            buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
+            buf[1] = (char)((sv & 0x3F) + 0x80);
+            return 2;
+        } else {
+            // 3 byte
+            buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
+            buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+            buf[2] = (char)((sv & 0x3F) + 0x80);
+            return 3;
+        }
+    }
+
+    inline size_t sv32_to_utf8_len(uint_fast32_t sv) {
+        if ((sv & 0xFFFFFF80) == 0) {
+            // 1 byte
+            return 1;
+        } else if ((sv & 0xFFFFF800) == 0) {
+            // 2 byte
+            return 2;
+        } else if ((sv & 0xFFFF0000) == 0) {
+            // 3 byte
+            return 3;
+        } else {
+            // 4 byte
+            return 4;
+        }
+    }
+
+    inline size_t sv32_to_utf8_ava(uint_fast32_t sv, char buf[4]) {
+        if ((sv & 0xFFFFFF80) == 0) {
+            // 1 byte
+            buf[0] = (char)(sv & 0x7F);
+            return 1;
+        } else if ((sv & 0xFFFFF800) == 0) {
+            // 2 byte
+            buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
+            buf[1] = (char)((sv & 0x3F) + 0x80);
+            return 2;
+        } else if ((sv & 0xFFFF0000) == 0) {
+            // 3 byte
+            buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
+            buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+            buf[2] = (char)((sv & 0x3F) + 0x80);
+            return 3;
+        } else {
+            // 4 byte
+            buf[0] = (char)(((sv & 0x1C0000) >> 18) + 0xF0);
+            buf[1] = (char)(((sv & 0x3F000) >> 12) + 0x80);
+            buf[2] = (char)(((sv & 0xFC0) >> 6) + 0x80);
+            buf[3] = (char)((sv & 0x3F) + 0x80);
+            return 4;
+        }
+    }
+
+    bool sv32_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t* len) {
         if ((sv & 0xFFFF0000) == 0) {
             // 1 word
             if (buf && *len >= 1) {
-                buf[0] = char16_t(sv & 0xFFFF);
+                buf[0] = (char16_t)(sv & 0xFFFF);
                 *len = 1;
             } else {
                 *len = 1;
@@ -123,10 +204,10 @@ namespace {
         } else {
             // 2 word
             if (buf && *len >= 2) {
-                buf[0] = char16_t(
+                buf[0] = (char16_t)(
                     ((sv & 0xFC00) >> 10) +
                     ((((sv & 0x1F0000) - 1) & 0xF0000) >> 10) + 0xD800);
-                buf[1] = char16_t((sv & 0x3FF) + 0xDC00);
+                buf[1] = (char16_t)((sv & 0x3FF) + 0xDC00);
                 *len = 2;
             } else {
                 *len = 2;
@@ -136,24 +217,43 @@ namespace {
         return true;
     }
 
-    uint_fast32_t sv8(uint_fast8_t byte) {
-        return byte;
+    inline size_t sv32_to_utf16_len(uint_fast32_t sv) {
+        if ((sv & 0xFFFF0000) == 0) {
+            // 1 word
+            return 1;
+        } else {
+            // 2 word
+            return 2;
+        }
     }
 
-    uint_fast32_t sv8(uint_fast8_t byte1, uint_fast8_t byte2) {
-        uint_fast32_t result = uint_fast32_t(byte1 & 0x1F) << 6;
-        result += (byte2 & 0x3F);
-        return result;
+    inline size_t sv32_to_utf16_ava(uint_fast32_t sv, char16_t buf[2]) {
+        if ((sv & 0xFFFF0000) == 0) {
+            // 1 word
+            buf[0] = (char16_t)sv;
+            return 1;
+        } else {
+            // 2 word
+            buf[0] = (char16_t)(
+                ((sv & 0xFC00) >> 10) +
+                ((((sv & 0x1F0000) - 1) & 0xF0000) >> 10) + 0xD800);
+            buf[1] = (char16_t)((sv & 0x3FF) + 0xDC00);
+            return 2;
+        }
     }
 
-    uint_fast32_t sv8(uint_fast8_t byte1, uint_fast8_t byte2, uint_fast8_t byte3) {
-        uint_fast32_t result = uint_fast32_t(byte1 & 0xF) << 12;
-        result += uint_fast32_t(byte2 & 0x3F) << 6;
+    inline uint_fast16_t sv8(uint_fast8_t byte1, uint_fast8_t byte2) {
+        return ((uint_fast16_t)(byte1 & 0x1F) << 6) + (byte2 & 0x3F);
+    }
+
+    inline uint_fast16_t sv8(uint_fast8_t byte1, uint_fast8_t byte2, uint_fast8_t byte3) {
+        uint_fast16_t result = (uint_fast16_t)(byte1 & 0xF) << 12;
+        result += (uint_fast16_t)(byte2 & 0x3F) << 6;
         result += (byte3 & 0x3F);
         return result;
     }
 
-    uint_fast32_t sv8(uint_fast8_t byte1, uint_fast8_t byte2, uint_fast8_t byte3, uint_fast8_t byte4) {
+    inline uint_fast32_t sv8(uint_fast8_t byte1, uint_fast8_t byte2, uint_fast8_t byte3, uint_fast8_t byte4) {
         uint_fast32_t result = uint_fast32_t(byte1 & 0x7) << 18;
         result += uint_fast32_t(byte2 & 0x3F) << 12;
         result += uint_fast32_t(byte3 & 0x3F) << 6;
@@ -161,94 +261,92 @@ namespace {
         return result;
     }
 
-    uint_fast32_t sv16(uint_fast16_t word) {
-        return word;
-    }
-
-    uint_fast32_t sv16(uint_fast16_t word1, uint_fast16_t word2) {
-        uint_fast32_t result = uint_fast32_t((word1 & 0x3C0) + 0x40) << 10;
-        result += uint_fast32_t(word1 & 0x3F) << 10;
-        result += (word2 & 0x3FF);
-        return result;
+    inline uint_fast32_t sv16(uint_fast16_t word1, uint_fast16_t word2) {
+        return (uint_fast32_t((word1 & 0x3C0) + 0x40) << 10)
+            + (uint_fast32_t(word1 & 0x3F) << 10)
+            + (word2 & 0x3FF);
     }
 
     template <typename Cy>
-    bool nextsv8(const Cy*& s, const Cy* se, uint_fast32_t* sv) {
+    bool nextsv8_ava(const Cy*& s, const Cy* se, uint_fast32_t* sv) {
         GET_BYTE(1);
-        IF_IN_RANGE(byte1, 0x00, 0x7F)   // 1 byte
-            if (sv) *sv = sv8(byte1);
-        ++s;
-        ELIF_IN_RANGE(byte1, 0xC2, 0xDF) // 2 byte
-            CHECK_LENGTH(2)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2);
-        s += 2;
-        ELIF_EQUAL(byte1, 0xE0)          // 3 byte
-            CHECK_LENGTH(3)
-            GET_BYTE_AND_CHECK_RANGE(2, 0xA0, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3);
-        s += 3;
-        ELIF_IN_RANGE(byte1, 0xE1, 0xEC) // 3 byte
-            CHECK_LENGTH(3)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3);
-        s += 3;
-        ELIF_EQUAL(byte1, 0xED)          // 3 byte
-            CHECK_LENGTH(3)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0x9F)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3);
-        s += 3;
-        ELIF_IN_RANGE(byte1, 0xEE, 0xEF) // 3 byte
-            CHECK_LENGTH(3)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3);
-        s += 3;
-        ELIF_EQUAL(byte1, 0xF0)          // 4 byte
-            CHECK_LENGTH(4)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x90, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(4, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3, byte4);
-        s += 4;
-        ELIF_IN_RANGE(byte1, 0xF1, 0xF3) // 4 byte
-            CHECK_LENGTH(4)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(4, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3, byte4);
-        s += 4;
-        ELIF_EQUAL(byte1, 0xF4)          // 4 byte
-            CHECK_LENGTH(4)
-            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0x8F)
-            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF)
-            GET_BYTE_AND_CHECK_RANGE(4, 0x80, 0xBF)
-            if (sv) *sv = sv8(byte1, byte2, byte3, byte4);
-        s += 4;
-        ELSE_RET_FALSE
+        if (IN_RANGE(byte1, 0x00, 0x7F)) {   // 1 byte
+            *sv = byte1;
+            ++s;
+        } else if (IN_RANGE(byte1, 0xC2, 0xDF)) { // 2 byte
+            CHECK_LENGTH(2);
+            GET_BYTE_AND_CHECK_RANGE(2, 0x80, 0xBF);
+            *sv = sv8(byte1, byte2);
+            s += 2;
+        } else if (IN_RANGE(byte1, 0xE0, 0xEF)) { // 3 byte
+            CHECK_LENGTH(3);
+            GET_BYTE_AND_CHECK_RANGE(2,
+                0x80u + ((uint_fast8_t)(byte1 == 0xE0u) << 5u),  // byte1 == 0xE0 ? 0xA0 : 0x80
+                0x9Fu + ((uint_fast8_t)(byte1 != 0xEDu) << 5u)); // byte1 == 0xED ? 0x9F : 0xBF
+            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF);
+            *sv = sv8(byte1, byte2, byte3);
+            s += 3;
+        } else if (IN_RANGE(byte1, 0xF0, 0xF4)) { // 4 byte
+            CHECK_LENGTH(4);
+            GET_BYTE_AND_CHECK_RANGE(2,
+                0x80u + ((uint_fast8_t)(byte1 == 0xF0u) << 4u),        // byte1 == 0xF0 ? 0x90 : 0x80
+                0x8Fu + (((uint_fast8_t)(byte1 != 0xF4u) * 3) << 4u)); // byte1 == 0xF4 ? 0x8F : 0xBF
+            GET_BYTE_AND_CHECK_RANGE(3, 0x80, 0xBF);
+            GET_BYTE_AND_CHECK_RANGE(4, 0x80, 0xBF);
+            *sv = sv8(byte1, byte2, byte3, byte4);
+            s += 4;
+        } else {
+            return false;
+        }
 
         return true;
     }
 
     template <typename Cy>
-    bool nextsv16(const Cy*& s, const Cy* se, uint_fast32_t* sv) {
-        GET_WORD(1);
-        IF_IN_RANGE(word1, 0x0000, 0xD7FF)   // 1 word
-            if (sv) *sv = sv16(word1);
-        ++s;
-        ELIF_IN_RANGE(word1, 0xE000, 0xFFFF) // 1 word
-            if (sv) *sv = sv16(word1);
-        ++s;
-        ELSE                                 // 2 word
-            CHECK_LENGTH(2)
-            GET_WORD(2);
-            if (sv) *sv = sv16(word1, word2);
+    bool nextsv8_adv(const Cy*& s, const Cy* se) {
+        GET_BYTE(1);
+        if (IN_RANGE(byte1, 0x00, 0x7F)) {   // 1 byte
+            ++s;
+        } else if (IN_RANGE(byte1, 0xC2, 0xDF)) { // 2 byte
+            CHECK_LENGTH(2);
             s += 2;
-        END_IF
+        } else if (IN_RANGE(byte1, 0xE0, 0xEF)) { // 3 byte
+            CHECK_LENGTH(3);
+            s += 3;
+        } else if (IN_RANGE(byte1, 0xF0, 0xF4)) { // 4 byte
+            CHECK_LENGTH(4);
+            s += 4;
+        } else {
+            return false;
+        }
 
+        return true;
+    }
+
+    template <typename Cy>
+    bool nextsv16_ava(const Cy*& s, const Cy* se, uint_fast32_t* sv) {
+        GET_WORD(1);
+        if (IS_SURROGATES(word1)) { // 2 word
+            CHECK_LENGTH(2);
+            GET_WORD(2);
+            *sv = sv16(word1, word2);
+            s += 2;
+        } else {                    // 1 word
+            *sv = word1;
+            ++s;
+        }
+        return true;
+    }
+
+    template <typename Cy>
+    bool nextsv16_adv(const Cy*& s, const Cy* se) {
+        GET_WORD(1);
+        if (IS_SURROGATES(word1)) { // 2 word
+            CHECK_LENGTH(2);
+            s += 2;
+        } else {                    // 1 word
+            ++s;
+        }
         return true;
     }
 
@@ -257,7 +355,9 @@ namespace {
 namespace utl {
 
     bool utf8_substr(const char* src, size_t len, size_t* sub_len) {
-        if (*sub_len >= len) {
+        assert(src && sub_len);
+        size_t hc = *sub_len;
+        if (hc >= len) {
             *sub_len = len;
             return true;
         }
@@ -265,16 +365,13 @@ namespace utl {
         auto s = src;
         auto se = s + len;
 
-        for (size_t i = 0; i < *sub_len; ++i) {
-            if (s >= se) {
-                return false;
-            }
-            if (!nextsv8(s, se, nullptr)) {
+        for (size_t i = 0; i < hc && s < se; ++i) {
+            if (!nextsv8_adv(s, se)) {
                 return false;
             }
         }
 
-        *sub_len = size_t(s - src);
+        *sub_len = (size_t)(s - src);
         return true;
     }
 
@@ -283,7 +380,9 @@ namespace utl {
     }
 
     bool utf16_substr(const char16_t* src, size_t len, size_t* sub_len) {
-        if (*sub_len >= len) {
+        assert(src && sub_len);
+        size_t hc = *sub_len;
+        if (hc >= len) {
             *sub_len = len;
             return true;
         }
@@ -291,16 +390,14 @@ namespace utl {
         auto s = src;
         auto se = s + len;
 
-        for (size_t i = 0; i < *sub_len; ++i) {
-            if (s >= se) {
-                return false;
-            }
-            if (!nextsv16(s, se, nullptr)) {
-                return false;
+        for (size_t i = 0; i < hc && s < se; ++i) {
+            if (IS_SURROGATES(*s++)) {
+                if (s >= se) return false;
+                ++s;
             }
         }
 
-        *sub_len = size_t(s - src);
+        *sub_len = (size_t)(s - src);
         return true;
     }
 
@@ -309,6 +406,7 @@ namespace utl {
     }
 
     void utf32_substr(const char32_t* src, size_t len, size_t* sub_len) {
+        assert(src && sub_len);
         if (*sub_len >= len) {
             *sub_len = len;
         }
@@ -319,8 +417,11 @@ namespace utl {
     }
 
     bool wchar_substr(const wchar_t* src, size_t len, size_t* sub_len) {
+        assert(src && sub_len);
+
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            if (*sub_len >= len) {
+            size_t hc = *sub_len;
+            if (hc >= len) {
                 *sub_len = len;
                 return true;
             }
@@ -328,16 +429,14 @@ namespace utl {
             auto s = src;
             auto se = s + len;
 
-            for (size_t i = 0; i < *sub_len; ++i) {
-                if (s >= se) {
-                    return false;
-                }
-                if (!nextsv16(s, se, nullptr)) {
-                    return false;
+            for (size_t i = 0; i < hc && s < se; ++i) {
+                if (IS_SURROGATES(*s++)) {
+                    if (s >= se) return false;
+                    ++s;
                 }
             }
 
-            *sub_len = size_t(s - src);
+            *sub_len = (size_t)(s - src);
             return true;
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             if (*sub_len >= len) {
@@ -366,10 +465,7 @@ namespace utl {
     int utf8_to_utf16(
         const char* src, size_t len, char16_t* buf, size_t* buf_len)
     {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -380,13 +476,12 @@ namespace utl {
 
         uint_fast32_t scalar_value;
         while (s < se) {
-            if (!nextsv8(s, se, &scalar_value)) {
+            if (!nextsv8_ava(s, se, &scalar_value)) {
                 return SCR_FAIL;
             }
 
             char16_t _buf[2];
-            size_t count = 2;
-            sv_to_utf16(scalar_value, _buf, &count);
+            size_t count = sv32_to_utf16_ava(scalar_value, _buf);
 
             if (s16) {
                 for (size_t i = 0; i < count && s16 < s16e; ++i) {
@@ -405,29 +500,25 @@ namespace utl {
     }
 
     bool utf8_to_utf16(const char* src, size_t len, std::u16string* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
 
         uint_fast32_t scalar_value;
-        std::u16string utf16_string;
+        std::u16string u16str;
 
         while (s < se) {
-            if (!nextsv8(s, se, &scalar_value)) {
+            if (!nextsv8_ava(s, se, &scalar_value)) {
                 return false;
             }
 
             char16_t buf[2];
-            size_t count = 2;
-            sv_to_utf16(scalar_value, buf, &count);
-            utf16_string.append(buf, count);
+            size_t count = sv32_to_utf16_ava(scalar_value, buf);
+            u16str.append(buf, count);
         }
 
-        *dst = std::move(utf16_string);
+        *dst = std::move(u16str);
         return true;
     }
 
@@ -447,10 +538,7 @@ namespace utl {
     int utf8_to_utf32(
         const char* src, size_t len, char32_t* buf, size_t* buf_len)
     {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -461,7 +549,7 @@ namespace utl {
 
         uint_fast32_t scalar_value;
         while (s < se) {
-            if (!nextsv8(s, se, &scalar_value)) {
+            if (!nextsv8_ava(s, se, &scalar_value)) {
                 return SCR_FAIL;
             }
 
@@ -480,27 +568,23 @@ namespace utl {
     }
 
     bool utf8_to_utf32(const char* src, size_t len, std::u32string* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
 
         uint_fast32_t scalar_value;
-        std::u16string utf16_string;
-        std::u32string utf32_string;
+        std::u32string u32str;
 
         while (s < se) {
-            if (!nextsv8(s, se, &scalar_value)) {
+            if (!nextsv8_ava(s, se, &scalar_value)) {
                 return false;
             }
 
-            utf32_string.push_back(scalar_value);
+            u32str.push_back(scalar_value);
         }
 
-        *dst = std::move(utf32_string);
+        *dst = std::move(u32str);
         return true;
     }
 
@@ -513,14 +597,11 @@ namespace utl {
         if (IS_SURROGATES(ch)) {
             return false;
         }
-        return sv_to_utf8((uint_fast32_t)ch, dst, len);
+        return sv16_to_utf8((uint_fast32_t)ch, dst, len);
     }
 
     int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -531,13 +612,12 @@ namespace utl {
 
         uint_fast32_t scalar_value;
         while (s < se) {
-            if (!nextsv16(s, se, &scalar_value)) {
+            if (!nextsv16_ava(s, se, &scalar_value)) {
                 return SCR_FAIL;
             }
 
             char _buf[4];
-            size_t count = 4;
-            sv_to_utf8(scalar_value, _buf, &count);
+            size_t count = sv32_to_utf8_ava(scalar_value, _buf);
 
             if (s8) {
                 for (size_t i = 0; i < count && s8 < s8e; ++i) {
@@ -556,29 +636,25 @@ namespace utl {
     }
 
     bool utf16_to_utf8(const char16_t* src, size_t len, std::string* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
 
         uint_fast32_t scalar_value;
-        std::string utf8_string;
+        std::string u8str;
 
         while (s < se) {
-            if (!nextsv16(s, se, &scalar_value)) {
+            if (!nextsv16_ava(s, se, &scalar_value)) {
                 return false;
             }
 
             char buf[4];
-            size_t count = 4;
-            sv_to_utf8(scalar_value, buf, &count);
-            utf8_string.append(buf, count);
+            size_t count = sv32_to_utf8_ava(scalar_value, buf);
+            u8str.append(buf, count);
         }
 
-        *dst = std::move(utf8_string);
+        *dst = std::move(u8str);
         return true;
     }
 
@@ -596,10 +672,7 @@ namespace utl {
     }
 
     int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -610,7 +683,7 @@ namespace utl {
 
         uint_fast32_t scalar_value;
         while (s < se) {
-            if (!nextsv16(s, se, &scalar_value)) {
+            if (!nextsv16_ava(s, se, &scalar_value)) {
                 return SCR_FAIL;
             }
 
@@ -629,26 +702,23 @@ namespace utl {
     }
 
     bool utf16_to_utf32(const char16_t* src, size_t len, std::u32string* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
 
         uint_fast32_t scalar_value;
-        std::u32string utf32_string;
+        std::u32string u32str;
 
         while (s < se) {
-            if (!nextsv16(s, se, &scalar_value)) {
+            if (!nextsv16_ava(s, se, &scalar_value)) {
                 return false;
             }
 
-            utf32_string.push_back(scalar_value);
+            u32str.push_back(scalar_value);
         }
 
-        *dst = std::move(utf32_string);
+        *dst = std::move(u32str);
         return true;
     }
 
@@ -658,14 +728,11 @@ namespace utl {
 
 
     bool utf32_to_utf8(char32_t ch, char* dst, size_t* len) {
-        return sv_to_utf8((uint_fast32_t)ch, dst, len);
+        return sv32_to_utf8((uint_fast32_t)ch, dst, len);
     }
 
     bool utf32_to_utf8(const char32_t* src, size_t len, char* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return true;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -677,8 +744,7 @@ namespace utl {
         char _buf[4];
         size_t count;
         for (; s < se; ++s) {
-            count = 4;
-            sv_to_utf8(*s, _buf, &count);
+            count = sv32_to_utf8_ava(*s, _buf);
             if (s8) {
                 for (size_t i = 0; i < count && s8 < s8e; ++i) {
                     *s8++ = _buf[i];
@@ -696,21 +762,20 @@ namespace utl {
     }
 
     void utf32_to_utf8(const char32_t* src, size_t len, std::string* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::string u8str;
 
         char buf[4];
         size_t count;
         for (; s < se; ++s) {
-            count = 4;
-            sv_to_utf8(*s, buf, &count);
-            dst->append(buf, count);
+            count = sv32_to_utf8_ava(*s, buf);
+            u8str.append(buf, count);
         }
+
+        *dst = std::move(u8str);
     }
 
     void utf32_to_utf8(const std::u32string_view& sv, std::string* dst) {
@@ -719,14 +784,11 @@ namespace utl {
 
 
     bool utf32_to_utf16(char32_t ch, char16_t* dst, size_t* len) {
-        return sv_to_utf16((uint_fast32_t)ch, dst, len);
+        return sv32_to_utf16((uint_fast32_t)ch, dst, len);
     }
 
     bool utf32_to_utf16(const char32_t* src, size_t len, char16_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return true;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -738,8 +800,7 @@ namespace utl {
         char16_t _buf[2];
         size_t count;
         for (; s < se; ++s) {
-            count = 2;
-            sv_to_utf16(*s, _buf, &count);
+            count = sv32_to_utf16_ava(*s, _buf);
             if (s16) {
                 for (size_t i = 0; i < count && s16 < s16e; ++i) {
                     *s16++ = _buf[i];
@@ -757,21 +818,19 @@ namespace utl {
     }
 
     void utf32_to_utf16(const char32_t* src, size_t len, std::u16string* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::u16string u16s;
 
         char16_t buf[2];
         size_t count;
         for (; s < se; ++s) {
-            count = 2;
-            sv_to_utf16(*s, buf, &count);
-            dst->append(buf, count);
+            count = sv32_to_utf16_ava(*s, buf);
+            u16s.append(buf, count);
         }
+        *dst = std::move(u16s);
     }
 
     void utf32_to_utf16(const std::u32string_view& sv, std::u16string* dst) {
@@ -781,14 +840,10 @@ namespace utl {
 
     int wchar_to_utf8(wchar_t ch, char* dst, size_t* len) {
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            if ((/*ch >= 0x0000 &&*/ ch <= 0xD7FF) ||
-                (ch >= 0xE000 && ch <= 0xFFFF))
-            {
-                return sv_to_utf8((uint_fast32_t)ch, dst, len) ? SCR_OK : SCR_BUF;
-            }
-            return SCR_FAIL;
+            if (IS_SURROGATES(ch)) return SCR_FAIL;
+            return sv16_to_utf8((uint_fast16_t)ch, dst, len) ? SCR_OK : SCR_BUF;
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
-            return sv_to_utf8((uint_fast32_t)ch, dst, len) ? SCR_OK : SCR_BUF;
+            return sv32_to_utf8((uint_fast32_t)ch, dst, len) ? SCR_OK : SCR_BUF;
         } else {
             assert(false);
             return SCR_FAIL;
@@ -796,10 +851,7 @@ namespace utl {
     }
 
     int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -811,13 +863,12 @@ namespace utl {
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             uint_fast32_t scalar_value;
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
+                if (!nextsv16_ava(s, se, &scalar_value)) {
                     return SCR_FAIL;
                 }
 
                 char _buf[4];
-                size_t count = 4;
-                sv_to_utf8(scalar_value, _buf, &count);
+                size_t count = sv32_to_utf8_ava(scalar_value, _buf);
 
                 if (s8) {
                     for (size_t i = 0; i < count && s8 < s8e; ++i) {
@@ -830,8 +881,7 @@ namespace utl {
             char _buf[4];
             size_t count;
             for (; s < se; ++s) {
-                count = 4;
-                sv_to_utf8(*s, _buf, &count);
+                count = sv32_to_utf8_ava(*s, _buf);
                 if (s8) {
                     for (size_t i = 0; i < count && s8 < s8e; ++i) {
                         *s8++ = _buf[i];
@@ -853,38 +903,38 @@ namespace utl {
     }
 
     bool wchar_to_utf8(const wchar_t* src, size_t len, std::string* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::string u8s;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            uint_fast32_t scalar_value;
-            std::string utf8_string;
+            char buf[4];
+            size_t count;
 
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
-                    return false;
+                auto ch = *s++;
+                if (IS_SURROGATES(ch)) {
+                    // 2 word
+                    if (s >= se) return false;
+                    count = sv32_to_utf8_ava(sv16(ch, *s++), buf);
+                } else {
+                    // 1 word
+                    count = sv16_to_utf8_ava(ch, buf);
                 }
-
-                char buf[4];
-                size_t count = 4;
-                sv_to_utf8(scalar_value, buf, &count);
-                utf8_string.append(buf, count);
+                u8s.append(buf, count);
             }
 
-            *dst = std::move(utf8_string);
+            *dst = std::move(u8s);
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             char buf[4];
             size_t count;
             for (; s < se; ++s) {
-                count = 4;
-                sv_to_utf8(*s, buf, &count);
-                dst->append(buf, count);
+                count = sv32_to_utf8_ava(*s, buf);
+                u8s.append(buf, count);
             }
+            *dst = std::move(u8s);
         } else {
             assert(false);
             return false;
@@ -898,6 +948,8 @@ namespace utl {
 
 
     int wchar_to_utf16(wchar_t ch, char16_t* dst, size_t* len) {
+        assert(len);
+
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             if (dst && *len >= 1) {
                 *dst = (char16_t)ch;
@@ -907,7 +959,7 @@ namespace utl {
             *len = 1;
             return SCR_BUF;
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
-            return sv_to_utf16((uint_fast32_t)ch, dst, len) ? SCR_OK : SCR_BUF;
+            return sv32_to_utf16((uint_fast32_t)ch, dst, len) ? SCR_OK : SCR_BUF;
         } else {
             assert(false);
             return SCR_FAIL;
@@ -915,10 +967,7 @@ namespace utl {
     }
 
     int wchar_to_utf16(const wchar_t* src, size_t len, char16_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -938,8 +987,7 @@ namespace utl {
             char16_t _buf[2];
             size_t count;
             for (; s < se; ++s) {
-                count = 2;
-                sv_to_utf16(*s, _buf, &count);
+                count = sv32_to_utf16_ava(*s, _buf);
                 if (s16) {
                     for (size_t i = 0; i < count && s16 < s16e; ++i, ++s16) {
                         *s16 = _buf[i];
@@ -961,27 +1009,26 @@ namespace utl {
     }
 
     bool wchar_to_utf16(const wchar_t* src, size_t len, std::u16string* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::u16string out;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            dst->resize(len);
+            out.resize(len);
             for (size_t i = 0; i < len; ++i) {
-                (*dst)[i] = (char16_t)*s++;
+                out[i] = (char16_t)*s++;
             }
+            *dst = std::move(out);
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             char16_t buf[2];
             size_t count;
             for (; s < se; ++s) {
-                count = 2;
-                sv_to_utf16(*s, buf, &count);
-                dst->append(buf, count);
+                count = sv32_to_utf16_ava(*s, buf);
+                out.append(buf, count);
             }
+            *dst = std::move(out);
         } else {
             assert(false);
             return false;
@@ -995,10 +1042,10 @@ namespace utl {
 
 
     bool wchar_to_utf32(wchar_t ch, char32_t* out) {
+        assert(out);
+
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            if ((/*ch >= 0x0000 &&*/ ch <= 0xD7FF) ||
-                (ch >= 0xE000 && ch <= 0xFFFF))
-            {
+            if (!IS_SURROGATES(ch)) {
                 *out = ch;
                 return true;
             }
@@ -1013,10 +1060,7 @@ namespace utl {
     }
 
     int wchar_to_utf32(const wchar_t* src, size_t len, char32_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -1028,7 +1072,7 @@ namespace utl {
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             uint_fast32_t scalar_value;
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
+                if (!nextsv16_ava(s, se, &scalar_value)) {
                     return SCR_FAIL;
                 }
 
@@ -1058,38 +1102,31 @@ namespace utl {
     }
 
     bool wchar_to_utf32(const wchar_t* src, size_t len, std::u32string* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::u32string out;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             uint_fast32_t scalar_value;
-            std::string utf8_string;
-            std::u32string utf32_string;
-
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
+                if (!nextsv16_ava(s, se, &scalar_value)) {
                     return false;
                 }
-
-                utf32_string.push_back(scalar_value);
+                out.push_back(scalar_value);
             }
-
-            *dst = std::move(utf32_string);
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
-            dst->resize(len);
+            out.resize(len);
             for (size_t i = 0; i < len; ++i) {
-                (*dst)[i] = *s++;
+                out[i] = *s++;
             }
         } else {
             assert(false);
             return false;
         }
 
+        *dst = std::move(out);
         return true;
     }
 
@@ -1111,10 +1148,7 @@ namespace utl {
     }
 
     int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -1126,13 +1160,12 @@ namespace utl {
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             uint_fast32_t scalar_value;
             while (s < se) {
-                if (!nextsv8(s, se, &scalar_value)) {
+                if (!nextsv8_ava(s, se, &scalar_value)) {
                     return SCR_FAIL;
                 }
 
                 char16_t _buf[2];
-                size_t count = 2;
-                sv_to_utf16(scalar_value, _buf, &count);
+                size_t count = sv32_to_utf16_ava(scalar_value, _buf);
 
                 if (sw) {
                     for (size_t i = 0; i < count && sw < swe; ++i) {
@@ -1144,7 +1177,7 @@ namespace utl {
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             uint_fast32_t scalar_value;
             while (s < se) {
-                if (!nextsv8(s, se, &scalar_value)) {
+                if (!nextsv8_ava(s, se, &scalar_value)) {
                     return SCR_FAIL;
                 }
 
@@ -1167,49 +1200,38 @@ namespace utl {
     }
 
     bool utf8_to_wchar(const char* src, size_t len, std::wstring* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
-
         uint_fast32_t scalar_value;
+        std::wstring out;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            std::wstring w16_string;
-
             while (s < se) {
-                if (!nextsv8(s, se, &scalar_value)) {
+                if (!nextsv8_ava(s, se, &scalar_value)) {
                     return false;
                 }
 
                 char16_t buf[2];
-                size_t count = 2;
-                sv_to_utf16(scalar_value, buf, &count);
+                size_t count = sv32_to_utf16_ava(scalar_value, buf);
                 for (size_t i = 0; i < count; ++i) {
-                    w16_string.push_back(buf[i]);
+                    out.push_back(buf[i]);
                 }
             }
-
-            *dst = std::move(w16_string);
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
-            std::wstring w32_string;
-
             while (s < se) {
-                if (!nextsv8(s, se, &scalar_value)) {
+                if (!nextsv8_ava(s, se, &scalar_value)) {
                     return false;
                 }
-                w32_string.push_back(scalar_value);
+                out.push_back(scalar_value);
             }
-
-            *dst = std::move(w32_string);
         } else {
             assert(false);
             return false;
         }
 
+        *dst = std::move(out);
         return true;
     }
 
@@ -1232,10 +1254,7 @@ namespace utl {
     }
 
     int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -1254,7 +1273,7 @@ namespace utl {
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             uint_fast32_t scalar_value;
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
+                if (!nextsv16_ava(s, se, &scalar_value)) {
                     return SCR_FAIL;
                 }
 
@@ -1277,36 +1296,31 @@ namespace utl {
     }
 
     bool utf16_to_wchar(const char16_t* src, size_t len, std::wstring* dst) {
-        if (!len || !src) {
-            dst->clear();
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::wstring out;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
-            dst->resize(len);
+            out.resize(len);
             for (size_t i = 0; i < len; ++i) {
-                (*dst)[i] = *s++;
+                out[i] = *s++;
             }
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
             uint_fast32_t scalar_value;
-            std::wstring w32_string;
-
             while (s < se) {
-                if (!nextsv16(s, se, &scalar_value)) {
+                if (!nextsv16_ava(s, se, &scalar_value)) {
                     return false;
                 }
-                w32_string.push_back(scalar_value);
+                out.push_back(scalar_value);
             }
-
-            *dst = std::move(w32_string);
         } else {
             assert(false);
             return false;
         }
 
+        *dst = std::move(out);
         return true;
     }
 
@@ -1316,10 +1330,12 @@ namespace utl {
 
 
     int utf32_to_wchar(char32_t ch, wchar_t* dst, size_t* len) {
+        assert(len);
+
         bool is_ok = true;
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             char16_t buf[2];
-            if (!sv_to_utf16((uint_fast32_t)ch, dst ? buf : nullptr, len)) {
+            if (!sv32_to_utf16((uint_fast32_t)ch, dst ? buf : nullptr, len)) {
                 return SCR_BUF;
             }
             if (dst) {
@@ -1344,10 +1360,7 @@ namespace utl {
     }
 
     int utf32_to_wchar(const char32_t* src, size_t len, wchar_t* buf, size_t* buf_len) {
-        if (!len || !src) {
-            *buf_len = 0;
-            return SCR_OK;
-        }
+        assert(src && buf_len);
 
         auto s = src;
         auto se = s + len;
@@ -1360,8 +1373,7 @@ namespace utl {
             char16_t _buf[2];
             size_t count;
             for (; s < se; ++s) {
-                count = 2;
-                sv_to_utf16(*s, _buf, &count);
+                count = sv32_to_utf16_ava(*s, _buf);
                 if (sw) {
                     for (size_t i = 0; i < count && sw < swe; ++i) {
                         *sw++ = (wchar_t)_buf[i];
@@ -1390,34 +1402,32 @@ namespace utl {
     }
 
     bool utf32_to_wchar(const char32_t* src, size_t len, std::wstring* dst) {
-        dst->clear();
-        if (!len || !src) {
-            return true;
-        }
+        assert(src && dst);
 
         auto s = src;
         auto se = s + len;
+        std::wstring out;
 
         if (sizeof(wchar_t) * CHAR_BIT == 16u) {
             char16_t buf[2];
             size_t count;
             for (; s < se; ++s) {
-                count = 2;
-                sv_to_utf16(*s, buf, &count);
+                count = sv32_to_utf16_ava(*s, buf);
                 for (size_t i = 0; i < count; ++i) {
-                    dst->push_back((wchar_t)buf[i]);
+                    out.push_back((wchar_t)buf[i]);
                 }
             }
         } else if (sizeof(wchar_t) * CHAR_BIT == 32u) {
-            dst->resize(len);
+            out.resize(len);
             for (size_t i = 0; i < len; ++i) {
-                (*dst)[i] = (wchar_t)*s++;
+                out[i] = (wchar_t)*s++;
             }
         } else {
             assert(false);
             return false;
         }
 
+        *dst = std::move(out);
         return true;
     }
 

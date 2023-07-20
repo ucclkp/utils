@@ -192,6 +192,7 @@
     <ClCompile Include="stl_utils.cpp" />
     <ClCompile Include="stream_utils.cpp" />
     <ClCompile Include="strings\float_conv.cpp" />
+    <ClCompile Include="strings\utfcc.c" />
     <ClCompile Include="strings\unicode_conv.cpp" />
     <ClCompile Include="strings\usformat.cpp" />
     <ClCompile Include="strings\usprintf.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="strings\string_utils_internal.hpp" />
     <ClInclude Include="strings\string_utils_types.hpp" />
     <ClInclude Include="strings\uint_exp.hpp" />
+    <ClInclude Include="strings\utfcc.h" />
     <ClInclude Include="strings\unicode_conv.h" />
     <ClInclude Include="strings\usformat.h" />
     <ClInclude Include="strings\usformat_any_internal.hpp" />
