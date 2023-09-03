@@ -18,23 +18,26 @@ namespace utl {
 
     Cycler::Cycler()
         : pump_(MessagePump::getCurrent()),
-          listener_(nullptr) {
-    }
+          listener_(nullptr),
+          clear_when_destroy_(true) {}
 
     Cycler::Cycler(const std::weak_ptr<MessagePump>& pump)
         : pump_(pump),
-          listener_(nullptr) {
-    }
+          listener_(nullptr),
+          clear_when_destroy_(true) {}
 
     Cycler::~Cycler() {
-        auto ptr = pump_.lock();
-        if (ptr) {
-            ptr->getQueue()->remove(this);
+        if (clear_when_destroy_.load(std::memory_order_relaxed)) {
+            clear();
         }
     }
 
     void Cycler::setListener(CyclerListener* l) {
         listener_ = l;
+    }
+
+    void Cycler::setClearWhenDestroy(bool val) {
+        clear_when_destroy_.store(val, std::memory_order_relaxed);
     }
 
     void Cycler::post(Executable* exec, int id) {
@@ -95,6 +98,13 @@ namespace utl {
     void Cycler::postAtTime(Message* msg, nsp at_time) {
         msg->time_ns = at_time.count();
         enqueueMessage(msg);
+    }
+
+    void Cycler::clear() {
+        auto ptr = pump_.lock();
+        if (ptr) {
+            ptr->getQueue()->remove(this);
+        }
     }
 
     void Cycler::enqueueMessage(Message* msg) {

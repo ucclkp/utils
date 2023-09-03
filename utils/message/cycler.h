@@ -38,6 +38,7 @@ namespace utl {
         virtual ~Cycler();
 
         void setListener(CyclerListener* l);
+        void setClearWhenDestroy(bool val);
 
         void post(Executable* exec, int id = -1);
         void postDelayed(Executable* exec, nsp delay, int id = -1);
@@ -55,6 +56,8 @@ namespace utl {
         void postDelayed(int id, nsp delay);
         void postAtTime(int id, nsp at_time);
 
+        void clear();
+
         void enqueueMessage(Message* msg);
 
         bool hasMessages(int id);
@@ -67,6 +70,7 @@ namespace utl {
     private:
         std::weak_ptr<MessagePump> pump_;
         CyclerListener* listener_;
+        std::atomic_bool clear_when_destroy_;
     };
 
 }
