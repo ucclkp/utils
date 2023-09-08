@@ -46,30 +46,49 @@ using namespace utl;
 
 TEST_CASE(StringUtilsUnitTest) {
 
+    TEST_DEF("tolatcx test.") {
+        TEST_E(tolatcu('a'), 'A');
+        TEST_E(tolatcu('A'), 'A');
+        TEST_E(tolatcu('z'), 'Z');
+        TEST_E(tolatcu('Z'), 'Z');
+        TEST_E(tolatcu('0'), '0');
+
+        TEST_E(tolatcl('A'), 'a');
+        TEST_E(tolatcl('Z'), 'z');
+        TEST_E(tolatcl('0'), '0');
+        TEST_E(tolatcl('a'), 'a');
+        TEST_E(tolatcl('z'), 'z');
+        TEST_E(tolatcl('0'), '0');
+
+        return true;
+    };
+
+    TEST_DEF("tolatx test.") {
+        TEST_E(tolatu("a"), "A");
+        TEST_E(tolatu("A"), "A");
+        TEST_E(tolatu("z"), "Z");
+        TEST_E(tolatu("Z"), "Z");
+        TEST_E(tolatu("0"), "0");
+        TEST_E(tolatu("aBcDeF"), "ABCDEF");
+
+        TEST_E(tolatl("A"), "a");
+        TEST_E(tolatl("Z"), "z");
+        TEST_E(tolatl("0"), "0");
+        TEST_E(tolatl("a"), "a");
+        TEST_E(tolatl("z"), "z");
+        TEST_E(tolatl("0"), "0");
+        TEST_E(tolatl("aBcDeF"), "abcdef");
+
+        return true;
+    };
+
     TEST_DEF("Trim test.") {
-        std::string text;
-        trim(&text);
-        TEST_TRUE(text.empty());
-
-        text = " 1 2 3 ";
-        trim(&text);
-        TEST_E(text, "1 2 3");
-
-        text = " 1 2 3 ";
-        trim(&text, "1", 0);
-        TEST_E(text, " 1 2 3 ");
-
-        text = " 1 2 3 ";
-        trim(&text, " ", TRF_START);
-        TEST_E(text, "1 2 3 ");
-
-        text = " 1 2 3 ";
-        trim(&text, " ", TRF_END);
-        TEST_E(text, " 1 2 3");
-
-        text = " 1 2 3 ";
-        trim(&text, " ", TRF_ALL);
-        TEST_E(text, "123");
+        TEST_E(trim(""), "");
+        TEST_E(trim(" 1 2 3 "), "1 2 3");
+        TEST_E(trim(" 1 2 3 ", "1", 0), " 1 2 3 ");
+        TEST_E(trim(" 1 2 3 ", " ", TRF_START), "1 2 3 ");
+        TEST_E(trim(" 1 2 3 ", " ", TRF_END), " 1 2 3");
+        TEST_E(trim(" 1 2 3 ", " ", TRF_ALL), "123");
 
         return true;
     };

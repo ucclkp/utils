@@ -15,10 +15,12 @@
 namespace utl {
 
     enum TrimFlags {
-        TRF_START = 1,
+        TRF_NONE   = 0,
+        TRF_START  = 1,
         TRF_MIDDLE = 2,
-        TRF_END = 4,
-        TRF_ALL = TRF_START | TRF_MIDDLE | TRF_END,
+        TRF_END    = 4,
+        TRF_SE     = TRF_START | TRF_END,
+        TRF_ALL    = TRF_START | TRF_MIDDLE | TRF_END,
     };
 
 }

@@ -16,133 +16,89 @@
 
 namespace utl {
 
-    inline char tolatu(char ch) {
-        return internal::tolatu(ch);
-    }
+    inline char     tolatcu(char ch)     { return internal::tolatu(ch); }
+    inline char16_t tolatcu(char16_t ch) { return internal::tolatu(ch); }
+    inline char32_t tolatcu(char32_t ch) { return internal::tolatu(ch); }
+    inline wchar_t  tolatcu(wchar_t ch)  { return internal::tolatu(ch); }
+    inline int      tolatcu(int ch)      { return internal::tolatu(ch); }
 
-    inline char16_t tolatu(char16_t ch) {
-        return internal::tolatu(ch);
-    }
+    inline char     tolatcl(char ch)     { return internal::tolatl(ch); }
+    inline char16_t tolatcl(char16_t ch) { return internal::tolatl(ch); }
+    inline char32_t tolatcl(char32_t ch) { return internal::tolatl(ch); }
+    inline wchar_t  tolatcl(wchar_t ch)  { return internal::tolatl(ch); }
+    inline int      tolatcl(int ch)      { return internal::tolatl(ch); }
 
-    inline char32_t tolatu(char32_t ch) {
-        return internal::tolatu(ch);
-    }
+    inline void tolatu_self(std::string* text)    { internal::tolatu_self(text); }
+    inline void tolatu_self(std::u16string* text) { internal::tolatu_self(text); }
+    inline void tolatu_self(std::u32string* text) { internal::tolatu_self(text); }
+    inline void tolatu_self(std::wstring* text)   { internal::tolatu_self(text); }
 
-    inline wchar_t tolatu(wchar_t ch) {
-        return internal::tolatu(ch);
-    }
+    inline void tolatl_self(std::string* text)    { internal::tolatl_self(text); }
+    inline void tolatl_self(std::u16string* text) { internal::tolatl_self(text); }
+    inline void tolatl_self(std::u32string* text) { internal::tolatl_self(text); }
+    inline void tolatl_self(std::wstring* text)   { internal::tolatl_self(text); }
+    
+    inline std::string    tolatu(const std::string_view& text)    { return internal::tolatu(text); }
+    inline std::u16string tolatu(const std::u16string_view& text) { return internal::tolatu(text); }
+    inline std::u32string tolatu(const std::u32string_view& text) { return internal::tolatu(text); }
+    inline std::wstring   tolatu(const std::wstring_view& text)   { return internal::tolatu(text); }
 
-    inline int tolatu(int ch) {
-        return internal::tolatu(ch);
-    }
+    inline std::string    tolatl(const std::string_view& text)    { return internal::tolatl(text); }
+    inline std::u16string tolatl(const std::u16string_view& text) { return internal::tolatl(text); }
+    inline std::u32string tolatl(const std::u32string_view& text) { return internal::tolatl(text); }
+    inline std::wstring   tolatl(const std::wstring_view& text)   { return internal::tolatl(text); }
 
-    inline void tolatu(std::string* text) {
-        internal::tolatu(text);
-    }
-
-    inline void tolatu(std::u16string* text) {
-        internal::tolatu(text);
-    }
-
-    inline void tolatu(std::u32string* text) {
-        internal::tolatu(text);
-    }
-
-    inline void tolatu(std::wstring* text) {
-        internal::tolatu(text);
-    }
-
-    inline char tolatl(char ch) {
-        return internal::tolatl(ch);
-    }
-
-    inline char16_t tolatl(char16_t ch) {
-        return internal::tolatl(ch);
-    }
-
-    inline char32_t tolatl(char32_t ch) {
-        return internal::tolatl(ch);
-    }
-
-    inline wchar_t tolatl(wchar_t ch) {
-        return internal::tolatl(ch);
-    }
-
-    inline int tolatl(int ch) {
-        return internal::tolatl(ch);
-    }
-
-    inline void tolatl(std::string* text) {
-        internal::tolatl(text);
-    }
-
-    inline void tolatl(std::u16string* text) {
-        internal::tolatl(text);
-    }
-
-    inline void tolatl(std::u32string* text) {
-        internal::tolatl(text);
-    }
-
-    inline void tolatl(std::wstring* text) {
-        internal::tolatl(text);
-    }
-
-    inline void trim(
+    inline void trim_self(
         std::string* text,
         const std::string_view& tokens,
-        int flags = TRF_START | TRF_END)
-    {
-        internal::trim(text, tokens, flags);
-    }
-
-    inline void trim(
+        int flags = TRF_SE) { internal::trim_self(text, tokens, flags); }
+    inline void trim_self(
         std::u16string* text,
         const std::u16string_view& tokens,
-        int flags = TRF_START | TRF_END)
-    {
-        internal::trim(text, tokens, flags);
-    }
-
-    inline void trim(
+        int flags = TRF_SE) { internal::trim_self(text, tokens, flags); }
+    inline void trim_self(
         std::u32string* text,
         const std::u32string_view& tokens,
-        int flags = TRF_START | TRF_END)
-    {
-        internal::trim(text, tokens, flags);
-    }
-
-    inline void trim(
+        int flags = TRF_SE) { internal::trim_self(text, tokens, flags); }
+    inline void trim_self(
         std::wstring* text,
         const std::wstring_view& tokens,
-        int flags = TRF_START | TRF_END)
-    {
-        internal::trim(text, tokens, flags);
-    }
+        int flags = TRF_SE) { internal::trim_self(text, tokens, flags); }
 
-    inline void trim(
-        std::string* text, int flags = TRF_START | TRF_END)
-    {
-        trim(text, " ", flags);
-    }
+    inline void trim_self(
+        std::string* text, int flags = TRF_SE)    { trim_self(text, " ", flags); }
+    inline void trim_self(
+        std::u16string* text, int flags = TRF_SE) { trim_self(text, u" ", flags); }
+    inline void trim_self(
+        std::u32string* text, int flags = TRF_SE) { trim_self(text, U" ", flags); }
+    inline void trim_self(
+        std::wstring* text, int flags = TRF_SE)   { trim_self(text, L" ", flags); }
+    
+    inline std::string trim(
+        const std::string_view& text,
+        const std::string_view& tokens,
+        int flags = TRF_SE) { return internal::trim(text, tokens, flags); }
+    inline std::u16string trim(
+        const std::u16string_view& text,
+        const std::u16string_view& tokens,
+        int flags = TRF_SE) { return internal::trim(text, tokens, flags); }
+    inline std::u32string trim(
+        const std::u32string_view& text,
+        const std::u32string_view& tokens,
+        int flags = TRF_SE) { return internal::trim(text, tokens, flags); }
+    inline std::wstring trim(
+        const std::wstring_view& text,
+        const std::wstring_view& tokens,
+        int flags = TRF_SE) { return internal::trim(text, tokens, flags); }
 
-    inline void trim(
-        std::u16string* text, int flags = TRF_START | TRF_END)
-    {
-        trim(text, u" ", flags);
-    }
-
-    inline void trim(
-        std::u32string* text, int flags = TRF_START | TRF_END)
-    {
-        trim(text, U" ", flags);
-    }
-
-    inline void trim(
-        std::wstring* text, int flags = TRF_START | TRF_END)
-    {
-        trim(text, L" ", flags);
-    }
+    inline std::string trim(
+        const std::string_view& text, int flags = TRF_SE)    { return trim(text, " ", flags); }
+    inline std::u16string trim(
+        const std::u16string_view& text, int flags = TRF_SE) { return trim(text, u" ", flags); }
+    inline std::u32string trim(
+        const std::u32string_view& text, int flags = TRF_SE) { return trim(text, U" ", flags); }
+    inline std::wstring trim(
+        const std::wstring_view& text, int flags = TRF_SE)   { return trim(text, L" ", flags); }
 
     inline std::vector<std::string> split(
         const std::string_view& text,

@@ -83,7 +83,7 @@ namespace internal {
     }
 
     template <typename Cy>
-    void tolatu(std::basic_string<Cy>* text) {
+    void tolatu_self(std::basic_string<Cy>* text) {
         auto& s = *text;
         for (size_t i = 0; i < text->size(); ++i) {
             s[i] = tolatu(s[i]);
@@ -91,19 +91,33 @@ namespace internal {
     }
 
     template <typename Cy>
-    void tolatl(std::basic_string<Cy>* text) {
+    std::basic_string<Cy> tolatu(const std::basic_string_view<Cy>& text) {
+        std::basic_string<Cy> r(text);
+        tolatu_self(&r);
+        return r;
+    }
+
+    template <typename Cy>
+    void tolatl_self(std::basic_string<Cy>* text) {
         auto& s = *text;
         for (size_t i = 0; i < text->size(); ++i) {
             s[i] = tolatl(s[i]);
         }
     }
 
+    template <typename Cy>
+    std::basic_string<Cy> tolatl(const std::basic_string_view<Cy>& text) {
+        std::basic_string<Cy> r(text);
+        tolatl_self(&r);
+        return r;
+    }
+
     // 去除 text 中所有在 tokens 中出现的字符
     template <typename Cy>
-    void trim(
+    void trim_self(
         std::basic_string<Cy>* text,
         const std::basic_string_view<Cy>& tokens,
-        int flags = TRF_START | TRF_END)
+        int flags = TRF_SE)
     {
         size_t i;
         if (flags & TRF_START) {
@@ -112,9 +126,7 @@ namespace internal {
                 text->clear();
                 return;
             }
-            if (i > 0) {
-                text->erase(0, i);
-            }
+            if (i > 0) text->erase(0, i);
         }
 
         if (flags & TRF_END) {
@@ -123,17 +135,13 @@ namespace internal {
                 text->clear();
                 return;
             }
-            if (i + 1 < text->length()) {
-                text->erase(i + 1);
-            }
+            if (i + 1 < text->length()) text->erase(i + 1);
         }
 
         if (flags & TRF_MIDDLE) {
             for (i = 1;;) {
                 i = text->find_first_of(tokens, i);
-                if (i == std::basic_string<Cy>::npos) {
-                    break;
-                }
+                if (i == std::basic_string<Cy>::npos) break;
 
                 auto j = text->find_first_not_of(tokens, i);
                 if (j == std::basic_string<Cy>::npos) {
@@ -145,6 +153,18 @@ namespace internal {
                 ++i;
             }
         }
+    }
+
+    // 去除 text 中所有在 tokens 中出现的字符
+    template <typename Cy>
+    std::basic_string<Cy> trim(
+        const std::basic_string_view<Cy>& text,
+        const std::basic_string_view<Cy>& tokens,
+        int flags = TRF_SE)
+    {
+        std::basic_string<Cy> r(text);
+        trim_self(&r, tokens, flags);
+        return r;
     }
 
     template <typename Cy>
