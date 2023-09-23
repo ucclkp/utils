@@ -47,32 +47,6 @@ static inline int sv16_to_utf8(uint_fast16_t sv, char buf[3], size_t* len) {
     return 0;
 }
 
-static inline size_t sv16_to_utf8_len(uint_fast16_t sv) {
-    if ((sv & 0xFF80) == 0) {
-        return 1;
-    } else if ((sv & 0xF800) == 0) {
-        return 2;
-    } else {
-        return 3;
-    }
-}
-
-static inline size_t sv16_to_utf8_ava(uint_fast16_t sv, char buf[3]) {
-    if ((sv & 0xFF80) == 0) {
-        buf[0] = (char)(sv & 0x7F);
-        return 1;
-    } else if ((sv & 0xF800) == 0) {
-        buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
-        buf[1] = (char)((sv & 0x3F) + 0x80);
-        return 2;
-    } else {
-        buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
-        buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
-        buf[2] = (char)((sv & 0x3F) + 0x80);
-        return 3;
-    }
-}
-
 static inline int sv32_to_utf8(uint_fast32_t sv, char buf[4], size_t* len) {
     size_t buf_len;
 
@@ -123,35 +97,13 @@ static inline size_t sv32_to_utf8_len(uint_fast32_t sv) {
     }
 }
 
-static inline size_t sv32_to_utf8_ava(uint_fast32_t sv, char buf[4]) {
-    if ((sv & 0xFFFFFF80) == 0) {
-        buf[0] = (char)(sv & 0x7F);
-        return 1;
-    } else if ((sv & 0xFFFFF800) == 0) {
-        buf[0] = (char)(((sv & 0x7C0) >> 6) + 0xC0);
-        buf[1] = (char)((sv & 0x3F) + 0x80);
-        return 2;
-    } else if ((sv & 0xFFFF0000) == 0) {
-        buf[0] = (char)(((sv & 0xF000) >> 12) + 0xE0);
-        buf[1] = (char)(((sv & 0xFC0) >> 6) + 0x80);
-        buf[2] = (char)((sv & 0x3F) + 0x80);
-        return 3;
-    } else {
-        buf[0] = (char)(((sv & 0x1C0000) >> 18) + 0xF0);
-        buf[1] = (char)(((sv & 0x3F000) >> 12) + 0x80);
-        buf[2] = (char)(((sv & 0xFC0) >> 6) + 0x80);
-        buf[3] = (char)((sv & 0x3F) + 0x80);
-        return 4;
-    }
-}
-
 static inline int sv32_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t* len) {
     size_t buf_len;
 
     buf_len = *len;
     if ((sv & 0xFFFF0000) == 0) {
         if (buf && buf_len >= 1) {
-            buf[0] = (char16_t)(sv & 0xFFFF);
+            buf[0] = (char16_t)sv;
         }
         *len = 1;
     } else {
@@ -170,23 +122,35 @@ static inline int sv32_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t* len) 
     return 0;
 }
 
+static inline int sv32_to_w16(uint_fast32_t sv, wchar_t buf[2], size_t* len) {
+    size_t buf_len;
+
+    buf_len = *len;
+    if ((sv & 0xFFFF0000) == 0) {
+        if (buf && buf_len >= 1) {
+            buf[0] = (wchar_t)sv;
+        }
+        *len = 1;
+    } else {
+        if (buf && buf_len >= 2) {
+            buf[0] = (wchar_t)(
+                ((sv & 0xFC00) >> 10) +
+                ((((sv & 0x1F0000) - 1) & 0xF0000) >> 10) + 0xD800);
+            buf[1] = (wchar_t)((sv & 0x3FF) + 0xDC00);
+        }
+        *len = 2;
+    }
+
+    if (buf_len < *len) {
+        return UTFC_BUF;
+    }
+    return 0;
+}
+
 static inline size_t sv32_to_utf16_len(uint_fast32_t sv) {
     if ((sv & 0xFFFF0000) == 0) {
         return 1;
     } else {
-        return 2;
-    }
-}
-
-static inline size_t sv32_to_utf16_ava(uint_fast32_t sv, char16_t buf[2]) {
-    if ((sv & 0xFFFF0000) == 0) {
-        buf[0] = (char16_t)sv;
-        return 1;
-    } else {
-        buf[0] = (char16_t)(
-            ((sv & 0xFC00) >> 10) +
-            ((((sv & 0x1F0000) - 1) & 0xF0000) >> 10) + 0xD800);
-        buf[1] = (char16_t)((sv & 0x3FF) + 0xDC00);
         return 2;
     }
 }
@@ -218,7 +182,7 @@ static inline uint_fast32_t sv16(uint_fast16_t word1, uint_fast16_t word2) {
         + (word2 & 0x3FF);
 }
 
-static inline int nextsv8_ava(const char* s, const char* se, uint_fast32_t* sv, size_t* adv) {
+static inline int nextsv8(const char* s, const char* se, uint_fast32_t* sv, size_t* adv) {
     unsigned char b1, b2, b3, b4;
 
     b1 = (unsigned char)*s;
@@ -304,7 +268,7 @@ static inline int nextsv8_adv(const char* s, const char* se, size_t* adv) {
     return 0;
 }
 
-static inline int nextsv16w_ava(const wchar_t* s, const wchar_t* se, uint_fast32_t* sv, size_t* adv) {
+static inline int nextsv16w(const wchar_t* s, const wchar_t* se, uint_fast32_t* sv, size_t* adv) {
     uint_fast16_t w1, w2;
 
     w1 = (uint_fast16_t)*s;
@@ -325,7 +289,7 @@ static inline int nextsv16w_ava(const wchar_t* s, const wchar_t* se, uint_fast32
     return 0;
 }
 
-static inline int nextsv16w_chk_adv(const wchar_t* s, const wchar_t* se, size_t* adv) {
+static inline int nextsv16w_adv(const wchar_t* s, const wchar_t* se, size_t* adv) {
     uint_fast16_t w1, w2;
 
     w1 = (uint_fast16_t)*s;
@@ -344,7 +308,7 @@ static inline int nextsv16w_chk_adv(const wchar_t* s, const wchar_t* se, size_t*
     return 0;
 }
 
-static inline int nextsv16c_ava(const char16_t* s, const char16_t* se, uint_fast32_t* sv, size_t* adv) {
+static inline int nextsv16c(const char16_t* s, const char16_t* se, uint_fast32_t* sv, size_t* adv) {
     char16_t w1, w2;
 
     w1 = *s;
@@ -365,7 +329,7 @@ static inline int nextsv16c_ava(const char16_t* s, const char16_t* se, uint_fast
     return 0;
 }
 
-static inline int nextsv16c_chk_adv(const char16_t* s, const char16_t* se, size_t* adv) {
+static inline int nextsv16c_adv(const char16_t* s, const char16_t* se, size_t* adv) {
     char16_t w1, w2;
 
     w1 = *s;
@@ -777,8 +741,6 @@ int utf16c_to_wchar(char16_t ch, wchar_t* out, int flags) {
 
 int utf32c_to_wchar(char32_t ch, wchar_t* dst, size_t* len, int flags) {
     int ret;
-    size_t i;
-    char16_t buf[2];
 
     assert(len);
 
@@ -792,12 +754,7 @@ int utf32c_to_wchar(char32_t ch, wchar_t* dst, size_t* len, int flags) {
     ret = 0;
     if (sizeof(wchar_t) * CHAR_BIT == 16u) {
         if (dst) {
-            if (sv32_to_utf16((uint_fast32_t)ch, buf, len) != 0) {
-                return UTFC_BUF;
-            }
-            for (i = 0; i < *len; ++i) {
-                dst[i] = (wchar_t)buf[i];
-            }
+            return sv32_to_w16((uint_fast32_t)ch, dst, len);
         } else {
             *len = sv32_to_utf16_len((uint_fast32_t)ch);
             ret = UTFC_BUF;
@@ -821,9 +778,8 @@ int utf32c_to_wchar(char32_t ch, wchar_t* dst, size_t* len, int flags) {
 int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, int flags) {
     const char* s, *se;
     char16_t* s16, *s16e;
-    size_t _buf_len, i, adv;
-    uint_fast32_t scalar_value;
-    char16_t _buf[2];
+    size_t _buf_len, adv;
+    uint_fast32_t sv;
 
     assert(src && buf_len);
 
@@ -836,7 +792,7 @@ int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, i
         s16e = buf + *buf_len;
 
         while (s < se) {
-            if (nextsv8_ava(s, se, &scalar_value, &adv) != 0) {
+            if (nextsv8(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
@@ -848,9 +804,11 @@ int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, i
                 ++_buf_len;
             } else {
                 s += adv;
-                adv = sv32_to_utf16_ava(scalar_value, _buf);
-                for (i = 0; i < adv && s16 < s16e; ++i) {
-                    *s16++ = _buf[i];
+                adv = s16e - s16;
+                if (sv32_to_utf16(sv, s16, &adv) == 0) {
+                    s16 += adv;
+                } else {
+                    s16 = s16e;
                 }
                 _buf_len += adv;
             }
@@ -861,7 +819,7 @@ int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, i
         }
     } else {
         while (s < se) {
-            if (nextsv8_ava(s, se, &scalar_value, &adv) != 0) {
+            if (nextsv8(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 }
@@ -869,7 +827,7 @@ int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, i
                 ++_buf_len;
             } else {
                 s += adv;
-                _buf_len += sv32_to_utf16_len(scalar_value);
+                _buf_len += sv32_to_utf16_len(sv);
             }
         }
         *buf_len = _buf_len;
@@ -881,7 +839,7 @@ int utf8_to_utf32(const char* src, size_t len, char32_t* buf, size_t* buf_len, i
     const char* s, *se;
     char32_t* s32, *s32e;
     size_t _buf_len, adv;
-    uint_fast32_t scalar_value;
+    uint_fast32_t sv;
 
     assert(src && buf_len);
 
@@ -894,7 +852,7 @@ int utf8_to_utf32(const char* src, size_t len, char32_t* buf, size_t* buf_len, i
         s32e = buf + *buf_len;
 
         while (s < se) {
-            if (nextsv8_ava(s, se, &scalar_value, &adv) != 0) {
+            if (nextsv8(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
@@ -905,9 +863,7 @@ int utf8_to_utf32(const char* src, size_t len, char32_t* buf, size_t* buf_len, i
                 ++s;
             } else {
                 s += adv;
-                if (s32 < s32e) {
-                    *s32++ = scalar_value;
-                }
+                if (s32 < s32e) *s32++ = sv;
             }
             ++_buf_len;
         }
@@ -935,9 +891,8 @@ int utf8_to_utf32(const char* src, size_t len, char32_t* buf, size_t* buf_len, i
 int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len, int flags) {
     const char16_t* s, *se;
     char* s8, *s8e;
-    size_t _buf_len, i, adv;
+    size_t _buf_len, adv;
     uint_fast32_t sv;
-    char _buf[4];
 
     assert(src && buf_len);
 
@@ -950,7 +905,7 @@ int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len, i
         s8e = buf + *buf_len;
 
         while (s < se) {
-            if (nextsv16c_ava(s, se, &sv, &adv) != 0) {
+            if (nextsv16c(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
@@ -962,9 +917,11 @@ int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len, i
                 }
             }
             s += adv;
-            adv = sv32_to_utf8_ava(sv, _buf);
-            for (i = 0; i < adv && s8 < s8e; ++i) {
-                *s8++ = _buf[i];
+            adv = s8e - s8;
+            if (sv32_to_utf8(sv, s8, &adv) == 0) {
+                s8 += adv;
+            } else {
+                s8 = s8e;
             }
             _buf_len += adv;
         }
@@ -972,7 +929,7 @@ int utf16_to_utf8(const char16_t* src, size_t len, char* buf, size_t* buf_len, i
         if (s8 - buf == _buf_len) return 0;
     } else {
         while (s < se) {
-            if (nextsv16c_ava(s, se, &sv, &adv) != 0) {
+            if (nextsv16c(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
@@ -996,7 +953,7 @@ int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_l
     const char16_t* s, *se;
     char32_t* s32, *s32e;
     size_t _buf_len, adv;
-    uint_fast32_t scalar_value;
+    uint_fast32_t sv;
 
     assert(src && buf_len);
 
@@ -1009,7 +966,7 @@ int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_l
         s32e = buf + *buf_len;
 
         while (s < se) {
-            if (nextsv16c_ava(s, se, &scalar_value, &adv) != 0) {
+            if (nextsv16c(s, se, &sv, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
@@ -1020,9 +977,7 @@ int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_l
                 ++s;
             } else {
                 s += adv;
-                if (s32 < s32e) {
-                    *s32++ = scalar_value;
-                }
+                if (s32 < s32e) *s32++ = sv;
             }
             ++_buf_len;
         }
@@ -1030,7 +985,7 @@ int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_l
         if (s32 - buf == _buf_len) return 0;
     } else {
         while (s < se) {
-            if (nextsv16c_chk_adv(s, se, &adv) != 0) {
+            if (nextsv16c_adv(s, se, &adv) != 0) {
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 }
@@ -1050,8 +1005,7 @@ int utf16_to_utf32(const char16_t* src, size_t len, char32_t* buf, size_t* buf_l
 int utf32_to_utf8(const char32_t* src, size_t len, char* buf, size_t* buf_len, int flags) {
     const char32_t* s, *se;
     char* s8, *s8e;
-    size_t _buf_len, i, count;
-    char _buf[4];
+    size_t _buf_len, adv;
     uint_fast32_t ch;
 
     assert(src && buf_len);
@@ -1074,11 +1028,13 @@ int utf32_to_utf8(const char32_t* src, size_t len, char* buf, size_t* buf_len, i
                     ch = UTFC_INVALID_CHAR;
                 }
             }
-            count = sv32_to_utf8_ava(ch, _buf);
-            for (i = 0; i < count && s8 < s8e; ++i) {
-                *s8++ = _buf[i];
+            adv = s8e - s8;
+            if (sv32_to_utf8(ch, s8, &adv) == 0) {
+                s8 += adv;
+            } else {
+                s8 = s8e;
             }
-            _buf_len += count;
+            _buf_len += adv;
         }
         *buf_len = _buf_len;
         if (s8 - buf == _buf_len) return 0;
@@ -1104,8 +1060,7 @@ int utf32_to_utf8(const char32_t* src, size_t len, char* buf, size_t* buf_len, i
 int utf32_to_utf16(const char32_t* src, size_t len, char16_t* buf, size_t* buf_len, int flags) {
     const char32_t* s, *se;
     char16_t* s16, *s16e;
-    size_t _buf_len, i, count;
-    char16_t _buf[2];
+    size_t _buf_len, adv;
     uint_fast32_t ch;
 
     assert(src && buf_len);
@@ -1128,11 +1083,13 @@ int utf32_to_utf16(const char32_t* src, size_t len, char16_t* buf, size_t* buf_l
                     ch = UTFC_INVALID_CHAR;
                 }
             }
-            count = sv32_to_utf16_ava(ch, _buf);
-            for (i = 0; i < count && s16 < s16e; ++i) {
-                *s16++ = _buf[i];
+            adv = s16e - s16;
+            if (sv32_to_utf16(ch, s16, &adv) == 0) {
+                s16 += adv;
+            } else {
+                s16 = s16e;
             }
-            _buf_len += count;
+            _buf_len += adv;
         }
 
         *buf_len = _buf_len;
@@ -1159,9 +1116,8 @@ int utf32_to_utf16(const char32_t* src, size_t len, char16_t* buf, size_t* buf_l
 int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, int flags) {
     const wchar_t* s, *se;
     char* s8, *s8e;
-    size_t _buf_len, i, adv;
+    size_t _buf_len, adv;
     uint_fast32_t sv;
-    char _buf[4];
 
     assert(src && buf_len);
 
@@ -1174,7 +1130,7 @@ int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, in
             s8 = buf;
             s8e = buf + *buf_len;
             while (s < se) {
-                if (nextsv16w_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv16w(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1186,9 +1142,11 @@ int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, in
                     }
                 }
                 s += adv;
-                adv = sv32_to_utf8_ava(sv, _buf);
-                for (i = 0; i < adv && s8 < s8e; ++i) {
-                    *s8++ = _buf[i];
+                adv = s8e - s8;
+                if (sv32_to_utf8(sv, s8, &adv) == 0) {
+                    s8 += adv;
+                } else {
+                    s8 = s8e;
                 }
                 _buf_len += adv;
             }
@@ -1196,7 +1154,7 @@ int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, in
             if (s8 - buf == _buf_len) return 0;
         } else {
             while (s < se) {
-                if (nextsv16w_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv16w(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1226,9 +1184,11 @@ int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, in
                         sv = UTFC_INVALID_CHAR;
                     }
                 }
-                adv = sv32_to_utf8_ava(sv, _buf);
-                for (i = 0; i < adv && s8 < s8e; ++i) {
-                    *s8++ = _buf[i];
+                adv = s8e - s8;
+                if (sv32_to_utf8(sv, s8, &adv) == 0) {
+                    s8 += adv;
+                } else {
+                    s8 = s8e;
                 }
                 _buf_len += adv;
             }
@@ -1260,8 +1220,7 @@ int wchar_to_utf8(const wchar_t* src, size_t len, char* buf, size_t* buf_len, in
 int wchar_to_utf16(const wchar_t* src, size_t len, char16_t* buf, size_t* buf_len, int flags) {
     const wchar_t* s, *se;
     char16_t* s16, *s16e, ch16, ch16_2;
-    size_t _buf_len, i, count;
-    char16_t _buf[2];
+    size_t _buf_len, adv;
     uint_fast32_t ch;
 
     assert(src && buf_len);
@@ -1353,11 +1312,13 @@ int wchar_to_utf16(const wchar_t* src, size_t len, char16_t* buf, size_t* buf_le
                         ch = UTFC_INVALID_CHAR;
                     }
                 }
-                count = sv32_to_utf16_ava(ch, _buf);
-                for (i = 0; i < count && s16 < s16e; ++i, ++s16) {
-                    *s16 = _buf[i];
+                adv = s16e - s16;
+                if (sv32_to_utf16(ch, s16, &adv) == 0) {
+                    s16 += adv;
+                } else {
+                    s16 = s16e;
                 }
-                _buf_len += count;
+                _buf_len += adv;
             }
             *buf_len = _buf_len;
             if (s16 - buf == _buf_len) return 0;
@@ -1401,7 +1362,7 @@ int wchar_to_utf32(const wchar_t* src, size_t len, char32_t* buf, size_t* buf_le
             s32 = buf;
             s32e = buf + *buf_len;
             while (s < se) {
-                if (nextsv16w_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv16w(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1412,9 +1373,7 @@ int wchar_to_utf32(const wchar_t* src, size_t len, char32_t* buf, size_t* buf_le
                     ++s;
                 } else {
                     s += adv;
-                    if (s32 < s32e) {
-                        *s32++ = (char32_t)sv;
-                    }
+                    if (s32 < s32e) *s32++ = (char32_t)sv;
                 }
                 ++_buf_len;
             }
@@ -1422,7 +1381,7 @@ int wchar_to_utf32(const wchar_t* src, size_t len, char32_t* buf, size_t* buf_le
             if (s32 - buf == _buf_len) return 0;
         } else {
             while (s < se) {
-                if (nextsv16w_chk_adv(s, se, &adv) != 0) {
+                if (nextsv16w_adv(s, se, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     }
@@ -1480,10 +1439,9 @@ int wchar_to_utf32(const wchar_t* src, size_t len, char32_t* buf, size_t* buf_le
 
 int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, int flags) {
     const char* s, *se;
-    size_t _buf_len, i, adv;
+    size_t _buf_len, adv;
     wchar_t* sw, *swe;
     uint_fast32_t sv;
-    char16_t _buf[2];
 
     assert(src && buf_len);
 
@@ -1496,7 +1454,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
             sw = buf;
             swe = buf + *buf_len;
             while (s < se) {
-                if (nextsv8_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv8(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1508,9 +1466,11 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
                     ++_buf_len;
                 } else {
                     s += adv;
-                    adv = sv32_to_utf16_ava(sv, _buf);
-                    for (i = 0; i < adv && sw < swe; ++i) {
-                        *sw++ = (wchar_t)_buf[i];
+                    adv = swe - sw;
+                    if (sv32_to_w16(sv, sw, &adv) == 0) {
+                        sw += adv;
+                    } else {
+                        sw = swe;
                     }
                     _buf_len += adv;
                 }
@@ -1519,7 +1479,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
             if (sw - buf == _buf_len) return 0;
         } else {
             while (s < se) {
-                if (nextsv8_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv8(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     }
@@ -1537,7 +1497,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
             sw = buf;
             swe = buf + *buf_len;
             while (s < se) {
-                if (nextsv8_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv8(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1548,9 +1508,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
                     ++s;
                 } else {
                     s += adv;
-                    if (sw < swe) {
-                        *sw++ = (wchar_t)sv;
-                    }
+                    if (sw < swe) *sw++ = (wchar_t)sv;
                 }
                 ++_buf_len;
             }
@@ -1664,7 +1622,7 @@ int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_le
             sw = buf;
             swe = buf + *buf_len;
             while (s < se) {
-                if (nextsv16c_ava(s, se, &sv, &adv) != 0) {
+                if (nextsv16c(s, se, &sv, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
@@ -1675,9 +1633,7 @@ int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_le
                     ++s;
                 } else {
                     s += adv;
-                    if (sw < swe) {
-                        *sw++ = (wchar_t)sv;
-                    }
+                    if (sw < swe) *sw++ = (wchar_t)sv;
                 }
                 ++_buf_len;
             }
@@ -1685,7 +1641,7 @@ int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_le
             if (sw - buf == _buf_len)return 0;
         } else {
             while (s < se) {
-                if (nextsv16c_chk_adv(s, se, &adv) != 0) {
+                if (nextsv16c_adv(s, se, &adv) != 0) {
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     }
@@ -1708,8 +1664,7 @@ int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_le
 int utf32_to_wchar(const char32_t* src, size_t len, wchar_t* buf, size_t* buf_len, int flags) {
     const char32_t* s, *se;
     wchar_t* sw, *swe;
-    size_t _buf_len, i, count;
-    char16_t _buf[2];
+    size_t _buf_len, adv;
     char32_t ch;
 
     assert(src && buf_len);
@@ -1732,11 +1687,13 @@ int utf32_to_wchar(const char32_t* src, size_t len, wchar_t* buf, size_t* buf_le
                         ch = UTFC_INVALID_CHAR;
                     }
                 }
-                count = sv32_to_utf16_ava((uint_fast32_t)ch, _buf);
-                for (i = 0; i < count && sw < swe; ++i) {
-                    *sw++ = (wchar_t)_buf[i];
+                adv = swe - sw;
+                if (sv32_to_w16((uint_fast32_t)ch, sw, &adv) == 0) {
+                    sw += adv;
+                } else {
+                    sw = swe;
                 }
-                _buf_len += count;
+                _buf_len += adv;
             }
             *buf_len = _buf_len;
             if (sw - buf == _buf_len) return 0;

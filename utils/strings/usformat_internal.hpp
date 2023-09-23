@@ -127,21 +127,21 @@ namespace internal {
             *dig = p.c_str();
             *len = p.size();
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
-            int ret = utf8_to_utf16(p, r, len);
-            if (ret == SCR_FAIL) {
+            int ret = utf8_to_utf16(p, r, len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return false;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
-            int ret = utf8_to_utf32(p, r, len);
-            if (ret == SCR_FAIL) {
+            int ret = utf8_to_utf32(p, r, len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return false;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 *dig = r;
             } else {
                 *dig = nullptr;
@@ -209,12 +209,12 @@ namespace internal {
         if constexpr (std::is_same<Cy, char>::value) {
             sv = p;
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
-            if (!utf8_to_utf16(p, &str)) {
+            if (utf8_to_utf16(p, &str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = str;
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
-            if (!utf8_to_utf32(p, &str)) {
+            if (utf8_to_utf32(p, &str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = str;

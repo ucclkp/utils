@@ -6,8 +6,6 @@
 
 #include "utils/command_line.h"
 
-#include "utils/unicode_conv.h"
-
 #import <Foundation/Foundation.h>
 
 
