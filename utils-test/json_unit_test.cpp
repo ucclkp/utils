@@ -181,7 +181,8 @@ TEST_CASE(JSONUnitTest) {
             TEST_E(value->asObject()->getString("a"), u8p("@😀😀@"));
         }
         {
-            std::istringstream iss("{\"a\":\"\\u0040\\ud83d\\ud83d\\ude00\\u0040\"}", std::ios::binary);
+            std::wstring tr(L"@🐽@");
+            std::istringstream iss("{\"a\":\"\\u0040\\ud83d\\udc3d\\u0040\"}", std::ios::binary);
             TEST_TRUE(parser.parse(iss, &value));
             TEST_E(value->asObject()->getString("a"), u8p("@🐽@"));
         }

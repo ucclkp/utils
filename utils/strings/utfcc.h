@@ -14,6 +14,7 @@ typedef uint_least32_t char32_t;
 
 #define WCHAR_IS_UTF16 (WCHAR_MAX == 0xFFFF)
 #define WCHAR_IS_UTF32 (WCHAR_MAX  > 0xFFFF)
+#define UTFC_INVALID_CHAR 0xFFFDu
 
 #define IS_START_SURROGATES(ch)  ((ch) >= 0xD800 && (ch) <= 0xDBFF)
 #define IS_END_SURROGATES(ch)    ((ch) >= 0xDC00 && (ch) <= 0xDFFF)

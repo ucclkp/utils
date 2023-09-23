@@ -15,7 +15,6 @@
 
 // D90
 #define IS_ILL_U32CU(ch)  (IS_SURROGATES(ch) || ch > 0x10FFFFu)
-#define UTFC_INVALID_CHAR 0xFFFD
 
 
 static inline int sv16_to_utf8(uint_fast16_t sv, char buf[3], size_t* len) {
@@ -146,7 +145,7 @@ static inline size_t sv32_to_utf8_ava(uint_fast32_t sv, char buf[4]) {
     }
 }
 
-static inline int sv32_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t * len) {
+static inline int sv32_to_utf16(uint_fast32_t sv, char16_t buf[2], size_t* len) {
     size_t buf_len;
 
     buf_len = *len;
@@ -841,7 +840,7 @@ int utf8_to_utf16(const char* src, size_t len, char16_t* buf, size_t* buf_len, i
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
-                    if (s16 < s16e) *s16++ = (char16_t)*s;
+                    if (s16 < s16e) *s16++ = (unsigned char)*s;
                 } else {
                     if (s16 < s16e) *s16++ = UTFC_INVALID_CHAR;
                 }
@@ -899,7 +898,7 @@ int utf8_to_utf32(const char* src, size_t len, char32_t* buf, size_t* buf_len, i
                 if (flags & UTFCF_CHK) {
                     return UTFC_ERR;
                 } else if (flags & UTFCF_IGN) {
-                    if (s32 < s32e) *s32++ = (char32_t)*s;
+                    if (s32 < s32e) *s32++ = (unsigned char)*s;
                 } else {
                     if (s32 < s32e) *s32++ = UTFC_INVALID_CHAR;
                 }
@@ -1312,7 +1311,7 @@ int wchar_to_utf16(const wchar_t* src, size_t len, char16_t* buf, size_t* buf_le
                         }
                         ++s;
                         *s16++ = ch16;
-                        if (s16 < s16e) *s16++ = ch16;
+                        if (s16 < s16e) *s16++ = ch16_2;
                     } else if (IS_END_SURROGATES(ch16)) {
                         *s16++ = UTFC_INVALID_CHAR;
                     } else {
@@ -1501,7 +1500,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
-                        if (sw < swe) *sw++ = (wchar_t)*s;
+                        if (sw < swe) *sw++ = (unsigned char)*s;
                     } else {
                         if (sw < swe) *sw++ = (wchar_t)UTFC_INVALID_CHAR;
                     }
@@ -1542,7 +1541,7 @@ int utf8_to_wchar(const char* src, size_t len, wchar_t* buf, size_t* buf_len, in
                     if (flags & UTFCF_CHK) {
                         return UTFC_ERR;
                     } else if (flags & UTFCF_IGN) {
-                        if (sw < swe) *sw++ = (wchar_t)*s;
+                        if (sw < swe) *sw++ = (unsigned char)*s;
                     } else {
                         if (sw < swe) *sw++ = (wchar_t)UTFC_INVALID_CHAR;
                     }
@@ -1632,7 +1631,7 @@ int utf16_to_wchar(const char16_t* src, size_t len, wchar_t* buf, size_t* buf_le
                         }
                         ++s;
                         *sw++ = w16;
-                        if (sw < swe) *sw++ = w16;
+                        if (sw < swe) *sw++ = w16_2;
                     } else if (IS_END_SURROGATES(w16)) {
                         *sw++ = (wchar_t)UTFC_INVALID_CHAR;
                     } else {

@@ -11,7 +11,7 @@
 #include "utils/stream_utils.h"
 #include "utils/strings/int_conv.hpp"
 #include "utils/strings/float_conv.h"
-#include "utils/strings/unicode_conv.h"
+#include "utils/strings/utfccpp.h"
 
 
 namespace utl {
@@ -270,16 +270,18 @@ namespace utl {
 
     bool JSONParser::parseString(std::istream& s, std::string* val) {
         std::string str;
-        size_t u16_c = 0;
-        char16_t u16_buf[2];
+        std::u16string u16_str;
 
         GET_STREAM(char ch);
         for (;;) {
             if (ch == '\\') {
                 GET_STREAM(ch);
-                if (ch != 'u' && u16_c) {
-                    // 忽略未匹配的代理对
-                    u16_c = 0;
+                if (ch != 'u' && !u16_str.empty()) {
+                    std::string buf;
+                    if (utf16_to_utf8(u16_str, &buf, UTFCF_CHK) == 0) {
+                        str.append(buf);
+                    }
+                    u16_str.clear();
                 }
 
                 switch (ch) {
@@ -312,45 +314,28 @@ namespace utl {
                     if (!utl::isdigit(ch, 16)) return false;
                     code |= uint_fast16_t(utl::ctoi(ch)) << 0;
 
-                    if (IS_SURROGATES(code)) {
-                        u16_buf[u16_c] = char16_t(code);
-                        if (u16_c) {
-                            char u8_buf[8];
-                            size_t u8_c = 8;
-                            if (utf16_to_utf8(u16_buf, 2, u8_buf, &u8_c) == SCR_OK) {
-                                str.append(u8_buf, u8_c);
-                            }
-                            u16_c = 0;
-                        } else {
-                            ++u16_c;
-                        }
-                    } else {
-                        if (u16_c) {
-                            // 忽略未匹配的代理对
-                            u16_c = 0;
-                        }
-
-                        char u8_buf[4];
-                        size_t u8_c = 4;
-                        if (utf16_to_utf8(char16_t(code), u8_buf, &u8_c)) {
-                            str.append(u8_buf, u8_c);
-                        }
-                    }
+                    u16_str.push_back(code);
                     break;
                 }
                 default: return false;
                 }
                 GET_STREAM(ch);
             } else if (ch == '"') {
-                if (u16_c) {
-                    // 忽略未匹配的代理对
-                    u16_c = 0;
+                if (!u16_str.empty()) {
+                    std::string buf;
+                    if (utf16_to_utf8(u16_str, &buf, UTFCF_CHK) == 0) {
+                        str.append(buf);
+                    }
+                    u16_str.clear();
                 }
                 break;
             } else {
-                if (u16_c) {
-                    // 忽略未匹配的代理对
-                    u16_c = 0;
+                if (!u16_str.empty()) {
+                    std::string buf;
+                    if (utf16_to_utf8(u16_str, &buf, UTFCF_CHK) == 0) {
+                        str.append(buf);
+                    }
+                    u16_str.clear();
                 }
 
                 str.push_back(ch);

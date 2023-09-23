@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "utils/strings/string_utils_internal.hpp"
-#include "utils/strings/unicode_conv.h"
+#include "utils/strings/utfccpp.h"
 
 
 namespace utl {
@@ -294,52 +294,50 @@ namespace utl {
 
     inline std::string u16to8(const std::u16string_view& str) {
         std::string utf8_str;
-        if (utf16_to_utf8(str, &utf8_str)) {
+        if (utf16_to_utf8(str, &utf8_str, UTFCF_DEF) == 0) {
             return utf8_str;
         }
-
         return {};
     }
 
     inline std::u16string u8to16(const std::string_view& str) {
         std::u16string utf16_str;
-        if (utf8_to_utf16(str, &utf16_str)) {
+        if (utf8_to_utf16(str, &utf16_str, UTFCF_DEF) == 0) {
             return utf16_str;
         }
-
         return {};
     }
 
     inline std::string wtou8(const std::wstring_view& str) {
         std::string out;
-        if (!wchar_to_utf8(str, &out)) {
-            out.clear();
+        if (wchar_to_utf8(str, &out, UTFCF_DEF) == 0) {
+            return out;
         }
-        return out;
+        return {};
     }
 
     inline std::u16string wtou16(const std::wstring_view& str) {
         std::u16string out;
-        if (!wchar_to_utf16(str, &out)) {
-            out.clear();
+        if (wchar_to_utf16(str, &out, UTFCF_DEF) == 0) {
+            return out;
         }
-        return out;
+        return {};
     }
 
     inline std::wstring u8tow(const std::string_view& sv) {
         std::wstring out;
-        if (!utf8_to_wchar(sv, &out)) {
-            out.clear();
+        if (utf8_to_wchar(sv, &out, UTFCF_DEF) == 0) {
+            return out;
         }
-        return out;
+        return {};
     }
 
     inline std::wstring u16tow(const std::u16string_view& sv) {
         std::wstring out;
-        if (!utf16_to_wchar(sv, &out)) {
-            out.clear();
+        if (utf16_to_wchar(sv, &out, UTFCF_DEF) == 0) {
+            return out;
         }
-        return out;
+        return {};
     }
 
 }

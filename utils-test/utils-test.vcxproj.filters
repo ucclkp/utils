@@ -7,7 +7,7 @@
     <ClCompile Include="matrix_unit_test.cpp" />
     <ClCompile Include="dynamic_matrix_unit_test.cpp" />
     <ClCompile Include="string_utils_unit_test.cpp" />
-    <ClCompile Include="unicode_unit_test.cpp" />
+    <ClCompile Include="utfccpp_unit_test.cpp" />
     <ClCompile Include="number_conv_unit_test.cpp" />
     <ClCompile Include="file_unit_test.cpp" />
     <ClCompile Include="log_unit_test.cpp" />

@@ -13,7 +13,7 @@
 
 #include "utils/strings/int_conv.hpp"
 #include "utils/strings/float_conv.h"
-#include "utils/strings/unicode_conv.h"
+#include "utils/strings/utfccpp.h"
 #include "utils/strings/ustring_print_internal.hpp"
 #include "utils/type_utils.hpp"
 
@@ -39,14 +39,15 @@ namespace internal {
         char* r, size_t* len,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char buf[4];
         size_t _len = 4;
         if (modifier == MOD_ll) {
-            utf32_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len);
+            ret = utf32c_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &_len)) {
-                return SCR_FAIL;
-            }
+            ret = utf16c_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &_len, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
         } else {
             buf[0] = char(va_arg(args->args, int));
             _len = 1;
@@ -67,19 +68,18 @@ namespace internal {
         char16_t* r, size_t* len,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char16_t buf[2];
         size_t _len = 2;
         if (modifier == MOD_ll) {
-            utf32_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len);
+            ret = utf32c_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &_len, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
         } else if (modifier == MOD_l) {
             buf[0] = va_arg(args->args, utl::upromote<char16_t>::type);
             _len = 1;
         } else {
-            if (!utf8_to_utf16(
-                char(va_arg(args->args, int)), buf))
-            {
-                return SCR_FAIL;
-            }
+            ret = utf8c_to_utf16(char(va_arg(args->args, int)), buf, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
             _len = 1;
         }
 
@@ -98,21 +98,16 @@ namespace internal {
         char32_t* r, size_t* len,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char32_t ch;
         if (modifier == MOD_ll) {
             ch = va_arg(args->args, utl::upromote<char32_t>::type);
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf32(
-                va_arg(args->args, utl::upromote<char16_t>::type), &ch))
-            {
-                return SCR_FAIL;
-            }
+            ret = utf16c_to_utf32(va_arg(args->args, utl::upromote<char16_t>::type), &ch, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
         } else {
-            if (!utf8_to_utf32(
-                char(va_arg(args->args, int)), &ch))
-            {
-                return SCR_FAIL;
-            }
+            ret = utf8c_to_utf32(char(va_arg(args->args, int)), &ch, UTFCF_DEF);
+            if (ret != 0) return SCR_FAIL;
         }
 
         auto s = r;
@@ -131,14 +126,15 @@ namespace internal {
         std::string& r,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char buf[4];
         size_t len = 4;
         if (modifier == MOD_ll) {
-            utf32_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len);
+            ret = utf32c_to_utf8(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len, UTFCF_DEF);
+            if (ret != 0) return false;
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &len)) {
-                return false;
-            }
+            ret = utf16c_to_utf8(va_arg(args->args, utl::upromote<char16_t>::type), buf, &len, UTFCF_DEF);
+            if (ret != 0) return false;
         } else {
             buf[0] = char(va_arg(args->args, int));
             len = 1;
@@ -152,19 +148,18 @@ namespace internal {
         std::u16string& r,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char16_t buf[2];
         size_t len = 2;
         if (modifier == MOD_ll) {
-            utf32_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len);
+            ret = utf32c_to_utf16(va_arg(args->args, utl::upromote<char32_t>::type), buf, &len, UTFCF_DEF);
+            if (ret != 0) return false;
         } else if (modifier == MOD_l) {
             buf[0] = va_arg(args->args, utl::upromote<char16_t>::type);
             len = 1;
         } else {
-            if (!utf8_to_utf16(
-                char(va_arg(args->args, int)), buf))
-            {
-                return false;
-            }
+            ret = utf8c_to_utf16(char(va_arg(args->args, int)), buf, UTFCF_DEF);
+            if (ret != 0) return false;
             len = 1;
         }
 
@@ -176,21 +171,16 @@ namespace internal {
         std::u32string& r,
         int flags, int modifier, int width, vlw* args)
     {
+        int ret;
         char32_t ch;
         if (modifier == MOD_ll) {
             ch = va_arg(args->args, utl::upromote<char32_t>::type);
         } else if (modifier == MOD_l) {
-            if (!utf16_to_utf32(
-                va_arg(args->args, utl::upromote<char16_t>::type), &ch))
-            {
-                return false;
-            }
+            ret = utf16c_to_utf32(va_arg(args->args, utl::upromote<char16_t>::type), &ch, UTFCF_DEF);
+            if (ret != 0) return false;
         } else {
-            if (!utf8_to_utf32(
-                char(va_arg(args->args, int)), &ch))
-            {
-                return false;
-            }
+            ret = utf8c_to_utf32(char(va_arg(args->args, int)), &ch, UTFCF_DEF);
+            if (ret != 0) return false;
         }
 
         fill_c(&ch, 1, r, flags, width);
@@ -201,22 +191,27 @@ namespace internal {
         char* r, size_t* len,
         int flags, int precision, int modifier, int width, vlw* args)
     {
+        int ret;
         const char* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
             std::u32string_view u32_s(va_arg(args->args, char32_t*));
-            if (utf32_to_utf8(u32_s, r, &_len)) {
+            ret = utf32_to_utf8(u32_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
+                return SCR_FAIL;
+            }
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
             }
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
-            int ret = utf16_to_utf8(u16_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf16_to_utf8(u16_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -247,11 +242,16 @@ namespace internal {
         char16_t* r, size_t* len,
         int flags, int precision, int modifier, int width, vlw* args)
     {
+        int ret;
         const char16_t* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
             std::u32string_view u32_s(va_arg(args->args, char32_t*));
-            if (utf32_to_utf16(u32_s, r, &_len)) {
+            ret = utf32_to_utf16(u32_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
+                return SCR_FAIL;
+            }
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -264,11 +264,11 @@ namespace internal {
             }
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
-            int ret = utf8_to_utf16(u8_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf8_to_utf16(u8_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -293,6 +293,7 @@ namespace internal {
         char32_t* r, size_t* len,
         int flags, int precision, int modifier, int width, vlw* args)
     {
+        int ret;
         const char32_t* dig;
         size_t _len = *len;
         if (modifier == MOD_ll) {
@@ -303,8 +304,8 @@ namespace internal {
             }
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
-            int ret = utf16_to_utf32(u16_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf16_to_utf32(u16_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
             if (ret == SCR_OK) {
@@ -314,8 +315,8 @@ namespace internal {
             }
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
-            int ret = utf8_to_utf32(u8_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf8_to_utf32(u8_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
             if (ret == SCR_OK) {
@@ -347,11 +348,13 @@ namespace internal {
         std::string_view sv;
         if (modifier == MOD_ll) {
             std::u32string_view u32_s(va_arg(args->args, char32_t*));
-            utf32_to_utf8(u32_s, &u8_str);
+            if (utf32_to_utf8(u32_s, &u8_str, UTFCF_DEF) != 0) {
+                return false;
+            }
             sv = u8_str;
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
-            if (!utf16_to_utf8(u16_s, &u8_str)) {
+            if (utf16_to_utf8(u16_s, &u8_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u8_str;
@@ -375,13 +378,15 @@ namespace internal {
         std::u16string_view sv;
         if (modifier == MOD_ll) {
             std::u32string_view u32_s(va_arg(args->args, char32_t*));
-            utf32_to_utf16(u32_s, &u16_str);
+            if (utf32_to_utf16(u32_s, &u16_str, UTFCF_DEF) != 0) {
+                return false;
+            }
             sv = u16_str;
         } else if (modifier == MOD_l) {
             sv = va_arg(args->args, char16_t*);
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
-            if (!utf8_to_utf16(u8_s, &u16_str)) {
+            if (utf8_to_utf16(u8_s, &u16_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u16_str;
@@ -405,13 +410,13 @@ namespace internal {
             sv = va_arg(args->args, char32_t*);
         } else if (modifier == MOD_l) {
             std::u16string_view u16_s(va_arg(args->args, char16_t*));
-            if (!utf16_to_utf32(u16_s, &u32_str)) {
+            if (utf16_to_utf32(u16_s, &u32_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u32_str;
         } else {
             std::string_view u8_s(va_arg(args->args, char*));
-            if (!utf8_to_utf32(u8_s, &u32_str)) {
+            if (utf8_to_utf32(u8_s, &u32_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u32_str;

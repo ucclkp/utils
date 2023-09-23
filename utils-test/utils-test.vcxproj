@@ -185,7 +185,7 @@
     <ClCompile Include="point_unit_test.cpp" />
     <ClCompile Include="stream_unit_test.cpp" />
     <ClCompile Include="string_utils_unit_test.cpp" />
-    <ClCompile Include="unicode_unit_test.cpp" />
+    <ClCompile Include="utfccpp_unit_test.cpp" />
     <ClCompile Include="uri_unit_test.cpp" />
     <ClCompile Include="utfcc_unit_test.cpp" />
     <ClCompile Include="var_unit_test.cpp" />

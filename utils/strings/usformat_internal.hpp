@@ -13,7 +13,7 @@
 #include "utils/numbers.hpp"
 #include "utils/strings/int_conv.hpp"
 #include "utils/strings/float_conv.h"
-#include "utils/strings/unicode_conv.h"
+#include "utils/strings/utfccpp.h"
 #include "utils/strings/usformat_any_internal.hpp"
 #include "utils/strings/ustring_print_internal.hpp"
 
@@ -155,31 +155,31 @@ namespace internal {
     template <typename Cy>
     bool path_to_ub(const std::wstring& p, const Cy** dig, size_t* len, Cy* r) {
         if constexpr (std::is_same<Cy, char>::value) {
-            int ret = wchar_to_utf8(p, r, len);
-            if (ret == SCR_FAIL) {
+            int ret = wchar_to_utf8(p, r, len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return false;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
-            int ret = wchar_to_utf16(p, r, len);
-            if (ret == SCR_FAIL) {
+            int ret = wchar_to_utf16(p, r, len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return false;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 *dig = r;
             } else {
                 *dig = nullptr;
             }
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
-            int ret = wchar_to_utf32(p, r, len);
-            if (ret == SCR_FAIL) {
+            int ret = wchar_to_utf32(p, r, len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return false;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 *dig = r;
             } else {
                 *dig = nullptr;
@@ -231,17 +231,17 @@ namespace internal {
         std::basic_string<Cy>& str)
     {
         if constexpr (std::is_same<Cy, char>::value) {
-            if (!wchar_to_utf8(p, &str)) {
+            if (wchar_to_utf8(p, &str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = str;
         } else if constexpr (std::is_same<Cy, char16_t>::value) {
-            if (!wchar_to_utf16(p, &str)) {
+            if (wchar_to_utf16(p, &str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = str;
         } else if constexpr (std::is_same<Cy, char32_t>::value) {
-            if (!wchar_to_utf32(p, &str)) {
+            if (wchar_to_utf32(p, &str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = str;
@@ -262,13 +262,15 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            utf32_to_utf8(val, buf, &_len);
+            if (utf32c_to_utf8(val, buf, &_len, UTFCF_DEF) != 0) {
+                return SCR_FAIL;
+            }
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            if (!utf16_to_utf8(val, buf, &_len)) {
+            if (utf16c_to_utf8(val, buf, &_len, UTFCF_DEF) != 0) {
                 return SCR_FAIL;
             }
         } else {
@@ -302,7 +304,9 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            utf32_to_utf16(val, buf, &_len);
+            if (utf32c_to_utf16(val, buf, &_len, UTFCF_DEF) != 0) {
+                return SCR_FAIL;
+            }
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
@@ -315,7 +319,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            if (!utf8_to_utf16(val, buf)) {
+            if (utf8c_to_utf16(val, buf, UTFCF_DEF) != 0) {
                 return SCR_FAIL;
             }
             _len = 1;
@@ -346,7 +350,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            if (!utf16_to_utf32(val, &ch)) {
+            if (utf16c_to_utf32(val, &ch, UTFCF_DEF) != 0) {
                 return SCR_FAIL;
             }
         } else {
@@ -354,7 +358,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return SCR_FAIL;
             }
-            if (!utf8_to_utf32(val, &ch)) {
+            if (utf8c_to_utf32(val, &ch, UTFCF_DEF) != 0) {
                 return SCR_FAIL;
             }
         }
@@ -382,13 +386,15 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            utf32_to_utf8(val, buf, &len);
+            if (utf32c_to_utf8(val, buf, &len, UTFCF_DEF) != 0) {
+                return false;
+            }
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            if (!utf16_to_utf8(val, buf, &len)) {
+            if (utf16c_to_utf8(val, buf, &len, UTFCF_DEF) != 0) {
                 return false;
             }
         } else {
@@ -415,7 +421,9 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            utf32_to_utf16(val, buf, &len);
+            if (utf32c_to_utf16(val, buf, &len, UTFCF_DEF) != 0) {
+                return false;
+            }
         } else if (modifier == MOD_l) {
             char16_t val;
             if (!get_usfa_ci(arg, &val)) {
@@ -428,7 +436,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            if (!utf8_to_utf16(val, buf)) {
+            if (utf8c_to_utf16(val, buf, UTFCF_DEF) != 0) {
                 return false;
             }
             len = 1;
@@ -452,7 +460,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            if (!utf16_to_utf32(val, &ch)) {
+            if (utf16c_to_utf32(val, &ch, UTFCF_DEF) != 0) {
                 return false;
             }
         } else {
@@ -460,7 +468,7 @@ namespace internal {
             if (!get_usfa_ci(arg, &val)) {
                 return false;
             }
-            if (!utf8_to_utf32(val, &ch)) {
+            if (utf8c_to_utf32(val, &ch, UTFCF_DEF) != 0) {
                 return false;
             }
         }
@@ -473,6 +481,7 @@ namespace internal {
         char* r, size_t* len,
         int flags, int precision, int width, const usformat_any& arg)
     {
+        int ret;
         const char* dig;
         size_t _len = *len;
 
@@ -483,7 +492,11 @@ namespace internal {
             std::u32string_view u32_s(
                 arg.index() == USFA_CHAR32P ?
                 std::get<USFA_CHAR32P>(arg) : std::get<USFA_SV32>(arg));
-            if (utf32_to_utf8(u32_s, r, &_len)) {
+            ret = utf32_to_utf8(u32_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
+                return SCR_FAIL;
+            }
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -497,11 +510,11 @@ namespace internal {
             std::u16string_view u16_s(
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
-            int ret = utf16_to_utf8(u16_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf16_to_utf8(u16_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -527,11 +540,11 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            int ret = wchar_to_utf8(w_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            int ret = wchar_to_utf8(w_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -569,6 +582,7 @@ namespace internal {
         char16_t* r, size_t* len,
         int flags, int precision, int width, const usformat_any& arg)
     {
+        int ret;
         const char16_t* dig;
         size_t _len = *len;
 
@@ -579,7 +593,11 @@ namespace internal {
             std::u32string_view u32_s(
                 arg.index() == USFA_CHAR32P ?
                 std::get<USFA_CHAR32P>(arg) : std::get<USFA_SV32>(arg));
-            if (utf32_to_utf16(u32_s, r, &_len)) {
+            ret = utf32_to_utf16(u32_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
+                return SCR_FAIL;
+            }
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -605,11 +623,11 @@ namespace internal {
             std::string_view u8_s(
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
-            int ret = utf8_to_utf16(u8_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf8_to_utf16(u8_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -623,11 +641,11 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            int ret = wchar_to_utf16(w_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = wchar_to_utf16(w_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -665,6 +683,7 @@ namespace internal {
         char32_t* r, size_t* len,
         int flags, int precision, int width, const usformat_any& arg)
     {
+        int ret;
         const char32_t* dig;
         size_t _len = *len;
 
@@ -687,11 +706,11 @@ namespace internal {
             std::u16string_view u16_s(
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
-            int ret = utf16_to_utf32(u16_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf16_to_utf32(u16_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -705,11 +724,11 @@ namespace internal {
             std::string_view u8_s(
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
-            int ret = utf8_to_utf32(u8_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = utf8_to_utf32(u8_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -723,11 +742,11 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            int ret = wchar_to_utf32(w_s, r, &_len);
-            if (ret == SCR_FAIL) {
+            ret = wchar_to_utf32(w_s, r, &_len, UTFCF_DEF);
+            if (ret == UTFC_ERR) {
                 return SCR_FAIL;
             }
-            if (ret == SCR_OK) {
+            if (ret == 0) {
                 dig = r;
             } else {
                 dig = nullptr;
@@ -775,7 +794,9 @@ namespace internal {
             std::u32string_view u32_s(
                 arg.index() == USFA_CHAR32P ?
                 std::get<USFA_CHAR32P>(arg) : std::get<USFA_SV32>(arg));
-            utf32_to_utf8(u32_s, &u8_str);
+            if (utf32_to_utf8(u32_s, &u8_str, UTFCF_DEF) != 0) {
+                return false;
+            }
             sv = u8_str;
             break;
         }
@@ -786,7 +807,7 @@ namespace internal {
             std::u16string_view u16_s(
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
-            if (!utf16_to_utf8(u16_s, &u8_str)) {
+            if (utf16_to_utf8(u16_s, &u8_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u8_str;
@@ -807,7 +828,7 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            if (!wchar_to_utf8(w_s, &u8_str)) {
+            if (wchar_to_utf8(w_s, &u8_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u8_str;
@@ -848,7 +869,9 @@ namespace internal {
             std::u32string_view u32_s(
                 arg.index() == USFA_CHAR32P ?
                 std::get<USFA_CHAR32P>(arg) : std::get<USFA_SV32>(arg));
-            utf32_to_utf16(u32_s, &u16_str);
+            if (utf32_to_utf16(u32_s, &u16_str, UTFCF_DEF) != 0) {
+                return false;
+            }
             sv = u16_str;
             break;
         }
@@ -867,7 +890,7 @@ namespace internal {
             std::string_view u8_s(
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
-            if (!utf8_to_utf16(u8_s, &u16_str)) {
+            if (utf8_to_utf16(u8_s, &u16_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u16_str;
@@ -880,7 +903,7 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            if (!wchar_to_utf16(w_s, &u16_str)) {
+            if (wchar_to_utf16(w_s, &u16_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u16_str;
@@ -929,7 +952,7 @@ namespace internal {
             std::u16string_view u16_s(
                 arg.index() == USFA_CHAR16P ?
                 std::get<USFA_CHAR16P>(arg) : std::get<USFA_SV16>(arg));
-            if (!utf16_to_utf32(u16_s, &u32_str)) {
+            if (utf16_to_utf32(u16_s, &u32_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u32_str;
@@ -942,7 +965,7 @@ namespace internal {
             std::string_view u8_s(
                 arg.index() == USFA_CHARP ?
                 std::get<USFA_CHARP>(arg) : std::get<USFA_SV>(arg));
-            if (!utf8_to_utf32(u8_s, &u32_str)) {
+            if (utf8_to_utf32(u8_s, &u32_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u32_str;
@@ -955,7 +978,7 @@ namespace internal {
             std::wstring_view w_s(
                 arg.index() == USFA_WCHARP ?
                 std::get<USFA_WCHARP>(arg) : std::get<USFA_WSV>(arg));
-            if (!wchar_to_utf32(w_s, &u32_str)) {
+            if (wchar_to_utf32(w_s, &u32_str, UTFCF_DEF) != 0) {
                 return false;
             }
             sv = u32_str;

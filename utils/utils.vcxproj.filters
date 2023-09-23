@@ -114,7 +114,7 @@
     <ClCompile Include="unit_test\test_collector.cpp">
       <Filter>unit_test</Filter>
     </ClCompile>
-    <ClCompile Include="strings\unicode_conv.cpp">
+    <ClCompile Include="strings\utfccpp.cpp">
       <Filter>strings</Filter>
     </ClCompile>
     <ClCompile Include="strings\usformat.cpp">
@@ -222,7 +222,7 @@
     <ClInclude Include="strings\string_utils_types.hpp">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="strings\unicode_conv.h">
+    <ClInclude Include="strings\utfccpp.h">
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="strings\usformat.h">

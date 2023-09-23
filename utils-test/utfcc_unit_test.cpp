@@ -51,7 +51,7 @@
 // UTF-16C 到 UTF-8 正常转换
 #define T0_U16C2U8(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(utf16c_to_utf8(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(char)), 0);
 
 // UTF-16C 到 UTF-8 错误转换
 #define TF_U16C2U8(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -61,7 +61,7 @@
 // UTF-32C 到 UTF-8 正常转换
 #define T0_U32C2U8(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(utf32c_to_utf8(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(char)), 0);
 
 // UTF-32C 到 UTF-8 错误转换
 #define TF_U32C2U8(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -71,7 +71,7 @@
 // UTF-32C 到 UTF-16 正常转换
 #define T0_U32C2U16(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(utf32c_to_utf16(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(char16_t)), 0);
 
 // UTF-32C 到 UTF-16 错误转换
 #define TF_U32C2U16(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -81,7 +81,7 @@
 // WCHARC 到 UTF-8 正常转换
 #define T0_WC2U8(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(wcharc_to_utf8(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(char)), 0);
 
 // WCHARC 到 UTF-8 错误转换
 #define TF_WC2U8(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -91,7 +91,7 @@
 // WCHARC 到 UTF-16 正常转换
 #define T0_WC2U16(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(wcharc_to_utf16(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(char16_t)), 0);
 
 // WCHARC 到 UTF-16 错误转换
 #define TF_WC2U16(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -101,7 +101,7 @@
 // UTF-32C 到 WCHAR 正常转换
 #define T0_U32C2W(src, sl, dst, dl, f)  len = sl;  \
     TEST_E(utf32c_to_wchar(src, ch, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(ch, dst, len * sizeof(wchar_t)), 0);
 
 // UTF-32C 到 WCHAR 错误转换
 #define TF_U32C2W(src, sl, ch, dl, f, ret)  len = sl;  \
@@ -111,7 +111,7 @@
 // UTF-8 到 UTF-16 正常转换
 #define T0_U8_16(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf8_to_utf16((const char*)src, T_U8LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char16_t)), 0);
 
 // UTF-8 到 UTF-16 错误转换
 #define TF_U8_16(src, sl, buf, dl, f, ret)  len = sl; \
@@ -121,7 +121,7 @@
 // UTF-8 到 UTF-32 正常转换
 #define T0_U8_32(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf8_to_utf32((const char*)src, T_U8LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char32_t)), 0);
 
 // UTF-8 到 UTF-32 错误转换
 #define TF_U8_32(src, sl, buf, dl, f, ret)  len = sl; \
@@ -131,7 +131,7 @@
 // UTF-16 到 UTF-8 正常转换
 #define T0_U16_8(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf16_to_utf8(src, T_U16LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char)), 0);
 
 // UTF-16 到 UTF-8 错误转换
 #define TF_U16_8(src, sl, buf, dl, f, ret)  len = sl; \
@@ -141,7 +141,7 @@
 // UTF-16 到 UTF-32 正常转换
 #define T0_U16_32(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf16_to_utf32(src, T_U16LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char32_t)), 0);
 
 // UTF-16 到 UTF-32 错误转换
 #define TF_U16_32(src, sl, buf, dl, f, ret)  len = sl; \
@@ -151,7 +151,7 @@
 // UTF-32 到 UTF-8 正常转换
 #define T0_U32_8(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf32_to_utf8(src, T_U32LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char)), 0);
 
 // UTF-32 到 UTF-8 错误转换
 #define TF_U32_8(src, sl, buf, dl, f, ret)  len = sl; \
@@ -161,7 +161,7 @@
 // UTF-32 到 UTF-16 正常转换
 #define T0_U32_16(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf32_to_utf16(src, T_U32LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char16_t)), 0);
 
 // UTF-32 到 UTF-16 错误转换
 #define TF_U32_16(src, sl, buf, dl, f, ret)  len = sl; \
@@ -171,7 +171,7 @@
 // WCHAR 到 UTF-8 正常转换
 #define T0_W_U8(src, sl, dst, dl, f)  len = sl; \
     TEST_E(wchar_to_utf8(src, T_WLEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char)), 0);
 
 // WCHAR 到 UTF-8 错误转换
 #define TF_W_U8(src, sl, buf, dl, f, ret)  len = sl; \
@@ -181,7 +181,7 @@
 // WCHAR 到 UTF-16 正常转换
 #define T0_W_U16(src, sl, dst, dl, f)  len = sl; \
     TEST_E(wchar_to_utf16(src, T_WLEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char16_t)), 0)
 
 // WCHAR 到 UTF-16 错误转换
 #define TF_W_U16(src, sl, buf, dl, f, ret)  len = sl; \
@@ -191,7 +191,7 @@
 // WCHAR 到 UTF-32 正常转换
 #define T0_W_U32(src, sl, dst, dl, f)  len = sl; \
     TEST_E(wchar_to_utf32(src, T_WLEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(char32_t)), 0);
 
 // WCHAR 到 UTF-32 错误转换
 #define TF_W_U32(src, sl, buf, dl, f, ret)  len = sl; \
@@ -201,7 +201,7 @@
 // UTF-8 到 WCHAR 正常转换
 #define T0_U8_W(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf8_to_wchar((const char*)src, T_U8LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(wchar_t)), 0);
 
 // UTF-8 到 WCHAR 错误转换
 #define TF_U8_W(src, sl, buf, dl, f, ret)  len = sl; \
@@ -211,7 +211,7 @@
 // UTF-16 到 WCHAR 正常转换
 #define T0_U16_W(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf16_to_wchar(src, T_U16LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(wchar_t)), 0);
 
 // UTF-16 到 WCHAR 错误转换
 #define TF_U16_W(src, sl, buf, dl, f, ret)  len = sl; \
@@ -221,7 +221,7 @@
 // UTF-32 到 WCHAR 正常转换
 #define T0_U32_W(src, sl, dst, dl, f)  len = sl; \
     TEST_E(utf32_to_wchar(src, T_U32LEN(src), buf, &len, f), 0);  \
-    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len), 0);
+    TEST_E(len, dl); TEST_E(std::memcmp(buf, dst, len * sizeof(wchar_t)), 0);
 
 // UTF-32 到 WCHAR 错误转换
 #define TF_U32_W(src, sl, buf, dl, f, ret)  len = sl; \
@@ -964,10 +964,11 @@ TEST_CASE(UTFCCUnitTest) {
             u8"😍💖😜👀🚲🛴🏍⛅🧼🌁💒👱‍♂️👨‍🦰👨‍🦱👩‍🎨👩‍🎤👨‍💻🧜‍♂️🧛‍♂️🙄🤩😞☹☹",
             155, UTFCF_CHK);
 
-        // not error 
+        // not error
         T0_U16_8(u"我\xD800", 8, "\xE6\x88\x91\xED\xA0\x80", 6, UTFCF_IGN);
         T0_U16_8(u"我\xDFFF", 8, "\xE6\x88\x91\xED\xBF\xBF", 6, UTFCF_IGN);
         T0_U16_8(u"我\xDFFF", 8, "\xE6\x88\x91\xEF\xBF\xBD", 6, UTFCF_DEF);
+        T0_U16_8(u"\x0040\xd83d\xd83d\xde00\x0040", 10, u8"@�😀@", 9, UTFCF_DEF);
 
         // false case
         TF_U16_8(u"abcdefg",   6, buf,     7, UTFCF_CHK, UTFC_BUF);
