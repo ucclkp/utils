@@ -8,7 +8,7 @@
 #define UTILS_ASSUMING_HPP_
 
 #include <cassert>
-#include <numeric>
+#include <limits>
 
 
 namespace utl {
