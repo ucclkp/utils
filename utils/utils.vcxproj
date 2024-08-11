@@ -188,7 +188,6 @@
     <ClCompile Include="message\message_queue.cpp" />
     <ClCompile Include="message\win\message_pump_ui_win.cpp" />
     <ClCompile Include="message\win\message_pump_win.cpp" />
-    <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
     <ClCompile Include="stream_utils.cpp" />
     <ClCompile Include="strings\float_conv.cpp" />
@@ -224,6 +223,7 @@
     <ClInclude Include="message\executable.h" />
     <ClInclude Include="net\abnf.h" />
     <ClInclude Include="net\uri.hpp" />
+    <ClInclude Include="platform_entrances.h" />
     <ClInclude Include="strings\sc_ret_code.h" />
     <ClInclude Include="strings\float_conv.h" />
     <ClInclude Include="strings\float_conv_big_num.hpp" />

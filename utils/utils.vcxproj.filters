@@ -52,7 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="log.cpp" />
-    <ClCompile Include="platform_utils.cpp" />
     <ClCompile Include="stl_utils.cpp" />
     <ClCompile Include="json\json_parser.cpp">
       <Filter>json</Filter>
@@ -301,6 +300,7 @@
     <ClInclude Include="strings\utfcc.h">
       <Filter>strings</Filter>
     </ClInclude>
+    <ClInclude Include="platform_entrances.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

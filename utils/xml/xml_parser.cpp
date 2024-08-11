@@ -428,10 +428,12 @@ namespace utl {
         PEEK_STREAM(buf);
 
         if (buf == '/') {
+            // 结束标记 </sth>
             *type = NormTagType::EndTag;
             SKIP_BYTES(1);
             ADV_PEDO(1);
             bool has_space = false;
+            bool first_char = true;
             for (;;) {
                 GET_STREAM(buf);
                 if (buf == '>') break;
@@ -439,15 +441,24 @@ namespace utl {
                 if (isSpace(buf)) {
                     has_space = true;
                     pedometer_.space(buf);
+                    continue;
                 } else {
                     if (has_space) RET_FALSE;
                     ADV_PEDO(1);
+                }
+
+                if (first_char) {
+                    first_char = false;
+                    if (!isNameStartChar(buf)) RET_FALSE;
+                } else {
+                    if (!isNameChar(buf)) RET_FALSE;
                 }
                 cur->tag_name.push_back(buf);
             }
             if (!checkTagName(cur->tag_name)) RET_FALSE;
         } else {
             bool first_char = true;
+            bool space_after_name = false;
             auto stepper = ElementStepper::TAG_NAME;
             for (;;) {
                 PEEK_STREAM(buf);
@@ -480,12 +491,19 @@ namespace utl {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (cur->tag_name.empty()) RET_FALSE;
                         if (!checkTagName(cur->tag_name)) RET_FALSE;
-                        stepper = ElementStepper::ATTR_NAME;
+                        // 标签名后面的空格之后不一定是属性，也有可能是 ">"
+                        space_after_name = true;
                     } else if (stepper == ElementStepper::ATTR_NAME) {
                         // Do nothing
                     }
                     pedometer_.space(buf);
                 } else {
+                    if (space_after_name &&
+                        stepper == ElementStepper::TAG_NAME)
+                    {
+                        stepper = ElementStepper::ATTR_NAME;
+                    }
+
                     if (stepper == ElementStepper::TAG_NAME) {
                         SKIP_BYTES(1);
                         if (first_char) {
@@ -542,13 +560,17 @@ namespace utl {
         GET_STREAM(char buf);
         if (buf == 'y') {
             NEXT_EQUAL("es", 2);
+            ADV_PEDO(3);
         } else if (buf == 'n') {
             GET_STREAM(buf);
             if (buf != 'o') RET_FALSE;
+            ADV_PEDO(2);
         } else {
             RET_FALSE;
         }
+        GET_STREAM(buf);
         if (buf != cur_sign) RET_FALSE;
+        ADV_PEDO(1);
         return true;
     }
 

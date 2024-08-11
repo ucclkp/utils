@@ -20,19 +20,4 @@
 #define OS_UNKNOWN
 #endif
 
-// 入口点
-
-#ifdef OS_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-#define GUI_MAIN()  \
-    int APIENTRY wWinMain(  \
-        HINSTANCE hInstance, HINSTANCE hPrevInstance,  \
-        LPWSTR lpCmdLine, int nShowCmd)
-#else
-#define GUI_MAIN()  \
-    int main()
-#endif
-
 #endif  // UTILS_PLATFORM_UTILS_H_
