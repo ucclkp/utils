@@ -128,6 +128,9 @@
     <ClCompile Include="strings\utfcc.c">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="win\opt_parser_win.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="event_handler.hpp" />
@@ -301,6 +304,7 @@
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="platform_entrances.h" />
+    <ClInclude Include="opt_parser.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mac\command_line_mac.mm">

@@ -20,5 +20,6 @@
     <ClCompile Include="var_unit_test.cpp" />
     <ClCompile Include="uri_unit_test.cpp" />
     <ClCompile Include="utfcc_unit_test.cpp" />
+    <ClCompile Include="opt_parser_unit_test.cpp" />
   </ItemGroup>
 </Project>

@@ -205,12 +205,14 @@
     <ClCompile Include="unit_test\test_suite.cpp" />
     <ClCompile Include="win\command_line_win.cpp" />
     <ClCompile Include="win\log_win.cpp" />
+    <ClCompile Include="win\opt_parser_win.cpp" />
     <ClCompile Include="xml\xml_parser.cpp" />
     <ClCompile Include="xml\xml_pedometer.cpp" />
     <ClCompile Include="xml\xml_structs.cpp" />
     <ClCompile Include="xml\xml_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="opt_parser.hpp" />
     <ClInclude Include="assuming.hpp" />
     <ClInclude Include="command_line.h" />
     <ClInclude Include="define_utils.hpp" />
