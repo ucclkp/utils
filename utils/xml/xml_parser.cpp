@@ -76,6 +76,9 @@ namespace utl {
                     Content content;
                     content.type = Content::Type::CharData;
                     content.char_data = char_data;
+                    if (!cur_element) {
+                        RET_FALSE;
+                    }
                     cur_element->contents.push_back(content);
                     char_data.clear();
                 }
@@ -227,13 +230,16 @@ namespace utl {
             NEXT_EQUAL("?>", 2);
             ADV_PEDO(2);
         } else {
-            *type = QuesTagType::PIs;
+            //*type = QuesTagType::PIs;
+            *type = QuesTagType::Prolog;
             // PIs
             for (;;) {
                 GET_STREAM(buf);
                 if (buf == '?') {
                     PEEK_STREAM(char l_buf);
                     if (l_buf == '>') {
+                        SKIP_BYTES(1);
+                        ADV_PEDO(2);
                         break;
                     }
                 }
