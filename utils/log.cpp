@@ -94,7 +94,7 @@ namespace utl {
             .append(tid_ss.str())
             .append(
                 usformat(
-                    " %d/%d/%d %d:%02d:%02d:%d",
+                    " %d/%d/%d %d:%02d:%02d:%03d",
                     ca.year, ca.month, ca.day,
                     ca.hour, ca.minute, ca.second, ca.milliseconds))
             .append(u8p("] "));
