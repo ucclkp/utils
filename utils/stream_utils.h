@@ -66,6 +66,12 @@
     WRITE_STREAM(tmp, size)  \
 }
 
+#define WRITE_STREAM_LE(var, size) {  \
+    static_assert(size == sizeof(var), "The size of 'var' must be equal to 'size'");  \
+    auto tmp = utl::fromToLE(var);  \
+    WRITE_STREAM(tmp, size)  \
+}
+
 #define WRITE_STREAM_MLBE(var, size)  \
     if (!::utl::writeStreamML<size, false>(s, var)) RET_FALSE
 
