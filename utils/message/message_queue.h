@@ -65,6 +65,8 @@ namespace utl {
         void removeBarrier();
 
     private:
+        void addBarrierLocked();
+
         void enqueueDelayed(Message* msg);
 
         void remove(Message** head, Cycler* c);

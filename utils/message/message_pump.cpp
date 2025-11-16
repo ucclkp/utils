@@ -162,6 +162,9 @@ namespace utl {
             }
 
             msg->reset();
+
+            // 执行消息后，消息队列的状态可能已经发生变化，因此
+            // 后续的 dequeue 内部需要再次检查相关状态。
         }
         msg_queue_->removeBarrier();
 

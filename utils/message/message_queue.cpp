@@ -100,6 +100,9 @@ namespace utl {
 
     bool MessageQueue::dequeue(Message** out) {
         std::lock_guard<std::mutex> lk(queue_sync_);
+        if (!message_) {
+            return false;
+        }
 
         auto ptr = message_;
 
@@ -108,17 +111,20 @@ namespace utl {
             ptr = ptr->next;
         }
 
-        uthrow_if(!ptr, "Cannot find barrier!\n");
+        if (!ptr) {
+            addBarrierLocked();
+            ptr = message_;
+        }
 
         // over the barrier
-        auto prev = ptr;
+        auto barrier = ptr;
         ptr = ptr->next;
 
         auto cur = Cycler::now().count();
         while (ptr) {
             // 从队列中摘除该消息
-            // erase_after prev
-            prev->next = ptr->next;
+            // erase_after barrier
+            barrier->next = ptr->next;
 
             // 发现可以执行的消息就立即返回，即使后面可能存在延时消息。
             // 因此外部调用应循环调用 dequeue() 直到消息队列枯竭为止，
@@ -129,7 +135,7 @@ namespace utl {
             }
 
             enqueueDelayed(ptr);
-            ptr = prev->next;
+            ptr = barrier->next;
         }
 
         return false;
@@ -304,7 +310,10 @@ namespace utl {
 
     void MessageQueue::addBarrier() {
         std::lock_guard<std::mutex> lk(queue_sync_);
+        addBarrierLocked();
+    }
 
+    void MessageQueue::addBarrierLocked() {
         if (has_barrier_) {
             return;
         }
