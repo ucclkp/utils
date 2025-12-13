@@ -50,11 +50,18 @@ namespace utl {
         char buf;
         PEEK_STREAM(buf);
         if (uint8_t(buf) == 0xEF) {
+            auto start_pos = s.tellg();
+
             SKIP_BYTES(1);
             GET_STREAM(buf);
-            if (uint8_t(buf) != 0xBB) RET_FALSE;
-            GET_STREAM(buf);
-            if (uint8_t(buf) != 0xBF) RET_FALSE;
+            if (uint8_t(buf) != 0xBB) {
+                s.seekg(start_pos);
+            } else {
+                GET_STREAM(buf);
+                if (uint8_t(buf) != 0xBF) {
+                    s.seekg(start_pos);
+                }
+            }
         }
 
         std::string char_data;

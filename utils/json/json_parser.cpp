@@ -23,11 +23,18 @@ namespace utl {
         char ch;
         PEEK_STREAM(ch);
         if (uint8_t(ch) == 0xEF) {
+            auto start_pos = s.tellg();
+
             SKIP_BYTES(1);
             GET_STREAM(ch);
-            if (uint8_t(ch) != 0xBB) RET_FALSE;
-            GET_STREAM(ch);
-            if (uint8_t(ch) != 0xBF) RET_FALSE;
+            if (uint8_t(ch) != 0xBB) {
+                s.seekg(start_pos);
+            } else {
+                GET_STREAM(ch);
+                if (uint8_t(ch) != 0xBF) {
+                    s.seekg(start_pos);
+                }
+            }
         }
 
         GET_STREAM(ch);
