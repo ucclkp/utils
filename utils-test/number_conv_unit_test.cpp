@@ -440,7 +440,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "1234567890";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi(0);
             bi.fromChars(bins, std::size(bins) - 1, 9, false, &r);
             TEST_E(bi.raw[bi.uic - 1], 0u);
@@ -454,7 +454,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "1235.a67890";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi(0);
             bi.fromChars(bins, std::size(bins) - 1, 9, true, &r);
             TEST_E(bi.raw[bi.uic - 1], 0u);
@@ -464,7 +464,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "1.678901234";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi(0);
             bi.fromChars(bins, std::size(bins) - 1, 0, true, &r);
             TEST_E(bi.raw[bi.uic - 1], 78901234u);
@@ -473,7 +473,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "123";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi(0);
             bi.fromChars(bins, std::size(bins) - 1, 9, false, &r);
             TEST_E(bi.raw[bi.uic - 1], 0u);
@@ -485,7 +485,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "1234567890";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi2(0);
             bi2.fromChars(bins, std::size(bins) - 1, &r);
             TEST_E(bi2.raw[bi2.uic - 1], 34567890u);
@@ -511,7 +511,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bins[] = "12345.67890";
-            const char* r;
+            const char* r = nullptr;
             BigUInt_b10 bi2(0);
             bi2.fromChars(bins, std::size(bins) - 1, &r);
             TEST_E(bi2.raw[bi2.uic - 1], 12345u);
@@ -554,7 +554,7 @@ TEST_CASE(InternalBigNum) {
         TEST_E(bi1.raw[bi1.uic - 1], 131072u);
 
         char bins[] = "1234567890";
-        const char* r;
+        const char* r = nullptr;
         BigUInt_b16 bi2(0);
         bi2.fromChars(bins, std::size(bins) - 1, &r);
 
@@ -639,7 +639,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bfns[] = "123456789";
-            const char* r;
+            const char* r = nullptr;
             BigFloat_b10 bfn(0);
             bfn.fromChars(bfns, std::size(bfns) - 1, 2, false, &r);
             TEST_E(bfn.raw[0], 123456u);
@@ -651,7 +651,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bfns[] = "12345.a6789";
-            const char* r;
+            const char* r = nullptr;
             BigFloat_b10 bfn(0);
             bfn.fromChars(bfns, std::size(bfns) - 1, 2, false, &r);
             TEST_E(bfn.raw[0], 123450u);
@@ -659,7 +659,7 @@ TEST_CASE(InternalBigNum) {
         }
         {
             char bfns[] = "1";
-            const char* r;
+            const char* r = nullptr;
             BigFloat_b10 bfn(0);
             bfn.fromChars(bfns, std::size(bfns) - 1, &r);
 
@@ -743,7 +743,7 @@ TEST_CASE(InternalBigNum) {
         TEST_E(bf.effect, 3);
 
         char bfns[] = "1";
-        const char* r;
+        const char* r = nullptr;
         BigFloat_b16 bfn(0);
         bfn.fromChars(bfns, std::size(bfns) - 1, &r);
 

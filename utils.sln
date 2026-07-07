@@ -13,25 +13,35 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|ARM64 = Debug|ARM64
 		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|ARM64 = Release|ARM64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|x64.ActiveCfg = Debug|x64
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|x64.Build.0 = Debug|x64
+		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|ARM64.Build.0 = Debug|ARM64
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|x86.ActiveCfg = Debug|Win32
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Debug|x86.Build.0 = Debug|Win32
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|x64.ActiveCfg = Release|x64
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|x64.Build.0 = Release|x64
+		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|ARM64.ActiveCfg = Release|ARM64
+		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|ARM64.Build.0 = Release|ARM64
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|x86.ActiveCfg = Release|Win32
 		{97F36483-7CC1-4004-9510-BA6DDBA49C66}.Release|x86.Build.0 = Release|Win32
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|x64.ActiveCfg = Debug|x64
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|x64.Build.0 = Debug|x64
+		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|ARM64.Build.0 = Debug|ARM64
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|x86.ActiveCfg = Debug|Win32
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Debug|x86.Build.0 = Debug|Win32
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|x64.ActiveCfg = Release|x64
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|x64.Build.0 = Release|x64
+		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|ARM64.ActiveCfg = Release|ARM64
+		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|ARM64.Build.0 = Release|ARM64
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|x86.ActiveCfg = Release|Win32
 		{B7CF972E-0180-48BD-9443-F68CE6833744}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
